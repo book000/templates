@@ -83,7 +83,7 @@ jobs:
         run: yarn compile
 
       - name: 🏗️ Run build & generate (Nuxt.js)
-        if: steps.package-json.outputs.build == 'true' || steps.package-json.outputs.generate == 'true'
+        if: steps.package-json.outputs.build == 'true' && steps.package-json.outputs.generate == 'true'
         run: |
           yarn build
           yarn generate
