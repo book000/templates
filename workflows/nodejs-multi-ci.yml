@@ -37,7 +37,7 @@ jobs:
         run: |
           compile=$(jq '.scripts | has("compile")' package.json)
           build=$(jq '.scripts | has("build")' package.json)
-          generate=$(jq .scripts | has("generate") package.json)
+          generate=$(jq '.scripts | has("generate")' package.json)
           package=$(jq '.scripts | has("package")' package.json)
           lint=$(jq '.scripts | has("lint")' package.json)
           test=$(jq '.scripts | has("test")' package.json)
