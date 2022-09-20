@@ -92,6 +92,9 @@ jobs:
         if: steps.package-json.outputs.test == 'true'
         run: yarn test
 
+      - name: ☑️ Check Dependencies
+        run: npx depcheck
+
       - name: Check exists dist directory
         id: check-dist
         run: |
