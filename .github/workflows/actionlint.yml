@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Move workflow files
+        run: |
+          rm -v .github/workflows/*
+          cp -v workflows/* .github/workflows/
+
       - uses: reviewdog/action-actionlint@v1
         with:
           fail_on_error: true
