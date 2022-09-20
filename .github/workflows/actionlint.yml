@@ -18,7 +18,7 @@ jobs:
           rm -v .github/workflows/*
           cp -v workflows/* .github/workflows/
 
-      - name: Run ationlint
+      - name: Run actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
           ./actionlint -color
