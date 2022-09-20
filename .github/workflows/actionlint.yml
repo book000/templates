@@ -1,4 +1,4 @@
-name: Actionlint with reviewdog
+name: Actionlint
 
 on:
   push:
