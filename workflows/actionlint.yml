@@ -1,0 +1,26 @@
+name: Actionlint with reviewdog
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run ationlint (Push)
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+
+      - name: Run actionlint (Pull-request)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: reviewdog/action-actionlint@v1
+        with:
+          fail_on_error: true
