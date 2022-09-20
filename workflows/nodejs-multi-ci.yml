@@ -35,12 +35,12 @@ jobs:
         id: package-json
         working-directory: ${{ matrix.directory }}
         run: |
-          compile=$(cat package.json | jq '.scripts | has("compile")')
-          build=$(cat package.json | jq '.scripts | has("build")')
-          generate=$(cat package.json | jq '.scripts | has("generate")')
-          package=$(cat package.json | jq '.scripts | has("package")')
-          lint=$(cat package.json | jq '.scripts | has("lint")')
-          test=$(cat package.json | jq '.scripts | has("test")')
+          compile=$(jq '.scripts | has("compile")' package.json)
+          build=$(jq '.scripts | has("build")' package.json)
+          generate=$(jq .scripts | has("generate") package.json)
+          package=$(jq '.scripts | has("package")' package.json)
+          lint=$(jq '.scripts | has("lint")' package.json)
+          test=$(jq '.scripts | has("test")' package.json)
 
           echo "compile: $compile"
           echo "build: $build"
