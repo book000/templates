@@ -23,9 +23,3 @@ jobs:
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
           ./actionlint -color
-
-      - name: Run actionlint (Pull-request)
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: reviewdog/action-actionlint@v1
-        with:
-          fail_on_error: true
