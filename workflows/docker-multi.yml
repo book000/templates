@@ -32,7 +32,7 @@ jobs:
         target:
           - '{ imageName: "XXXXX/XXXXX-a", directory: "a" }'
           - '{ imageName: "XXXXX/XXXXX-b", directory: "b" }'
-          - '{ imageName: "XXXXX/XXXXX-c", directory: "c" }'
+          - '{ imageName: "ghcr.io/XXXXX/XXXXX-c", directory: "c" }'
 
     steps:
       - name: Check out the repo
