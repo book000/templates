@@ -33,7 +33,7 @@ jobs:
       - name: 📃 Check package.json definition
         id: package-json
         run: |
-          # shellcheck disable=SC2086
+          # shellcheck disable=SC2086,SC2129
           compile=$(jq '.scripts | has("compile")' package.json)
           build=$(jq '.scripts | has("build")' package.json)
           generate=$(jq '.scripts | has("generate")' package.json)
@@ -48,14 +48,12 @@ jobs:
           echo "lint: $lint"
           echo "test: $test"
 
-          echo { \
-            "compile=$compile" \
-            "build=$build" \
-            "generate=$generate" \
-            "package=$package" \
-            "lint=$lint" \
-            "test=$test" \
-          } >> $GITHUB_OUTPUT
+          echo "compile=$compile" >> $GITHUB_OUTPUT
+          echo "build=$build" >> $GITHUB_OUTPUT
+          echo "generate=$generate" >> $GITHUB_OUTPUT
+          echo "package=$package" >> $GITHUB_OUTPUT
+          echo "lint=$lint" >> $GITHUB_OUTPUT
+          echo "test=$test" >> $GITHUB_OUTPUT
 
       - name: 🛠 Get yarn cache directory path
         id: yarn-cache-dir-path
