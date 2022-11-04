@@ -48,13 +48,13 @@ jobs:
           echo "lint: $lint"
           echo "test: $test"
 
-          echo {
-            "compile=$compile"
-            "build=$build"
-            "generate=$generate"
-            "package=$package"
-            "lint=$lint"
-            "test=$test"
+          echo { \
+            "compile=$compile" \
+            "build=$build" \
+            "generate=$generate" \
+            "package=$package" \
+            "lint=$lint" \
+            "test=$test" \
           } >> $GITHUB_OUTPUT
 
       - name: 🛠 Get yarn cache directory path
