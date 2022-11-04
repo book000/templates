@@ -35,6 +35,7 @@ jobs:
         id: package-json
         working-directory: ${{ matrix.directory }}
         run: |
+          # shellcheck disable=SC2086
           compile=$(jq '.scripts | has("compile")' package.json)
           build=$(jq '.scripts | has("build")' package.json)
           generate=$(jq '.scripts | has("generate")' package.json)
@@ -49,16 +50,20 @@ jobs:
           echo "lint: $lint"
           echo "test: $test"
 
-          echo "compile=$compile" >> $GITHUB_OUTPUT
-          echo "build=$build" >> $GITHUB_OUTPUT
-          echo "generate=$generate" >> $GITHUB_OUTPUT
-          echo "package=$package" >> $GITHUB_OUTPUT
-          echo "lint=$lint" >> $GITHUB_OUTPUT
-          echo "test=$test" >> $GITHUB_OUTPUT
+          echo {
+            "compile=$compile"
+            "build=$build"
+            "generate=$generate"
+            "package=$package"
+            "lint=$lint"
+            "test=$test"
+          } >> $GITHUB_OUTPUT
 
       - name: 🛠 Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+        run: |
+          # shellcheck disable=SC2086
+          echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - name: 📦 Cache node_modules
         uses: actions/cache@v3
@@ -108,6 +113,7 @@ jobs:
         id: check-dist
         working-directory: ${{ matrix.directory }}
         run: |
+          # shellcheck disable=SC2086
           echo "exists=$(test -d dist && echo true || echo false)" >> $GITHUB_OUTPUT
 
       - name: 📦 Upload artifact
