@@ -16,9 +16,10 @@ jobs:
       - name: Move workflow files
         run: |
           rm -v .github/workflows/*
-          cp -v workflows/* .github/workflows/
+          # サブディレクトリにあるworkflowファイルは無視する
+          cp -v workflows/* .github/workflows/ || true
 
       - name: Run actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color
+          ./actionlint -ignore SC2086 -ignore SC2129 -color

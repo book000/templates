@@ -1,4 +1,4 @@
-# 複数のディレクトリにある Node.js v14 と v16 でビルド・テストを実行する
+# 複数のディレクトリにある Node.js v16 でビルド・テストを実行する
 
 name: Node CI
 
@@ -51,23 +51,16 @@ jobs:
           echo "lint: $lint"
           echo "test: $test"
 
-          # shellcheck disable=SC2086,SC2129
           echo "compile=$compile" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "build=$build" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "generate=$generate" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "package=$package" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "lint=$lint" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "test=$test" >> $GITHUB_OUTPUT
 
       - name: 🛠 Get yarn cache directory path
         id: yarn-cache-dir-path
         run: |
-          # shellcheck disable=SC2086
           echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - name: 📦 Cache node_modules
@@ -118,7 +111,6 @@ jobs:
         id: check-dist
         working-directory: ${{ matrix.directory }}
         run: |
-          # shellcheck disable=SC2086
           echo "exists=$(test -d dist && echo true || echo false)" >> $GITHUB_OUTPUT
 
       - name: 📦 Upload artifact
