@@ -35,7 +35,6 @@ jobs:
       - name: 📃 Check package.json definition
         id: package-json
         run: |
-          # shellcheck disable=SC2086,SC2129
           compile=$(jq '.scripts | has("compile")' package.json)
           build=$(jq '.scripts | has("build")' package.json)
           generate=$(jq '.scripts | has("generate")' package.json)
@@ -50,23 +49,16 @@ jobs:
           echo "lint: $lint"
           echo "test: $test"
 
-          # shellcheck disable=SC2086,SC2129
           echo "compile=$compile" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "build=$build" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "generate=$generate" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "package=$package" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "lint=$lint" >> $GITHUB_OUTPUT
-          # shellcheck disable=SC2086,SC2129
           echo "test=$test" >> $GITHUB_OUTPUT
 
       - name: 🛠 Get yarn cache directory path
         id: yarn-cache-dir-path
         run: |
-          # shellcheck disable=SC2086
           echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - name: 📦 Cache node_modules
@@ -109,7 +101,6 @@ jobs:
       - name: Check exists dist directory
         id: check-dist
         run: |
-          # shellcheck disable=SC2086
           echo "exists=$(test -d dist && echo true || echo false)" >> $GITHUB_OUTPUT
 
       - name: 📦 Upload artifact
