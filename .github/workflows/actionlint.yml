@@ -16,7 +16,8 @@ jobs:
       - name: Move workflow files
         run: |
           rm -v .github/workflows/*
-          cp -v workflows/* .github/workflows/
+          # サブディレクトリにあるworkflowファイルは無視する
+          cp -v workflows/* .github/workflows/ || true
 
       - name: Run actionlint
         run: |
