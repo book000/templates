@@ -58,10 +58,10 @@ jobs:
       - name: Set platform matrix
         id: platform-matrix
         run: |
-          # linux/amd64,linux/arm64 -> [ 'linux/amd64', 'linux/arm64' ]
-          echo "matrix=[`echo $PLATFORMS | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g'`]" >> $GITHUB_OUTPUT
+          # shellcheck disable=SC2312
+          echo "matrix=[$(echo "$PLATFORMS" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> $GITHUB_OUTPUT
           # ,があるときはneed-merge=true
-          echo "need-merge=`echo $PLATFORMS | grep -q ',' && echo true || echo false`" >> $GITHUB_OUTPUT
+          echo "need-merge=$(echo "$PLATFORMS" | grep -q ',' && echo true || echo false)" >> $GITHUB_OUTPUT
 
   # Dockerイメージをビルドする
   build:
@@ -83,7 +83,7 @@ jobs:
       - name: Remove platform prefix
         id: platform
         run:
-          echo "shortPlatform=`echo ${{ matrix.platform }} | sed -r -e 's/^[^\/]+\///'`" >> $GITHUB_OUTPUT
+          echo "shortPlatform=$(echo "${{ matrix.platform }}" | sed -r -e 's/^[^\/]+\///')" >> $GITHUB_OUTPUT
 
       - name: Create GitHub deployment
         uses: chrnorm/deployment-action@v2.0.5
@@ -207,7 +207,7 @@ jobs:
         id: extra-images
         run: |
           # linux/amd64,linux/arm64 -> ${{ env.REGISTRY }}/tomacheese/my-pixiv:latest-amd64,${{ env.REGISTRY }}/tomacheese/my-pixiv:latest-arm64
-          echo "images=`echo $PLATFORMS | sed -r 's#([a-z]+)\/([a-z0-9]+)#${{ env.REGISTRY }}\/${{ fromJson(matrix.target).imageName }}:latest-\2#g'`" >> $GITHUB_OUTPUT
+          echo "images=$(echo "$PLATFORMS" | sed -r 's#([a-z]+)\/([a-z0-9]+)#${{ env.REGISTRY }}\/${{ fromJson(matrix.target).imageName }}:latest-\2#g')" >> $GITHUB_OUTPUT
 
       - name: Create and push manifest images (latest)
         uses: Noelware/docker-manifest-action@v0.2.3
