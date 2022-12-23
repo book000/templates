@@ -1,0 +1,40 @@
+name: Generate README.md
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+# workflows/*.yml 以下のファイルを取得し、### add-reviewer.yml\n\n```\nmkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://raw.githubusercontent.com/book000/templates/master/workflows/add-reviewer.yml\n``` のようにする
+# .github/templates.md を取得し、 <!-- templates --> に挿入する
+# README.md に書き込む
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create install commands
+        run: |
+          find workflows -maxdepth 1 -type f | while read -r file; do
+            echo "### ${file##*/}"
+            echo
+            echo '```shell'
+            echo "mkdir -p .github/workflows ; wget -O .github/workflows/${file##*/} https://raw.githubusercontent.com/book000/templates/master/${file}"
+            echo '```'
+            echo
+          done > install-cmds.txt
+
+          rm -f README.md
+          cp .github/templates.md README.md
+          sed -i -e '/<!-- templates -->/r install-cmds.txt' README.md
+          sed -i -e '/<!-- templates -->/d' README.md
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          git commit -m "feat: Update README.md"
+          git push
