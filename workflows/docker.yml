@@ -58,7 +58,7 @@ jobs:
       - name: Set platform matrix
         id: platform-matrix
         run: |
-          # shellcheck disable=SC2312
+          # shellcheck disable=SC2312,SC2086
           echo "matrix=[$(echo "$PLATFORMS" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> $GITHUB_OUTPUT
           # ,があるときはneed-merge=true
           echo "need-merge=$(echo "$PLATFORMS" | grep -q ',' && echo true || echo false)" >> $GITHUB_OUTPUT
@@ -125,6 +125,7 @@ jobs:
 
       - name: package.json update version
         run: |
+          # shellcheck disable=SC2086
           sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${{ needs.calc-version.outputs.tag }}\"/" view/package.json
           sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${{ needs.calc-version.outputs.tag }}\"/" api/package.json
           git diff
@@ -132,6 +133,7 @@ jobs:
       - name: Set tag suffix value
         id: tag
         run: |
+          # shellcheck disable=SC2086
           if [ "${{ fromJson(needs.calc-version.outputs.need-merge) }}" = "true" ]; then
             echo "suffix=-${{ steps.platform.outputs.shortPlatform }}" >> $GITHUB_OUTPUT
           else
