@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - master
+  pull_request:
+    branches:
+      - main
+      - master
 
 # workflows/*.yml 以下のファイルを取得し、### add-reviewer.yml\n\n```\nmkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://raw.githubusercontent.com/book000/templates/master/workflows/add-reviewer.yml\n``` のようにする
 # .github/templates.md を取得し、 <!-- templates --> に挿入する
@@ -15,6 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Initialize
+        run: |
+          rm -f README.md
+          cp .github/templates.md README.md
+
       - name: Create install commands
         run: |
           find workflows -maxdepth 1 -type f | while read -r file; do
@@ -24,17 +33,38 @@ jobs:
             echo "mkdir -p .github/workflows ; wget -O .github/workflows/${file##*/} https://raw.githubusercontent.com/book000/templates/master/${file}"
             echo '```'
             echo
-          done > install-cmds.txt
+          done > gw-install-cmds.txt
 
-          rm -f README.md
-          cp .github/templates.md README.md
-          sed -i -e '/<!-- templates -->/r install-cmds.txt' README.md
-          sed -i -e '/<!-- templates -->/d' README.md
+          sed -i -e '/<!-- gw-templates -->/r gw-install-cmds.txt' README.md
+          sed -i -e '/<!-- gw-templates -->/d' README.md
+
+      - name: Create Dockerfiles list
+        run: |
+          find dockerfiles -maxdepth 1 -type f -name '*.Dockerfile' | while read -r file; do
+            echo "### ${file##*/}"
+            echo
+            echo '```shell'
+            echo "wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/${file}"
+            echo '```'
+            echo
+          done > dockerfiles.txt
+
+          sed -i -e '/<!-- dockerfiles -->/r dockerfiles.txt' README.md
+          sed -i -e '/<!-- dockerfiles -->/d' README.md
 
       - name: Commit and push
+        if: github.event_name == 'push'
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add README.md
-          git commit -m "feat: Update README.md"
-          git push
+          git add README.md && \
+          git commit -m "feat: Update README.md" && \
+          git push || \
+            true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        if: github.event_name == 'pull_request'
+        with:
+          name: README.md
+          path: README.md
