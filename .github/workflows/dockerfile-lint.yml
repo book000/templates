@@ -19,7 +19,7 @@ jobs:
 
       - name: 📄 List Dockefile files
         id: list-files
-        working-directory: ${{ github.workspace }}/dockerfiles
+        working-directory: ./dockerfiles/
         run: |
           # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として $GITHUB_OUTPUT に files として出力する
           echo "files=[$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> $GITHUB_OUTPUT
@@ -42,4 +42,4 @@ jobs:
       - name: 🐳 hadolint
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: ${{ github.workspace }}/dockerfiles/${{ matrix.file }}.Dockerfile
+          dockerfile: dockerfiles/${{ matrix.file }}.Dockerfile
