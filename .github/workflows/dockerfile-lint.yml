@@ -2,6 +2,11 @@ name: hadolint
 
 on:
   pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - "dockerfiles/**"
 
 jobs:
   list-files:

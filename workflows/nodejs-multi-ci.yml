@@ -21,6 +21,7 @@ jobs:
         os: [ubuntu-latest]
         node: [16]
         directory: [AAAAA, BBBBB]
+      fail-fast: false
 
     steps:
       - name: 🛎 Checkout
