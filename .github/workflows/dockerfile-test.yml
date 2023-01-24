@@ -22,8 +22,8 @@ jobs:
         working-directory: ${{ github.workspace }}/dockerfiles
         run: |
           # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として $GITHUB_OUTPUT に files として出力する
-          echo "[$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]"
-          echo "files=[$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> $GITHUB_OUTPUT
+          echo "[$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]"
+          echo "files=[$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> $GITHUB_OUTPUT
 
   test:
     runs-on: ubuntu-latest
