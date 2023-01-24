@@ -19,7 +19,6 @@ jobs:
 
       - name: 📄 List Dockefile files
         id: list-files
-        working-directory: ./dockerfiles/
         run: |
           # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として $GITHUB_OUTPUT に files として出力する
           echo "[$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]"
@@ -46,9 +45,8 @@ jobs:
         run: |
           # dockerfiles/tests/<File>/ ディレクトリが存在するか確認し、存在する場合は、そのディレクトリに移動して docker build を実行する
           # <File> は拡張子を除いたファイル名
-          filename=$(basename ${{ matrix.file }} .Dockerfile)
           if [ -d "dockerfiles/tests/${{ matrix.file }}" ]; then
-            cp ${{ matrix.file }}.Dockerfile dockerfiles/tests/${{ matrix.file }}/Dockerfile
+            cp dockerfiles/${{ matrix.file }}.Dockerfile dockerfiles/tests/${{ matrix.file }}/Dockerfile
             cd dockerfiles/tests/${{ matrix.file }}
             docker build -t test .
 
