@@ -104,9 +104,21 @@ jobs:
         run: |
           echo "exists=$(test -d dist && echo true || echo false)" >> $GITHUB_OUTPUT
 
-      - name: 📦 Upload artifact
+      - name: 📦 Upload dist artifact
         if: steps.check-dist.outputs.exists == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist
+
+      - name: Check exists output directory
+        id: check-output
+        run: |
+          echo "exists=$(test -d output && echo true || echo false)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Upload output artifact
+        if: steps.check-output.outputs.exists == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: output
+          path: output
