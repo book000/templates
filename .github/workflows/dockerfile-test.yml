@@ -54,11 +54,6 @@ jobs:
             docker export -o test.tar test
             docker rm test
 
-            # test.tar を dist ディレクトリに展開する
-            # ${{ github.workspace }}/dist に展開する
-            mkdir -p ${{ github.workspace }}/dist
-            tar -xvf test.tar -C ${{ github.workspace }}/dist
-
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
@@ -70,4 +65,4 @@ jobs:
         with:
           name: ${{ matrix.file }}
           path: |
-            ${{ github.workspace }}/dist
+            dockerfiles/tests/${{ matrix.file }}/test.tar
