@@ -61,6 +61,12 @@ wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/do
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/python-app.Dockerfile
 ```
 
+### node-ncc-app.Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/node-ncc-app.Dockerfile
+```
+
 ### php-app.Dockerfile
 
 ```shell
