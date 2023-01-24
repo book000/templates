@@ -2,6 +2,8 @@
 
 ## templates
 
+### GitHub Action workflows
+
 ### docker.yml
 
 ```shell
@@ -36,5 +38,32 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-multi-ci.yml https
 
 ```shell
 mkdir -p .github/workflows ; wget -O .github/workflows/actionlint.yml https://raw.githubusercontent.com/book000/templates/master/workflows/actionlint.yml
+```
+
+
+### Dockerfile
+
+### puppeteer.Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/puppeteer.Dockerfile
+```
+
+### node-app.Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/node-app.Dockerfile
+```
+
+### python-app.Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/python-app.Dockerfile
+```
+
+### php-app.Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/php-app.Dockerfile
 ```
 
