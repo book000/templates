@@ -48,7 +48,15 @@ jobs:
           if [ -d "dockerfiles/tests/${{ matrix.file }}" ]; then
             cp dockerfiles/${{ matrix.file }}.Dockerfile dockerfiles/tests/${{ matrix.file }}/Dockerfile
             cd dockerfiles/tests/${{ matrix.file }}
+
             docker build -t test .
+            docker run test
+            docker export -o test.tar test
+
+            # test.tar を dist ディレクトリに展開する
+            # ${{ github.workspace }}/dist に展開する
+            mkdir -p ${{ github.workspace }}/dist
+            tar -xvf test.tar -C ${{ github.workspace }}/dist
 
             echo "success=true" >> $GITHUB_OUTPUT
           else
@@ -61,5 +69,4 @@ jobs:
         with:
           name: ${{ matrix.file }}
           path: |
-            dockerfiles/tests/${{ matrix.file }}/**
-            !dockerfiles/tests/${{ matrix.file }}/node_modules
+            ${{ github.workspace }}/dist
