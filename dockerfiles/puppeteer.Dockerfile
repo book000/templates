@@ -34,4 +34,4 @@ COPY tsconfig.json .
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["yarn", "build"]
+CMD ["yarn", "start"]
