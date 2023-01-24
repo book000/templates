@@ -2,4 +2,10 @@
 
 ## templates
 
-<!-- templates -->
+### GitHub Action workflows
+
+<!-- gw-templates -->
+
+### Dockerfile
+
+<!-- dockerfiles -->
