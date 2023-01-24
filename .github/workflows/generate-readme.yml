@@ -40,9 +40,13 @@ jobs:
 
       - name: Create Dockerfiles list
         run: |
-          # dockerfiles/*.Dockerfile のファイルを取得し、- Dockerfile のようにする
           find dockerfiles -maxdepth 1 -type f -name '*.Dockerfile' | while read -r file; do
-            echo "- [${file##*/}](https://raw.githubusercontent.com/book000/templates/master/dockerfiles/${file##*/})"
+            echo "### ${file##*/}"
+            echo
+            echo '```shell'
+            echo "wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/${file}"
+            echo '```'
+            echo
           done > dockerfiles.txt
 
           sed -i -e '/<!-- dockerfiles -->/r dockerfiles.txt' README.md
