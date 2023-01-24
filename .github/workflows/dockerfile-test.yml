@@ -50,8 +50,9 @@ jobs:
             cd dockerfiles/tests/${{ matrix.file }}
 
             docker build -t test .
-            docker run test
+            docker run --name test test
             docker export -o test.tar test
+            docker rm test
 
             # test.tar を dist ディレクトリに展開する
             # ${{ github.workspace }}/dist に展開する
