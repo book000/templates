@@ -63,6 +63,6 @@ jobs:
         uses: actions/upload-artifact@v3
         if: steps.test.outputs.success == 'true'
         with:
-          name: ${{ matrix.file }}
+          name: ${{ matrix.file }}.tar
           path: |
             dockerfiles/tests/${{ matrix.file }}/test.tar
