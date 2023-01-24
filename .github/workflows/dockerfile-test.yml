@@ -38,6 +38,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: 🧪 Test
         id: test
@@ -45,21 +46,21 @@ jobs:
           # dockerfiles/tests/<File>/ ディレクトリが存在するか確認し、存在する場合は、そのディレクトリに移動して docker build を実行する
           # <File> は拡張子を除いたファイル名
           filename=$(basename ${{ matrix.file }} .Dockerfile)
-          if [ -d "${{ github.workspace }}/dockerfiles/tests/${filename}" ]; then
-            cp ${{ github.workspace }}/${{ matrix.file }} ${{ github.workspace }}/dockerfiles/tests/${filename}/Dockerfile
-            cd ${{ github.workspace }}/dockerfiles/tests/${filename}
+          if [ -d "${{ github.workspace }}/dockerfiles/tests/${{ matrix.file }}" ]; then
+            cp ${{ github.workspace }}/${{ matrix.file }}.Dockerfile ${{ github.workspace }}/dockerfiles/tests/${{ matrix.file }}/Dockerfile
+            cd ${{ github.workspace }}/dockerfiles/tests/${{ matrix.file }}
             docker build -t test ${{ github.workspace }}
 
-            echo "filename=${filename}" >> $GITHUB_OUTPUT
+            echo "success=true" >> $GITHUB_OUTPUT
           else
-            echo "filename=NULL" >> $GITHUB_OUTPUT
+            echo "success=false" >> $GITHUB_OUTPUT
           fi
 
       - name: 📦 Upload artifact
         uses: actions/upload-artifact@v3
-        if: steps.test.outputs.filename != 'NULL'
+        if: steps.test.outputs.success == 'true'
         with:
-          name: ${{ steps.test.outputs.filename }}
+          name: ${{ matrix.file }}
           path: |
-            dockerfiles/tests/${{ steps.test.outputs.filename }}/**
-            !dockerfiles/tests/${{ steps.test.outputs.filename }}/node_modules
+            dockerfiles/tests/${{ matrix.file }}/**
+            !dockerfiles/tests/${{ matrix.file }}/node_modules
