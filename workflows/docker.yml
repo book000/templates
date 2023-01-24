@@ -54,6 +54,7 @@ jobs:
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはmasterを使う
           ref: ${{ github.event.pull_request.merged == true && 'master' || github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: Bump version and push tag
         id: tag-version
