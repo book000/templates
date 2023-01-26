@@ -1,4 +1,4 @@
-# 複数のディレクトリにある Node.js v16 でビルド・テストを実行する
+# 複数のディレクトリにある Node.js でビルド・テストを実行する。バージョンは .node-version に記載されているものを利用する
 
 name: Node CI
 
@@ -14,12 +14,10 @@ on:
 
 jobs:
   ci:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        node: [16]
         directory: [AAAAA, BBBBB]
       fail-fast: false
 
@@ -29,10 +27,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 🏗 Setup node env
+      - name: 🏗 Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
+          node-version-file: .node-version
+          cache: yarn
 
       - name: 📃 Check package.json definition
         id: package-json
@@ -59,23 +58,9 @@ jobs:
           echo "lint=$lint" >> $GITHUB_OUTPUT
           echo "test=$test" >> $GITHUB_OUTPUT
 
-      - name: 🛠 Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: |
-          echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-
-      - name: 📦 Cache node_modules
-        uses: actions/cache@v3
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: 👨🏻‍💻 Install dependencies
         working-directory: ${{ matrix.directory }}
-        run: yarn
+        run: yarn install --frozen-lockfile
 
       - name: 👀 Run linter
         if: steps.package-json.outputs.lint == 'true'
