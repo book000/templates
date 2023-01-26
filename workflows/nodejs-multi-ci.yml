@@ -30,7 +30,7 @@ jobs:
       - name: 🏗 Setup node
         uses: actions/setup-node@v3
         with:
-          node-version-file: .node-version
+          node-version-file: ${{ matrix.directory }}/.node-version
           cache: yarn
 
       - name: 📃 Check package.json definition
