@@ -35,8 +35,8 @@ env:
   # ビルド対象情報の情報
   TARGETS: >-
     [
-      { imageName: "tomacheese/my-pixiv", dir: ".", file: "view.Dockerfile", packageName: "my-pixiv" },
-      { imageName: "tomacheese/my-pixiv-api", dir: ".", file: "api.Dockerfile", packageName: "my-pixiv-api" }
+      { imageName: "tomacheese/my-pixiv", context: ".", file: "view.Dockerfile", packageName: "my-pixiv" },
+      { imageName: "tomacheese/my-pixiv-api", context: ".", file: "api.Dockerfile", packageName: "my-pixiv-api" }
     ]
 
 concurrency:
@@ -180,7 +180,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3.3.0
         with:
-          context: ${{ matrix.target.dir }}
+          context: ${{ matrix.target.context }}
           file: ${{ matrix.target.file }}
           push: ${{ github.event.pull_request.merged == true }}
           platforms: ${{ matrix.platform }}
