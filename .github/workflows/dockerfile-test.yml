@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - "dockerfiles/**"
+      - ".github/workflows/dockerfile-test.yml"
 
 jobs:
   list-files:
