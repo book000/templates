@@ -4,6 +4,12 @@
 
 ### GitHub Action workflows
 
+### hadolint-multi-ci.yml
+
+```shell
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/hadolint-multi-ci.yml
+```
+
 ### hadolint-ci.yml
 
 ```shell
