@@ -21,4 +21,4 @@ jobs:
       - name: Run actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -ignore SC2086 -ignore SC2129 -color
+          ./actionlint -color -shellcheck=
