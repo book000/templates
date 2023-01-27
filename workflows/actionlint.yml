@@ -9,20 +9,5 @@ on:
 
 jobs:
   actionlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Run ationlint (Push)
-        if: ${{ github.event_name == 'push' }}
-        run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color
-
-      - name: Run actionlint (Pull-request)
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: reviewdog/action-actionlint@v1
-        with:
-          fail_on_error: true
+    name: Actionlint with reviewdog
+    uses: book000/templates/.github/workflows/reusable-actionlint.yml@master
