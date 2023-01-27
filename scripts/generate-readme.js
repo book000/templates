@@ -7,7 +7,7 @@ function getWorkflowText(path) {
     `### ${filename}`,
     "",
     "```shell",
-    `mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/${filename}`,
+    `mkdir -p .github/workflows ; wget -O .github/workflows/${filename} https://raw.githubusercontent.com/book000/templates/master/workflows/${filename}`,
     "```",
   ];
 
