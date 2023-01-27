@@ -59,6 +59,8 @@ jobs:
       need-merge: ${{ steps.platform-matrix.outputs.need-merge }}
       # ビルド対象情報のマトリクス
       targets-matrix: ${{ steps.targets-matrix.outputs.matrix }}
+      # パッケージのアップロードが必要かどうか
+      need-upload: ${{ steps.need-upload.outputs.need-upload }}
 
     steps:
       - name: Check out the repo
@@ -93,6 +95,17 @@ jobs:
             core.setOutput('matrix', process.env.TARGETS)
         env:
           TARGETS: ${{ env.TARGETS }}
+
+      - name: Check if need package upload
+        id: need-upload
+        run: |
+          # package.json がない場合は false
+          if [ ! -f package.json ]; then
+            echo "need-upload=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          # "ncc build" が package.json にある場合は true、ない場合は false
+          echo "need-upload=$(grep -q 'ncc build' package.json && echo true || echo false)" >> $GITHUB_OUTPUT
 
   # Dockerイメージをビルドする
   build:
@@ -288,3 +301,48 @@ jobs:
           body: ${{ needs.calc-version.outputs.changelog }}
           draft: false
           prerelease: false
+
+  upload-package:
+    name: Upload package ${{ needs.calc-version.outputs.tag }}
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == true && needs.calc-version.outputs.need-upload == 'true' }}
+    needs:
+      - calc-version
+      - build
+      - merge-latest
+      - release
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはmasterを使う
+          ref: ${{ github.event.pull_request.merged == true && 'master' || github.event.pull_request.head.sha }}
+
+      - name: 🏗 Setup node env
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: 🎁 Run package
+        run: yarn package
+
+      - name: Create zip
+        id: create-zip
+        working-directory: output
+        run: |
+          REPO="${GITHUB_REPOSITORY#"${GITHUB_REPOSITORY_OWNER}/"}"
+          zip -r "${REPO}_${{ needs.calc-version.outputs.tag }}.zip" ./*
+          echo "zip-path=output/${REPO}-${{ needs.calc-version.outputs.tag }}.zip" >> $GITHUB_OUTPUT
+          echo "zip-filename=${REPO}-${{ needs.calc-version.outputs.tag }}.zip" >> $GITHUB_OUTPUT
+
+      - name: Upload Release Asset
+        uses: shogo82148/actions-upload-release-asset@v1.6.3
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ${{ steps.create-zip.outputs.zip-path }}
+          asset_name: ${{ steps.create-zip.outputs.zip-filename }}
+          asset_content_type: application/zip
