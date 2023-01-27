@@ -4,31 +4,31 @@ on:
   workflow_call:
     inputs:
       registry:
-        description: "Docker registry"
+        description: Docker registry
         type: string
         default: ghcr.io
       platforms:
-        description: "Docker platforms"
+        description: Docker platforms
         type: string
-        default: "linux/amd64,linux/arm64,linux/arm/v7"
+        default: linux/amd64,linux/arm64,linux/arm/v7
       targets:
-        description: "Docker targets"
+        description: Docker targets
         required: true
         type: string
       is-merged:
-        description: "Is merged"
+        description: Is merged
         type: boolean
         default: ${{ github.event.pull_request.merged == true }}
       pr-head-sha:
-        description: "Pull request head SHA"
+        description: Pull request head SHA
         type: string
         default: ${{ github.event.pull_request.head.sha }}
     secrets:
       DOCKER_PASSWORD:
-        description: "Docker registry username"
+        description: Docker registry username
         required: true
       DOCKER_USERNAME:
-        description: "Docker registry password"
+        description: Docker registry password
         required: true
 
 jobs:
@@ -254,8 +254,8 @@ jobs:
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
-          inputs: ${{ steps.extra-images.outputs.images }}
-          images: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
+          images: ${{ steps.extra-images.outputs.images }}
+          inputs: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
           push: true
 
       - name: Create and push manifest images (version)
@@ -263,8 +263,8 @@ jobs:
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
-          inputs: ${{ steps.extra-images.outputs.images }}
-          images: ${{ inputs.registry }}/${{ matrix.target.imageName }}:${{ needs.calc-version.outputs.tag }}
+          images: ${{ steps.extra-images.outputs.images }}
+          inputs: ${{ inputs.registry }}/${{ matrix.target.imageName }}:${{ needs.calc-version.outputs.tag }}
           push: true
 
   release:
