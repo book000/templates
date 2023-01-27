@@ -1,0 +1,30 @@
+name: Auto add reviewer
+
+on:
+  workflow_call:
+    inputs:
+      actors:
+        description: "Target actors (comma separated)"
+        type: string
+        default: "dependabot[bot],renovate[bot],github-actions[bot],book000"
+      reviewers:
+        description: "Reviewers (comma separated)"
+        type: string
+        default: "book000"
+
+jobs:
+  add-reviewer:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.user.login, inputs.actors) }}
+
+    steps:
+      - name: Add reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.pulls.requestReviewers({
+              ...context.repo,
+              pull_number: context.issue.number,
+              reviewers: "${{ inputs.reviewers }}".split(",")
+            })
