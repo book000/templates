@@ -13,6 +13,10 @@ on:
         description: Disable Jobs (comma separated)
         type: string
         default: ""
+      install-apt-packages:
+        description: Install apt packages (space separated)
+        type: string
+        default: ""
 
 jobs:
   setup:
@@ -51,6 +55,12 @@ jobs:
           node-version-file: ${{ matrix.directory }}/.node-version
           cache: yarn
           cache-dependency-path: ${{ matrix.directory }}/yarn.lock
+
+      - name: 👨🏻‍💻 Install apt packages
+        if: inputs.install-apt-packages != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ inputs.install-apt-packages }}
 
       - name: 📃 Check package.json definition
         id: package-json
