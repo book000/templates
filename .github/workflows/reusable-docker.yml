@@ -4,31 +4,31 @@ on:
   workflow_call:
     inputs:
       registry:
-        description: "Docker registry"
+        description: Docker registry
         type: string
         default: ghcr.io
       platforms:
-        description: "Docker platforms"
+        description: Docker platforms
         type: string
-        default: "linux/amd64,linux/arm64,linux/arm/v7"
+        default: linux/amd64,linux/arm64
       targets:
-        description: "Docker targets"
+        description: Docker targets
         required: true
         type: string
       is-merged:
-        description: "Is merged"
+        description: Is merged
         type: boolean
         default: ${{ github.event.pull_request.merged == true }}
       pr-head-sha:
-        description: "Pull request head SHA"
+        description: Pull request head SHA
         type: string
         default: ${{ github.event.pull_request.head.sha }}
     secrets:
       DOCKER_PASSWORD:
-        description: "Docker registry username"
+        description: Docker registry username
         required: true
       DOCKER_USERNAME:
-        description: "Docker registry password"
+        description: Docker registry password
         required: true
 
 jobs:
