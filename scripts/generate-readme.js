@@ -4,7 +4,7 @@ const jsyaml = require("js-yaml");
 function getWorkflowText(path) {
   const filename = path.split("/").pop();
   const contents = [
-    `## ${filename}`,
+    `### ${filename}`,
     "",
     "```shell",
     `mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/${filename}`,
@@ -63,7 +63,7 @@ function generateWorkflowFiles(templates) {
 function getDockerText(path) {
   const filename = path.split("/").pop();
   const contents = [
-    `## ${filename}`,
+    `### ${filename}`,
     "",
     "```shell",
     `wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/${filename}`,
