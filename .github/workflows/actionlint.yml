@@ -19,6 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Run actionlint
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -ignore SC2086 -ignore SC2129 -color
+
       - name: Move workflow files
         run: |
           rm -v .github/workflows/*
