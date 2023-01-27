@@ -29,7 +29,7 @@ concurrency:
 jobs:
   docker-ci:
     name: Docker CI
-    uses: book000/templates/workflows/reusables/docker.yml@master
+    uses: book000/templates/.github/workflows/reusable-docker.yml@master
     with:
       targets: >-
         [
