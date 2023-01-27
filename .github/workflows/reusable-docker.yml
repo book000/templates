@@ -3,18 +3,30 @@ name: Docker
 on:
   workflow_call:
     inputs:
-      registry:
-        description: "Docker registry"
-        type: string
-        default: ghcr.io
-      platforms:
-        description: "Docker platforms"
-        type: string
-        default: "linux/amd64,linux/arm64,linux/arm/v7"
       targets:
         description: "Docker targets"
         required: true
         type: string
+      registry:
+        description: "Docker registry"
+        type: string
+        default: ghcr.io
+      username:
+        description: "Docker registry username"
+        type: string
+        default: ${{ github.actor }}
+      password:
+        description: "Docker registry password"
+        type: string
+        default: ${{ github.token }}
+      is-mask-username:
+        description: "Either mask the username"
+        type: boolean
+        default: false
+      platforms:
+        description: "Docker platforms"
+        type: string
+        default: "linux/amd64,linux/arm64,linux/arm/v7"
       is-merged:
         description: "Is merged"
         type: boolean
@@ -23,13 +35,6 @@ on:
         description: "Pull request head SHA"
         type: string
         default: ${{ github.event.pull_request.head.sha }}
-    secrets:
-      DOCKER_PASSWORD:
-        description: "Docker registry username"
-        required: true
-      DOCKER_USERNAME:
-        description: "Docker registry password"
-        required: true
 
 jobs:
   # バージョンを計算する
@@ -58,6 +63,13 @@ jobs:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはmasterを使う
           ref: ${{ inputs.is-merged == true && 'master' || inputs.pr-head-sha }}
           fetch-depth: 0
+
+      - name: Mask password
+        run: echo "::add-mask::${{ inputs.password }}"
+
+      - name: Mask username
+        if: ${{ inputs.is-mask-username == true }}
+        run: echo "::add-mask::${{ inputs.username }}"
 
       - name: Bump version and push tag
         id: tag-version
