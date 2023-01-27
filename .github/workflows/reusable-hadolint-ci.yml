@@ -1,0 +1,25 @@
+name: hadolint
+
+on:
+  workflow_call:
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    name: hadolint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: hadolint (push)
+        uses: hadolint/hadolint-action@v3.1.0
+        if: ${{ github.event_name == 'push' }}
+        with:
+          recursive: true
+
+      - name: hadolint (pull_request)
+        uses: reviewdog/action-hadolint@v1
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          fail_on_error: true
