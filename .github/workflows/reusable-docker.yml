@@ -210,7 +210,7 @@ jobs:
           deployment-id: ${{ steps.deployment.outputs.deployment_id }}
 
   finished-build:
-    name: Check finished build
+    name: Check finished Docker CI
     runs-on: ubuntu-latest
     needs:
       - calc-version
