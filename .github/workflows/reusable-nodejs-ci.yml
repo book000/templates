@@ -25,7 +25,11 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          echo "directorys=[${{ inputs.directorys }}]" >> $GITHUB_OUTPUT
+          if [ "${{ inputs.directorys }}" = "." ]; then
+            echo "directorys=[\".\"]" >> $GITHUB_OUTPUT
+          else
+            echo "directorys=[${{ inputs.directorys }}]" >> $GITHUB_OUTPUT
+          fi
 
   node-ci:
     runs-on: ubuntu-latest
