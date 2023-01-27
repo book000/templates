@@ -29,16 +29,12 @@ concurrency:
 jobs:
   docker-ci:
     name: Docker CI
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Run book000/templates/workflows/reusables/docker.yml
-        uses: book000/templates/workflows/reusables/docker.yml@master
-        with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          targets: >-
-            [
-              { imageName: "tomacheese/my-pixiv", context: ".", file: "view.Dockerfile", packageName: "my-pixiv" },
-              { imageName: "tomacheese/my-pixiv-api", context: ".", file: "api.Dockerfile", packageName: "my-pixiv-api" }
-            ]
+    uses: book000/templates/workflows/reusables/docker.yml@master
+    with:
+      targets: >-
+        [
+          { imageName: "tomacheese/twitter-dm-memo", context: ".", file: "Dockerfile", packageName: "twitter-dm-memo" }
+        ]
+    secrets:
+      DOCKER_USERNAME: ${{ github.actor }}
+      DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

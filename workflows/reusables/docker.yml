@@ -7,14 +7,6 @@ on:
         description: "Docker registry"
         type: string
         default: ghcr.io
-      username:
-        description: "Docker registry username"
-        required: true
-        type: string
-      password:
-        description: "Docker registry password"
-        required: true
-        type: string
       platforms:
         description: "Docker platforms"
         type: string
@@ -31,6 +23,13 @@ on:
         description: "Pull request head SHA"
         type: string
         default: ${{ github.event.pull_request.head.sha }}
+    secrets:
+      username:
+        description: "Docker registry username"
+        required: true
+      password:
+        description: "Docker registry password"
+        required: true
 
 jobs:
   # バージョンを計算する
@@ -153,8 +152,8 @@ jobs:
         uses: docker/login-action@v2.1.0
         with:
           registry: ${{ inputs.registry }}
-          username: ${{ inputs.username }}
-          password: ${{ inputs.password }}
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
 
       - name: package.json update version
         run: |
@@ -242,8 +241,8 @@ jobs:
         uses: docker/login-action@v2.1.0
         with:
           registry: ${{ inputs.registry }}
-          username: ${{ inputs.username }}
-          password: ${{ inputs.password }}
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
 
       - name: Create extra-images list
         id: extra-images
