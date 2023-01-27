@@ -28,7 +28,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml htt
 | Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
 |  | `registry` | Docker registry | `string` | `ghcr.io` |
-|  | `platforms` | Docker platforms | `string` | `linux/amd64,linux/arm64,linux/arm/v7` |
+|  | `platforms` | Docker platforms | `string` | `linux/amd64,linux/arm64` |
 | ✔ | `targets` | Docker targets | `string` |  |
 |  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
