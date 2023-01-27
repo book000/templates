@@ -1,11 +1,9 @@
 # book000/templates
 
-## templates
-
-### GitHub Action workflows
+## GitHub Action workflows
 
 <!-- gw-templates -->
 
-### Dockerfile
+## Dockerfile
 
 <!-- dockerfiles -->

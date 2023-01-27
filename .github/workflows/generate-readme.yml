@@ -18,39 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Initialize
+        
+      - name: Install dependencies
         run: |
-          rm -f README.md
-          cp .github/templates.md README.md
+          yarn add js-yaml
 
-      - name: Create install commands
+      - name: Generate readme
         run: |
-          find workflows -maxdepth 1 -type f | while read -r file; do
-            echo "### ${file##*/}"
-            echo
-            echo '```shell'
-            echo "mkdir -p .github/workflows ; wget -O .github/workflows/${file##*/} https://raw.githubusercontent.com/book000/templates/master/${file}"
-            echo '```'
-            echo
-          done > gw-install-cmds.txt
-
-          sed -i -e '/<!-- gw-templates -->/r gw-install-cmds.txt' README.md
-          sed -i -e '/<!-- gw-templates -->/d' README.md
-
-      - name: Create Dockerfiles list
-        run: |
-          find dockerfiles -maxdepth 1 -type f -name '*.Dockerfile' | while read -r file; do
-            echo "### ${file##*/}"
-            echo
-            echo '```shell'
-            echo "wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/${file}"
-            echo '```'
-            echo
-          done > dockerfiles.txt
-
-          sed -i -e '/<!-- dockerfiles -->/r dockerfiles.txt' README.md
-          sed -i -e '/<!-- dockerfiles -->/d' README.md
+          node scripts/generate-readme.js
 
       - name: Commit and push
         if: github.event_name == 'push'
