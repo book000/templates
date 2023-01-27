@@ -255,8 +255,8 @@ jobs:
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
-          base-image: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
-          extra-images: ${{ steps.extra-images.outputs.images }}
+          inputs: ${{ steps.extra-images.outputs.images }}
+          images: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
           push: true
 
       - name: Create and push manifest images (version)
@@ -264,8 +264,8 @@ jobs:
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
-          base-image: ${{ inputs.registry }}/${{ matrix.target.imageName }}:${{ needs.calc-version.outputs.tag }}
-          extra-images: ${{ steps.extra-images.outputs.images }}
+          inputs: ${{ steps.extra-images.outputs.images }}
+          images: ${{ inputs.registry }}/${{ matrix.target.imageName }}:${{ needs.calc-version.outputs.tag }}
           push: true
 
   release:
