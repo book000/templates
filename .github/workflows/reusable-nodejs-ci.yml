@@ -25,7 +25,7 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          DIRECTORYS=$(echo "${{ inputs.directorys }}" | jq -R -r 'split(",") | map(select(length > 0))')
+          DIRECTORYS=$(echo "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0))')
           echo "directorys=$DIRECTORYS" >> $GITHUB_OUTPUT
 
   node-ci:
