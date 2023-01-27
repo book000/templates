@@ -48,11 +48,13 @@ jobs:
       - name: 🏗 Setup node
         uses: actions/setup-node@v3
         with:
-          node-version-file: .node-version
+          node-version-file: ${{ matrix.directory }}/.node-version
           cache: yarn
+          cache-dependency-path: ${{ matrix.directory }}/yarn.lock
 
       - name: 📃 Check package.json definition
         id: package-json
+        working-directory: ${{ matrix.directory }}
         run: |
           compile=$(jq '.scripts | has("compile")' package.json)
           build=$(jq '.scripts | has("build")' package.json)
@@ -84,18 +86,22 @@ jobs:
           echo "disabled-depcheck=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["depcheck"])')" >> $GITHUB_OUTPUT
 
       - name: 👨🏻‍💻 Install dependencies
+        working-directory: ${{ matrix.directory }}
         run: yarn install --frozen-lockfile
 
       - name: 👀 Run linter
         if: steps.package-json.outputs.lint == 'true' && steps.package-json.outputs.disabled-lint == 'false'
+        working-directory: ${{ matrix.directory }}
         run: yarn lint
 
       - name: 🎁 Run package
         if: steps.package-json.outputs.package == 'true' && steps.package-json.outputs.disabled-package == 'false'
+        working-directory: ${{ matrix.directory }}
         run: yarn package
 
       - name: 🏃 Run compile
         if: steps.package-json.outputs.compile == 'true' && steps.package-json.outputs.disabled-compile == 'false'
+        working-directory: ${{ matrix.directory }}
         run: yarn compile
 
       - name: 🏗️ Run build & generate (Nuxt.js)
@@ -104,20 +110,24 @@ jobs:
           steps.package-json.outputs.disabled-build == 'false' &&
           steps.package-json.outputs.generate == 'true' &&
           steps.package-json.outputs.disabled-generate == 'false'
+        working-directory: ${{ matrix.directory }}
         run: |
           yarn build
           yarn generate
 
       - name: 🧪 Run tests
         if: steps.package-json.outputs.test == 'true' && steps.package-json.outputs.disabled-test == 'false'
+        working-directory: ${{ matrix.directory }}
         run: yarn test
 
       - name: ☑️ Check Dependencies
         if: steps.package-json.outputs.disabled-depcheck == 'false'
+        working-directory: ${{ matrix.directory }}
         run: npx depcheck
 
       - name: Check exists dist directory
         id: check-dist
+        working-directory: ${{ matrix.directory }}
         run: |
           echo "exists=$(test -d dist && echo true || echo false)" >> $GITHUB_OUTPUT
 
@@ -125,8 +135,8 @@ jobs:
         if: steps.check-dist.outputs.exists == 'true'
         uses: actions/upload-artifact@v3
         with:
-          name: dist
-          path: dist
+          name: ${{ matrix.directory }}-dist
+          path: ${{ matrix.directory }}/dist
 
       - name: Check exists output directory
         id: check-output
@@ -137,8 +147,8 @@ jobs:
         if: steps.check-output.outputs.exists == 'true'
         uses: actions/upload-artifact@v3
         with:
-          name: output
-          path: output
+          name: ${{ matrix.directory }}-output
+          path: ${{ matrix.directory }}/output
 
   finished-node-ci:
     name: Check finished Node CI
