@@ -1,87 +1,89 @@
 # book000/templates
 
-## templates
+## GitHub Action workflows
 
-### GitHub Action workflows
-
-### hadolint-multi-ci.yml
+## actionlint.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/hadolint-multi-ci.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/actionlint.yml
 ```
 
-### hadolint-ci.yml
+## add-reviewer.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/hadolint-ci.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/add-reviewer.yml
 ```
 
-### docker.yml
+| Required | Key | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+|  | `actors` | Target actors (comma separated) | `string` | `dependabot[bot],renovate[bot],github-actions[bot],book000` |
+|  | `reviewers` | Reviewers (comma separated) | `string` | `book000` |
+
+## docker.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.githubusercontent.com/book000/templates/master/workflows/docker.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/docker.yml
 ```
 
-### add-reviewer.yml
+| Required | Key | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+|  | `registry` | Docker registry | `string` | `ghcr.io` |
+|  | `platforms` | Docker platforms | `string` | `linux/amd64,linux/arm64,linux/arm/v7` |
+| ✔ | `targets` | Docker targets | `string` |  |
+|  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
+|  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
+
+## hadolint-ci.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://raw.githubusercontent.com/book000/templates/master/workflows/add-reviewer.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/hadolint-ci.yml
 ```
 
-### nodejs-ci.yml
+## maven-ci.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-ci.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/maven-ci.yml
 ```
 
-### maven-ci.yml
+## nodejs-ci.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/maven-ci.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-ci.yml
 ```
 
-### nodejs-multi-ci.yml
+| Required | Key | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+|  | `directorys` | Target directorys (comma separated) | `string` | `.` |
+|  | `disabled-jobs` | Disable Jobs (comma separated) | `string` |  |
+
+## Dockerfile
+
+## node-app.Dockerfile
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-multi-ci.yml
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/node-app.Dockerfile
 ```
 
-### actionlint.yml
+## node-ncc-app.Dockerfile
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/actionlint.yml https://raw.githubusercontent.com/book000/templates/master/workflows/actionlint.yml
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/node-ncc-app.Dockerfile
 ```
 
-
-### Dockerfile
-
-### puppeteer.Dockerfile
+## php-app.Dockerfile
 
 ```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/puppeteer.Dockerfile
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/php-app.Dockerfile
 ```
 
-### node-app.Dockerfile
+## puppeteer.Dockerfile
 
 ```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/node-app.Dockerfile
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer.Dockerfile
 ```
 
-### python-app.Dockerfile
+## python-app.Dockerfile
 
 ```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/python-app.Dockerfile
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/python-app.Dockerfile
 ```
-
-### node-ncc-app.Dockerfile
-
-```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/node-ncc-app.Dockerfile
-```
-
-### php-app.Dockerfile
-
-```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/dockerfiles/php-app.Dockerfile
-```
-

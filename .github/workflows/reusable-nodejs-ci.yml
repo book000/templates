@@ -1,0 +1,150 @@
+# Node.js でビルド・テストを実行する。バージョンは .node-version に記載されているものを利用する
+
+name: Node CI
+
+on:
+  workflow_call:
+    inputs:
+      directorys:
+        description: Target directorys (comma separated)
+        type: string
+        default: .
+      disabled-jobs:
+        description: Disable Jobs (comma separated)
+        type: string
+        default: ""
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    outputs:
+      directorys: ${{ steps.setup.outputs.directorys }}
+
+    steps:
+      - name: Setup
+        id: setup
+        run: |
+          echo "directorys=[${{ inputs.directorys }}]" >> $GITHUB_OUTPUT
+
+  node-ci:
+    runs-on: ubuntu-latest
+
+    needs:
+      - setup
+
+    strategy:
+      matrix:
+        directory: ${{ fromJson(needs.setup.outputs.directorys) }}
+      fail-fast: false
+
+    steps:
+      - name: 🛎 Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 🏗 Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: yarn
+
+      - name: 📃 Check package.json definition
+        id: package-json
+        run: |
+          compile=$(jq '.scripts | has("compile")' package.json)
+          build=$(jq '.scripts | has("build")' package.json)
+          generate=$(jq '.scripts | has("generate")' package.json)
+          package=$(jq '.scripts | has("package")' package.json)
+          lint=$(jq '.scripts | has("lint")' package.json)
+          test=$(jq '.scripts | has("test")' package.json)
+
+          echo "compile: $compile"
+          echo "build: $build"
+          echo "generate: $generate"
+          echo "package: $package"
+          echo "lint: $lint"
+          echo "test: $test"
+
+          echo "compile=$compile" >> $GITHUB_OUTPUT
+          echo "build=$build" >> $GITHUB_OUTPUT
+          echo "generate=$generate" >> $GITHUB_OUTPUT
+          echo "package=$package" >> $GITHUB_OUTPUT
+          echo "lint=$lint" >> $GITHUB_OUTPUT
+          echo "test=$test" >> $GITHUB_OUTPUT
+
+          echo "disabled-compile=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["compile"])')" >> $GITHUB_OUTPUT
+          echo "disabled-build=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["build"])')" >> $GITHUB_OUTPUT
+          echo "disabled-generate=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["generate"])')" >> $GITHUB_OUTPUT
+          echo "disabled-package=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["package"])')" >> $GITHUB_OUTPUT
+          echo "disabled-lint=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["lint"])')" >> $GITHUB_OUTPUT
+          echo "disabled-test=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["test"])')" >> $GITHUB_OUTPUT
+          echo "disabled-depcheck=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["depcheck"])')" >> $GITHUB_OUTPUT
+
+      - name: 👨🏻‍💻 Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: 👀 Run linter
+        if: steps.package-json.outputs.lint == 'true' && steps.package-json.outputs.disabled-lint == 'false'
+        run: yarn lint
+
+      - name: 🎁 Run package
+        if: steps.package-json.outputs.package == 'true' && steps.package-json.outputs.disabled-package == 'false'
+        run: yarn package
+
+      - name: 🏃 Run compile
+        if: steps.package-json.outputs.compile == 'true' && steps.package-json.outputs.disabled-compile == 'false'
+        run: yarn compile
+
+      - name: 🏗️ Run build & generate (Nuxt.js)
+        if: >-
+          steps.package-json.outputs.build == 'true' &&
+          steps.package-json.outputs.disabled-build == 'false' &&
+          steps.package-json.outputs.generate == 'true' &&
+          steps.package-json.outputs.disabled-generate == 'false'
+        run: |
+          yarn build
+          yarn generate
+
+      - name: 🧪 Run tests
+        if: steps.package-json.outputs.test == 'true' && steps.package-json.outputs.disabled-test == 'false'
+        run: yarn test
+
+      - name: ☑️ Check Dependencies
+        if: steps.package-json.outputs.disabled-depcheck == 'false'
+        run: npx depcheck
+
+      - name: Check exists dist directory
+        id: check-dist
+        run: |
+          echo "exists=$(test -d dist && echo true || echo false)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Upload dist artifact
+        if: steps.check-dist.outputs.exists == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Check exists output directory
+        id: check-output
+        run: |
+          echo "exists=$(test -d output && echo true || echo false)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Upload output artifact
+        if: steps.check-output.outputs.exists == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: output
+          path: output
+
+  finished-node-ci:
+    name: Check finished Node CI
+    runs-on: ubuntu-latest
+    needs:
+      - node-ci
+
+    steps:
+      - name: Check finished Node CI
+        run: echo ok

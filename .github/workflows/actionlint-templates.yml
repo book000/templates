@@ -1,4 +1,4 @@
-name: Actionlint
+name: Actionlint templates
 
 on:
   push:
@@ -10,13 +10,20 @@ on:
       - main
       - master
     paths:
-      - ".github/workflows/*"
+      - "workflows/**"
+      - ".github/workflows/actionlint.yml"
 
 jobs:
   actionlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Move workflow files
+        run: |
+          rm -v .github/workflows/*
+          # サブディレクトリにあるworkflowファイルは無視する
+          cp -v workflows/* .github/workflows/ || true
 
       - name: Run actionlint
         run: |
