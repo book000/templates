@@ -5,13 +5,13 @@
 ### actionlint.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/actionlint.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/actionlint.yml https://raw.githubusercontent.com/book000/templates/master/workflows/actionlint.yml
 ```
 
 ### add-reviewer.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/add-reviewer.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://raw.githubusercontent.com/book000/templates/master/workflows/add-reviewer.yml
 ```
 
 | Required | Key | Description | Type | Default |
@@ -22,7 +22,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml htt
 ### docker.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/docker.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.githubusercontent.com/book000/templates/master/workflows/docker.yml
 ```
 
 | Required | Key | Description | Type | Default |
@@ -36,19 +36,19 @@ mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml htt
 ### hadolint-ci.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/hadolint-ci.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/hadolint-ci.yml
 ```
 
 ### maven-ci.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/maven-ci.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/maven-ci.yml
 ```
 
 ### nodejs-ci.yml
 
 ```shell
-mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-multi-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-ci.yml
+mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-ci.yml
 ```
 
 | Required | Key | Description | Type | Default |
