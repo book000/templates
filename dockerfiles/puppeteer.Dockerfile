@@ -1,4 +1,20 @@
-FROM alpine:edge
+FROM node:19-alpine as builder
+
+WORKDIR /app
+
+COPY package.json .
+COPY yarn.lock .
+
+RUN echo network-timeout 600000 > .yarnrc && \
+  yarn install --frozen-lockfile && \
+  yarn cache clean
+
+COPY src src
+COPY tsconfig.json .
+
+RUN yarn package
+
+FROM alpine:edge as runner
 
 # hadolint ignore=DL3018
 RUN apk update && \
@@ -14,7 +30,8 @@ RUN apk update && \
   ca-certificates \
   ttf-freefont \
   nodejs \
-  yarn && \
+  yarn \
+  && \
   apk add --update --no-cache tzdata && \
   cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
   echo "Asia/Tokyo" > /etc/timezone && \
@@ -22,16 +39,12 @@ RUN apk update && \
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+COPY --from=builder /app/output .
 
-RUN echo network-timeout 600000 > .yarnrc && \
-  yarn install --frozen-lockfile && \
-  yarn cache clean
-
-COPY src/ src/
-COPY tsconfig.json .
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["yarn", "start"]
+CMD ["/app/entrypoint.sh"]

@@ -46,7 +46,11 @@ WORKDIR /app
 
 COPY --from=builder /app/output .
 
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+ENV DISPLAY :99
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "index.js"]
+CMD ["/app/entrypoint.sh"]
