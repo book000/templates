@@ -15,7 +15,7 @@ on:
 jobs:
   add-reviewer:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.user.login, inputs.actors) }}
+    if: ${{ !contains(github.actor, inputs.actors) }}
 
     steps:
       - name: Add reviewer
