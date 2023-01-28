@@ -1,5 +1,4 @@
 #!/bin/sh
-
 rm /tmp/.X99-lock || true
 
 Xvfb :99 -ac -screen 0 600x800x16 -listen tcp &

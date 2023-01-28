@@ -44,4 +44,4 @@ COPY --from=builder /app/output .
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "index.js"]
+CMD ["/app/entrypoint.sh"]
