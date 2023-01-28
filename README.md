@@ -56,6 +56,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 |  | `directorys` | Target directorys (comma separated) | `string` | `.` |
 |  | `disabled-jobs` | Disable Jobs (comma separated) | `string` | `NULL` |
 |  | `install-apt-packages` | Install apt packages (space separated) | `string` |  |
+|  | `lock-path` | yarn.lock path | `string` | `{dir}/yarn.lock` |
 
 ## Dockerfile
 
