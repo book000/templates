@@ -78,6 +78,12 @@ wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/do
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/php-app.Dockerfile
 ```
 
+### puppeteer-ncc.Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer-ncc.Dockerfile
+```
+
 ### puppeteer.Dockerfile
 
 ```shell
