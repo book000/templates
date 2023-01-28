@@ -46,9 +46,6 @@ WORKDIR /app
 
 COPY --from=builder /app/output .
 
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
-
 ENV DISPLAY :99
 
 ENTRYPOINT ["dumb-init", "--"]
