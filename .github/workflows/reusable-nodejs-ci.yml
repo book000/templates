@@ -32,7 +32,7 @@ jobs:
         run: |
           DIRECTORYS=$(echo "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "directorys=$DIRECTORYS" >> $GITHUB_OUTPUT
-          DISABLED_JOBS=$(echo "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
+          DISABLED_JOBS=$(echo "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
           echo "disabled-jobs=$DISABLED_JOBS" >> $GITHUB_OUTPUT
 
   node-ci:
