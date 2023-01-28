@@ -41,6 +41,9 @@ WORKDIR /app
 
 COPY --from=builder /app/output .
 
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
 ENTRYPOINT ["dumb-init", "--"]
