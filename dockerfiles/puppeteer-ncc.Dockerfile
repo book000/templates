@@ -52,4 +52,4 @@ RUN chmod +x entrypoint.sh
 ENV DISPLAY :99
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["/app/entrypoint.sh"]
+CMD ["node", "index.js"]
