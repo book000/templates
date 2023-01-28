@@ -152,7 +152,9 @@ jobs:
         id: check-dist
         working-directory: ${{ matrix.directory }}
         run: |
-          echo "exists=$(test -d dist && echo true || echo false)" >> $GITHUB_OUTPUT
+          IS_DIRECTORY=$(test -d dist && echo true || echo false)
+          IS_SYMLINK=$(test -L dist && echo true || echo false)
+          echo "exists=$(test $IS_DIRECTORY = true && $IS_NOT_SYMLINK = false && echo true || echo false)" >> $GITHUB_OUTPUT
 
       - name: 📦 Upload dist artifact
         if: steps.check-dist.outputs.exists == 'true'
@@ -164,7 +166,9 @@ jobs:
       - name: Check exists output directory
         id: check-output
         run: |
-          echo "exists=$(test -d output && echo true || echo false)" >> $GITHUB_OUTPUT
+          IS_DIRECTORY=$(test -d output && echo true || echo false)
+          IS_SYMLINK=$(test -L output && echo true || echo false)
+          echo "exists=$(test $IS_DIRECTORY = true && $IS_NOT_SYMLINK = false && echo true || echo false)" >> $GITHUB_OUTPUT
 
       - name: 📦 Upload output artifact
         if: steps.check-output.outputs.exists == 'true'
