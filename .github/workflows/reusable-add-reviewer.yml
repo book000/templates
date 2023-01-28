@@ -20,7 +20,7 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          ACTORS=$(echo "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
+          ACTORS=$(echo "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "actors: $ACTORS"
           echo "is-need-add-reviewer: $(echo $ACTORS | jq -r '. | contains(["${{ github.actor }}"])')" >> $GITHUB_OUTPUT
 
