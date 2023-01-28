@@ -15,11 +15,18 @@ on:
 jobs:
   add-reviewer:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.actor, inputs.actors) }}
 
     steps:
+      - name: Setup
+        id: setup
+        run: |
+          ACTORS=$(echo "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
+          echo "actors: $ACTORS"
+          echo "is-need-add-reviewer: $(echo $ACTORS | jq -r '. | contains(["${{ github.actor }}"])')" >> $GITHUB_OUTPUT
+
       - name: Add reviewer
         uses: actions/github-script@v6
+        if: ${{ steps.setup.outputs.is-need-add-reviewer == 'true' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
