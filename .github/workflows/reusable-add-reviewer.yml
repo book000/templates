@@ -22,7 +22,7 @@ jobs:
         run: |
           ACTORS=$(echo "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "actors: $ACTORS"
-          echo "is-need-add-reviewer=$(echo $ACTORS | jq -r '. | contains(["${{ github.actor }}"])')" >> $GITHUB_OUTPUT
+          echo "is-need-add-reviewer=$(echo $ACTORS | jq -r '. | contains(["${{ github.actor }}"]) | not')" >> $GITHUB_OUTPUT
 
       - name: Add reviewer
         uses: actions/github-script@v6
