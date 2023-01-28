@@ -29,8 +29,10 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          DIRECTORYS=$(echo "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0))')
+          DIRECTORYS=$(echo "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "directorys=$DIRECTORYS" >> $GITHUB_OUTPUT
+          DISABLED_JOBS=$(echo "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
+          echo "disabled-jobs=$DISABLED_JOBS" >> $GITHUB_OUTPUT
 
   node-ci:
     runs-on: ubuntu-latest
@@ -87,13 +89,13 @@ jobs:
           echo "lint=$lint" >> $GITHUB_OUTPUT
           echo "test=$test" >> $GITHUB_OUTPUT
 
-          echo "disabled-compile=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["compile"])')" >> $GITHUB_OUTPUT
-          echo "disabled-build=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["build"])')" >> $GITHUB_OUTPUT
-          echo "disabled-generate=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["generate"])')" >> $GITHUB_OUTPUT
-          echo "disabled-package=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["package"])')" >> $GITHUB_OUTPUT
-          echo "disabled-lint=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["lint"])')" >> $GITHUB_OUTPUT
-          echo "disabled-test=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["test"])')" >> $GITHUB_OUTPUT
-          echo "disabled-depcheck=$(echo \"${{ inputs.disabled-jobs }}\" | jq -R -r 'split(",") | contains(["depcheck"])')" >> $GITHUB_OUTPUT
+          echo "disabled-compile=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["compile"])')" >> $GITHUB_OUTPUT
+          echo "disabled-build=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["build"])')" >> $GITHUB_OUTPUT
+          echo "disabled-generate=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["generate"])')" >> $GITHUB_OUTPUT
+          echo "disabled-package=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["package"])')" >> $GITHUB_OUTPUT
+          echo "disabled-lint=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["lint"])')" >> $GITHUB_OUTPUT
+          echo "disabled-test=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["test"])')" >> $GITHUB_OUTPUT
+          echo "disabled-depcheck=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["depcheck"])')" >> $GITHUB_OUTPUT
 
       - name: 👨🏻‍💻 Install dependencies
         working-directory: ${{ matrix.directory }}
