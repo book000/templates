@@ -19,8 +19,8 @@ async function main() {
   await page.goto("https://www.google.com/search?q=puppeteer", {
     waitUntil: "networkidle2",
   });
-  fs.mkdirSync("output", { recursive: true });
-  await page.screenshot({ path: "output/screenshot.png" });
+  fs.mkdirSync("screenshots", { recursive: true });
+  await page.screenshot({ path: "screenshots/screenshot.png" });
   await browser.close();
 }
 
