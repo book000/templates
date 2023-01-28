@@ -24,6 +24,7 @@ jobs:
 
     outputs:
       directorys: ${{ steps.setup.outputs.directorys }}
+      disabled-jobs: ${{ steps.setup.outputs.disabled-jobs }}
 
     steps:
       - name: Setup
