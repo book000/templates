@@ -46,7 +46,7 @@ WORKDIR /app
 
 COPY --from=builder /app/output .
 
-ENV DISPLAY :99
+ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "index.js"]
