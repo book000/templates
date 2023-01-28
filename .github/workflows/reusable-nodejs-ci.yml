@@ -17,6 +17,10 @@ on:
         description: Install apt packages (space separated)
         type: string
         default: ""
+      lock-path:
+        description: yarn.lock path
+        type: string
+        default: "{dir}/yarn.lock"
 
 jobs:
   setup:
@@ -52,12 +56,18 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: 📂 Set lock path
+        id: lock-path
+        run: |
+          LOCK_PATH=$(echo "${{ inputs.lock-path }}" | sed -e "s/{dir}/${{ matrix.directory }}/g")
+          echo "lock-path=$LOCK_PATH" >> $GITHUB_OUTPUT
+
       - name: 🏗 Setup node
         uses: actions/setup-node@v3
         with:
           node-version-file: ${{ matrix.directory }}/.node-version
           cache: yarn
-          cache-dependency-path: ${{ matrix.directory }}/yarn.lock
+          cache-dependency-path: ${{ steps.lock-path.outputs.lock-path }}
 
       - name: 👨🏻‍💻 Install apt packages
         if: inputs.install-apt-packages != ''
@@ -90,13 +100,13 @@ jobs:
           echo "lint=$lint" >> $GITHUB_OUTPUT
           echo "test=$test" >> $GITHUB_OUTPUT
 
-          echo "disabled-compile=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["compile"])')" >> $GITHUB_OUTPUT
-          echo "disabled-build=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["build"])')" >> $GITHUB_OUTPUT
-          echo "disabled-generate=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["generate"])')" >> $GITHUB_OUTPUT
-          echo "disabled-package=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["package"])')" >> $GITHUB_OUTPUT
-          echo "disabled-lint=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["lint"])')" >> $GITHUB_OUTPUT
-          echo "disabled-test=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["test"])')" >> $GITHUB_OUTPUT
-          echo "disabled-depcheck=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["depcheck"])')" >> $GITHUB_OUTPUT
+          echo "disabled-compile=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["compile"])')" >> $GITHUB_OUTPUT
+          echo "disabled-build=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["build"])')" >> $GITHUB_OUTPUT
+          echo "disabled-generate=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["generate"])')" >> $GITHUB_OUTPUT
+          echo "disabled-package=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["package"])')" >> $GITHUB_OUTPUT
+          echo "disabled-lint=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["lint"])')" >> $GITHUB_OUTPUT
+          echo "disabled-test=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["test"])')" >> $GITHUB_OUTPUT
+          echo "disabled-depcheck=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["depcheck"])')" >> $GITHUB_OUTPUT
 
       - name: 👨🏻‍💻 Install dependencies
         working-directory: ${{ matrix.directory }}
