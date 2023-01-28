@@ -90,13 +90,13 @@ jobs:
           echo "lint=$lint" >> $GITHUB_OUTPUT
           echo "test=$test" >> $GITHUB_OUTPUT
 
-          echo "disabled-compile=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["compile"])')" >> $GITHUB_OUTPUT
-          echo "disabled-build=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["build"])')" >> $GITHUB_OUTPUT
-          echo "disabled-generate=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["generate"])')" >> $GITHUB_OUTPUT
-          echo "disabled-package=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["package"])')" >> $GITHUB_OUTPUT
-          echo "disabled-lint=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["lint"])')" >> $GITHUB_OUTPUT
-          echo "disabled-test=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["test"])')" >> $GITHUB_OUTPUT
-          echo "disabled-depcheck=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r 'contains(["depcheck"])')" >> $GITHUB_OUTPUT
+          echo "disabled-compile=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["compile"])')" >> $GITHUB_OUTPUT
+          echo "disabled-build=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["build"])')" >> $GITHUB_OUTPUT
+          echo "disabled-generate=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["generate"])')" >> $GITHUB_OUTPUT
+          echo "disabled-package=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["package"])')" >> $GITHUB_OUTPUT
+          echo "disabled-lint=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["lint"])')" >> $GITHUB_OUTPUT
+          echo "disabled-test=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["test"])')" >> $GITHUB_OUTPUT
+          echo "disabled-depcheck=$(echo \"${{ needs.setup.outputs.disabled-jobs }}\" | jq -r '. | contains(["depcheck"])')" >> $GITHUB_OUTPUT
 
       - name: 👨🏻‍💻 Install dependencies
         working-directory: ${{ matrix.directory }}
