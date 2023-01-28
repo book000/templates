@@ -24,11 +24,11 @@ on:
         type: string
         default: ${{ github.event.pull_request.head.sha }}
     secrets:
-      DOCKER_PASSWORD:
-        description: Docker registry username
-        required: true
       DOCKER_USERNAME:
         description: Docker registry password
+        required: true
+      DOCKER_PASSWORD:
+        description: Docker registry username
         required: true
 
 jobs:
@@ -146,6 +146,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        with:
+          install: true
 
       - name: Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
