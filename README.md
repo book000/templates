@@ -54,7 +54,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 | Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
 |  | `directorys` | Target directorys (comma separated) | `string` | `.` |
-|  | `disabled-jobs` | Disable Jobs (comma separated) | `string` |  |
+|  | `disabled-jobs` | Disable Jobs (comma separated) | `string` | `NULL` |
 |  | `install-apt-packages` | Install apt packages (space separated) | `string` |  |
 
 ## Dockerfile
