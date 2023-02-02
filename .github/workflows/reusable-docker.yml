@@ -337,4 +337,3 @@ jobs:
           upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: ${{ steps.create-zip.outputs.zip-path }}
           asset_name: ${{ steps.create-zip.outputs.zip-filename }}
-          asset_content_type: application/zip
