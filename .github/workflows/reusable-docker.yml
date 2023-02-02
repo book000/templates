@@ -23,6 +23,10 @@ on:
         description: Pull request head SHA
         type: string
         default: ${{ github.event.pull_request.head.sha }}
+      version:
+          description: Next custom version (Not included prefix)
+          type: string
+          default: ''
     secrets:
       DOCKER_USERNAME:
         description: Docker registry password
@@ -67,6 +71,7 @@ jobs:
           default_bump: "minor"
           custom_release_rules: "feat:minor:✨ Features,fix:patch:🐛 Fixes,docs:patch:📰 Docs,chore:patch:🎨 Chore,pref:patch:🎈 Performance improvements,refactor:patch:🧹 Refactoring,build:patch:🔍 Build,ci:patch:🔍 CI,revert:patch:⏪ Revert,style:patch:🧹 Style,test:patch:👀 Test,release:major:📦 Release"
           dry_run: ${{ inputs.is-merged == true && 'false' || 'true' }}
+          custom_tag: ${{ inputs.version }}
 
       - name: Set platform matrix
         id: platform-matrix
