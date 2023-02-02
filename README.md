@@ -32,6 +32,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.gi
 | ✔ | `targets` | Docker targets | `string` |  |
 |  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
+|  | `version` | Next custom version (Not included prefix) | `string` |  |
 
 ### hadolint-ci.yml
 
