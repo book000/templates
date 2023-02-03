@@ -336,6 +336,11 @@ jobs:
           echo "zip-path=output/${REPO}-${{ needs.calc-version.outputs.tag }}.zip" >> $GITHUB_OUTPUT
           echo "zip-filename=${REPO}-${{ needs.calc-version.outputs.tag }}.zip" >> $GITHUB_OUTPUT
 
+      - name: ls
+        run: |
+          pwd
+          ls -la
+
       - name: Upload Release Asset
         uses: shogo82148/actions-upload-release-asset@v1.6.3
         with:
