@@ -5,9 +5,6 @@
   "ignorePresets": [
     ":prHourlyLimit2"
   ],
-  "reviewers": [
-    "book000"
-  ],
   "timezone": "Asia/Tokyo",
   "dependencyDashboard": false,
   "automerge": true,
