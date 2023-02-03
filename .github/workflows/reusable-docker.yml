@@ -329,12 +329,14 @@ jobs:
 
       - name: Create zip
         id: create-zip
-        working-directory: output
         run: |
           REPO="${GITHUB_REPOSITORY#"${GITHUB_REPOSITORY_OWNER}/"}"
-          zip -r "${REPO}_${{ needs.calc-version.outputs.tag }}.zip" ./*
-          echo "zip-path=output/${REPO}-${{ needs.calc-version.outputs.tag }}.zip" >> $GITHUB_OUTPUT
-          echo "zip-filename=${REPO}-${{ needs.calc-version.outputs.tag }}.zip" >> $GITHUB_OUTPUT
+          ZIP_FILENAME=${REPO}_${{ needs.calc-version.outputs.tag }}.zip
+          ZIP_PATH=$(pwd)/output/${ZIP_FILENAME}
+          cd output
+          zip -r ${ZIP_PATH} ./*
+          echo "zip-path=${ZIP_PATH}" >> $GITHUB_OUTPUT
+          echo "zip-filename=${ZIP_FILENAME}" >> $GITHUB_OUTPUT
 
       - name: ls
         run: |
