@@ -180,9 +180,17 @@ jobs:
   finished-node-ci:
     name: Check finished Node CI
     runs-on: ubuntu-latest
+    if: always()
     needs:
       - node-ci
 
     steps:
+      - name: Workflow conclusion
+        uses: technote-space/workflow-conclusion-action@v1
+
       - name: Check finished Node CI
-        run: echo ok
+        run: |
+          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+            echo "Build failed"
+            exit 1
+          fi

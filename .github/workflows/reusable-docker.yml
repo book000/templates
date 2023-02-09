@@ -219,13 +219,21 @@ jobs:
   finished-build:
     name: Check finished Docker CI
     runs-on: ubuntu-latest
+    if: always()
     needs:
       - calc-version
       - build
 
     steps:
+      - name: Workflow conclusion
+        uses: technote-space/workflow-conclusion-action@v1
+
       - name: Check finished build
-        run: echo ok
+        run: |
+          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+            echo "Build failed"
+            exit 1
+          fi
 
   # 各プラットフォームのlatestからlatestタグにマージしてイメージを作成
   merge-latest:
