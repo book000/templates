@@ -226,7 +226,7 @@ jobs:
 
     steps:
       - name: Workflow conclusion
-        uses: technote-space/workflow-conclusion-action@v1
+        uses: technote-space/workflow-conclusion-action@v3
 
       - name: Check finished build
         run: |
