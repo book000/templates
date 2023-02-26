@@ -223,6 +223,8 @@ jobs:
     needs:
       - calc-version
       - build
+    permissions:
+      actions: read
 
     steps:
       - name: Workflow conclusion
