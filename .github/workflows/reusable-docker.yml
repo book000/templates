@@ -143,8 +143,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはmasterを使う
-          ref: ${{ inputs.is-merged == true && 'refs/heads/master' || inputs.pr-head-sha }}
+          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
