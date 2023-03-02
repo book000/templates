@@ -24,7 +24,7 @@ on:
       - closed
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && 'master' || github.event.pull_request.head.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && github.base_ref || github.event.pull_request.head.sha }}
 
 jobs:
   docker-ci:

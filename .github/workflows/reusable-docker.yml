@@ -59,8 +59,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはmasterを使う
-          ref: ${{ inputs.is-merged == true && 'master' || inputs.pr-head-sha }}
+          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
 
       - name: Bump version and push tag
@@ -323,8 +323,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはmasterを使う
-          ref: ${{ inputs.is-merged == true && 'master' || inputs.pr-head-sha }}
+          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
 
       - name: 🏗 Setup node env
         uses: actions/setup-node@v3
