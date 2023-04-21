@@ -14,28 +14,10 @@ COPY tsconfig.json .
 
 RUN yarn package
 
-FROM alpine:edge as runner
+FROM zenika/alpine-chrome:with-puppeteer AS runner
 
-# hadolint ignore=DL3018
-RUN apk update && \
-  apk add --no-cache dumb-init && \
-  apk add --no-cache curl fontconfig font-noto-cjk && \
-  fc-cache -fv && \
-  apk add --no-cache \
-  chromium \
-  nss \
-  freetype \
-  freetype-dev \
-  harfbuzz \
-  ca-certificates \
-  ttf-freefont \
-  nodejs \
-  yarn \
-  && \
-  apk add --update --no-cache tzdata && \
-  cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
-  echo "Asia/Tokyo" > /etc/timezone && \
-  apk del tzdata
+# hadolint ignore=DL3002
+USER root
 
 WORKDIR /app
 
@@ -44,7 +26,8 @@ COPY --from=builder /app/output .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
+ENV TZ Asia/Tokyo
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
-ENTRYPOINT ["dumb-init", "--"]
+ENTRYPOINT ["tini", "--"]
 CMD ["/app/entrypoint.sh"]
