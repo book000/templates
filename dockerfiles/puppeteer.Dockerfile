@@ -16,6 +16,7 @@ RUN yarn package
 
 FROM zenika/alpine-chrome:with-puppeteer AS runner
 
+# hadolint ignore=DL3002
 USER root
 
 WORKDIR /app

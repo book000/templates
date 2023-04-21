@@ -16,6 +16,7 @@ RUN yarn package
 
 FROM zenika/alpine-chrome:with-puppeteer-xvfb as runner
 
+# hadolint ignore=DL3002
 USER root
 
 # hadolint ignore=DL3018
