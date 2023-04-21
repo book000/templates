@@ -56,5 +56,5 @@ RUN chmod +x entrypoint.sh
 
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
-ENTRYPOINT ["dumb-init", "--"]
+ENTRYPOINT ["tini", "--"]
 CMD ["/app/entrypoint.sh"]
