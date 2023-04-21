@@ -16,6 +16,8 @@ RUN yarn package
 
 FROM zenika/alpine-chrome:with-puppeteer-xvfb as runner
 
+USER root
+
 # hadolint ignore=DL3018
 RUN apk upgrade --no-cache --available && \
   apk update && \

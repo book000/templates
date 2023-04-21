@@ -16,6 +16,8 @@ RUN yarn package
 
 FROM zenika/alpine-chrome:with-puppeteer AS runner
 
+USER root
+
 WORKDIR /app
 
 COPY --from=builder /app/output .
