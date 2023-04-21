@@ -14,27 +14,32 @@ COPY tsconfig.json .
 
 RUN yarn package
 
-FROM alpine:edge as runner
+FROM alpine:3.17 as runner
 
 # hadolint ignore=DL3018
-RUN apk update && \
-  apk add --no-cache dumb-init && \
-  apk add --no-cache curl fontconfig font-noto-cjk && \
+RUN apk upgrade --no-cache --available && \
+  apk update && \
+  apk add --no-cache \
+  curl \
+  fontconfig \
+  font-noto-cjk \
+  font-noto-emoji \
+  && \
   fc-cache -fv && \
   apk add --no-cache \
-  chromium \
-  nss \
+  chromium-swiftshader \
+  ttf-freefont \
   freetype \
   freetype-dev \
   harfbuzz \
   ca-certificates \
-  ttf-freefont \
+  tini \
+  make \
+  gcc \
+  g++ \
+  python3 \
   nodejs \
-  yarn \
   xvfb \
-  xauth \
-  dbus \
-  dbus-x11 \
   x11vnc \
   && \
   apk add --update --no-cache tzdata && \
@@ -52,5 +57,5 @@ RUN chmod +x entrypoint.sh
 ENV DISPLAY :99
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 
-ENTRYPOINT ["dumb-init", "--"]
+ENTRYPOINT ["tini", "--"]
 CMD ["/app/entrypoint.sh"]
