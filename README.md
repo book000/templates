@@ -86,10 +86,22 @@ wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/do
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer-virtual-display.Dockerfile
 ```
 
+### puppeteer-virtual-display[old].Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer-virtual-display[old].Dockerfile
+```
+
 ### puppeteer.Dockerfile
 
 ```shell
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer.Dockerfile
+```
+
+### puppeteer[old].Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer[old].Dockerfile
 ```
 
 ### python-app.Dockerfile
