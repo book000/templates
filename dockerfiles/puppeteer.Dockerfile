@@ -2,14 +2,13 @@ FROM node:20-alpine as builder
 
 WORKDIR /app
 
-COPY package.json .
-COPY yarn.lock .
+COPY package.json yarn.lock ./
 
 RUN echo network-timeout 600000 > .yarnrc && \
   yarn install --frozen-lockfile && \
   yarn cache clean
 
-COPY src src
+COPY src/ src/
 COPY tsconfig.json .
 
 RUN yarn package
