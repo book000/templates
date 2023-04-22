@@ -28,7 +28,7 @@ WORKDIR /app
 
 COPY --from=builder /app/output .
 
-ENV NODE_ENV=production
+ENV NODE_ENV production
 
 VOLUME [ "/data" ]
 

@@ -23,6 +23,6 @@ RUN chmod +x entrypoint.sh
 COPY src src
 COPY tsconfig.json .
 
-ENV NODE_ENV=production
+ENV NODE_ENV production
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
