@@ -14,7 +14,7 @@ COPY tsconfig.json .
 
 RUN yarn package
 
-FROM alpine:3.17 as runner
+FROM alpine:3.18 as runner
 
 # hadolint ignore=DL3018
 RUN apk upgrade --no-cache --available && \
