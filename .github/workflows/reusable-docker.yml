@@ -299,12 +299,12 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1.12.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.calc-version.outputs.tag }}
-          release_name: ${{ needs.calc-version.outputs.tag }}
+          tag: ${{ needs.calc-version.outputs.tag }}
+          name: ${{ needs.calc-version.outputs.tag }}
           body: ${{ needs.calc-version.outputs.changelog }}
           draft: false
           prerelease: false
