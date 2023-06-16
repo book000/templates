@@ -31,6 +31,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.gi
 |  | `platforms` | Docker platforms | `string` | `linux/amd64,linux/arm64` |
 | ✔ | `targets` | Docker targets | `string` |  |
 |  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
+|  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` |  |
 
@@ -51,6 +52,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.
 |  | `java-version` | Java version | `string` | `17` |
 |  | `jdk-distribution` | JDK distribution | `string` | `adopt` |
 |  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
+|  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` |  |
 
