@@ -85,7 +85,7 @@ jobs:
 
       - name: Replace pom.xml version
         run: |
-          sed -r -i "1,/version/s#<version>(.+?)</version>#<version>${{ needs.calc-version.outputs.new_version }}</version>#" pom.xml
+          sed -r -i "1,/version/s#<version>(.+?)</version>#<version>${{ needs.calc-version.outputs.version }}</version>#" pom.xml
           git diff
 
       - name: Build with Maven
