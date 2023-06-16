@@ -112,6 +112,14 @@ jobs:
           echo "disabled-test=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["test"])')" >> $GITHUB_OUTPUT
           echo "disabled-depcheck=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["depcheck"])')" >> $GITHUB_OUTPUT
 
+      - name: 📂 Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
       - name: 👨🏻‍💻 Install dependencies
         working-directory: ${{ matrix.directory }}
         run: yarn install --frozen-lockfile
