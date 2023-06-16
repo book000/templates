@@ -105,6 +105,7 @@ jobs:
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1.12.0
+        if: inputs.is-merged == true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
