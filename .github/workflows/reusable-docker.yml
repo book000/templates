@@ -19,6 +19,10 @@ on:
         description: Is merged
         type: boolean
         default: ${{ github.event.pull_request.merged == true }}
+      is-release:
+        description: Whether to release
+        type: boolean
+        default: true
       pr-head-sha:
         description: Pull request head SHA
         type: string
@@ -27,6 +31,16 @@ on:
           description: Next custom version (Not included prefix)
           type: string
           default: ''
+    outputs:
+      version:
+        description: Next version
+        value: ${{ jobs.calc-version.outputs.version }}
+      tag:
+        description: Next tag
+        value: ${{ jobs.calc-version.outputs.tag }}
+      changelog:
+        description: Changelog
+        value: ${{ jobs.calc-version.outputs.changelog }}
     secrets:
       DOCKER_USERNAME:
         description: Docker registry password
@@ -42,6 +56,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
+      # バージョン
+      version: ${{ steps.tag-version.outputs.new_version }}
       # バージョンタグ
       tag: ${{ steps.tag-version.outputs.new_tag }}
       # リリースノート
@@ -241,7 +257,7 @@ jobs:
   merge-latest:
     name: Merge latest (${{ matrix.target.packageName }})
     runs-on: ubuntu-latest
-    if: inputs.is-merged == true
+    if: inputs.is-merged == true && inputs.is-release == true
     needs:
       - calc-version
       - build
@@ -287,7 +303,7 @@ jobs:
   release:
     name: Release ${{ needs.calc-version.outputs.tag }}
     runs-on: ubuntu-latest
-    if: inputs.is-merged == true
+    if: inputs.is-merged == true && inputs.is-release == true
     needs:
       - calc-version
       - build
@@ -312,7 +328,7 @@ jobs:
   upload-package:
     name: Upload package ${{ needs.calc-version.outputs.tag }}
     runs-on: ubuntu-latest
-    if: ${{ inputs.is-merged == true && needs.calc-version.outputs.need-upload == 'true' }}
+    if: inputs.is-merged == true && inputs.is-release == true && needs.calc-version.outputs.need-upload == 'true'
     needs:
       - calc-version
       - build
