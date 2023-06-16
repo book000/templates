@@ -15,6 +15,10 @@ on:
         description: Is merged
         type: boolean
         default: ${{ github.event.pull_request.merged == true }}
+      is-release:
+        description: Whether to release
+        type: boolean
+        default: true
       pr-head-sha:
         description: Pull request head SHA
         type: string
@@ -23,6 +27,16 @@ on:
         description: Next custom version (Not included prefix)
         type: string
         default: ""
+    outputs:
+      version:
+        description: Next version
+        value: ${{ jobs.calc-version.outputs.version }}
+      tag:
+        description: Next tag
+        value: ${{ jobs.calc-version.outputs.tag }}
+      changelog:
+        description: Changelog
+        value: ${{ jobs.calc-version.outputs.changelog }}
 
 jobs:
   # バージョンを計算する
@@ -105,7 +119,7 @@ jobs:
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1.12.0
-        if: inputs.is-merged == true
+        if: inputs.is-merged == true && inputs.is-release == true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
