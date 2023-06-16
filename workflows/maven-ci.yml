@@ -1,46 +1,34 @@
+# Maven でビルドを実行する。マージされたら、リリースを作成する。
 
+name: Maven
 
-# Maven でビルド・テストを実行する
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    types:
+      - opened
+      - synchronize
+    paths:
+      - .github/workflows/maven-ci.yml
+  pull_request_target:
+    branches:
+      - main
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
 
-name: Maven CI
-
-on: [ push, pull_request ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && github.base_ref || github.event.pull_request.head.sha }}
 
 jobs:
   maven-ci:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        java: [17]
-        distribution: [adopt]
-      fail-fast: false
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: ${{ matrix.distribution }}
-
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifact
-          path: target/*.jar
+    name: Maven CI
+    uses: book000/templates/.github/workflows/reusable-maven.yml@master
+    # with:
+    #    java-version: 17 # default: 17
+    #    jdk-distribution: adopt # default: adopt
