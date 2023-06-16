@@ -58,7 +58,7 @@ jobs:
 
   # Mavenでビルドする
   build:
-    name: Maven build (${{ matrix.target.packageName }}, ${{ matrix.platform }})
+    name: Maven build
     runs-on: ubuntu-latest
     needs: calc-version
 
