@@ -31,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
+      # バージョン
+      version: ${{ steps.tag-version.outputs.new_version }}
       # バージョンタグ
       tag: ${{ steps.tag-version.outputs.new_tag }}
       # リリースノート
@@ -83,7 +85,7 @@ jobs:
 
       - name: Replace pom.xml version
         run: |
-          sed -r -i "1,/version/s#<version>(.+?)</version>#<version>${{ steps.tag_version.outputs.new_version }}</version>#" pom.xml
+          sed -r -i "1,/version/s#<version>(.+?)</version>#<version>${{ needs.calc-version.outputs.new_version }}</version>#" pom.xml
           git diff
 
       - name: Build with Maven
@@ -106,9 +108,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          tag: ${{ needs.calc-version.outputs.tag }}
+          name: ${{ needs.calc-version.outputs.tag }}
+          body: ${{ needs.calc-version.outputs.changelog }}
           artifacts: |
             target/*.jar
             target/sha256sum.txt
