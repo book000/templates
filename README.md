@@ -119,3 +119,18 @@ wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/do
 ```shell
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/python-app.Dockerfile
 ```
+
+## renovate
+
+### Public repo
+
+```shell
+wget -O renovate.json https://raw.githubusercontent.com/book000/templates/master/renovate/public.json
+```
+
+### Private repo
+
+```shell
+wget -O renovate.json https://raw.githubusercontent.com/book000/templates/master/renovate/private.json
+```
+
