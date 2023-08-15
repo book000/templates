@@ -5,7 +5,7 @@
   "ignorePresets": [
     ":prHourlyLimit2"
   ],
-  "reviewers": [
+  "assignees": [
     "book000"
   ],
   "timezone": "Asia/Tokyo",
