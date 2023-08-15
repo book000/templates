@@ -1,6 +1,5 @@
 {
   "extends": [
     "github>book000/templates//renovate/base"
-  ],
-  "schedule": "after 17pm on friday"
+  ]
 }
