@@ -1,17 +1,7 @@
 {
   "extends": [
-    "config:base"
+    "github>book000/templates//renovate/base"
   ],
-  "ignorePresets": [
-    ":prHourlyLimit2"
-  ],
-  "assignees": [
-    "book000"
-  ],
-  "timezone": "Asia/Tokyo",
-  "dependencyDashboard": false,
-  "automerge": true,
-  "branchConcurrentLimit": 0,
   "github-actions": {
     "fileMatch": [
       "^(workflows/.*\\.ya?ml|)$"
