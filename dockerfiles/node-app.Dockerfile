@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:21-alpine
 
 # hadolint ignore=DL3018
 RUN apk update && \
