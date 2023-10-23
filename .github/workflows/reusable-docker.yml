@@ -343,7 +343,7 @@ jobs:
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
 
       - name: 🏗 Setup node env
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
