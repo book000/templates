@@ -56,6 +56,20 @@ mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` |  |
 
+### nodejs-ci-pnpm.yml
+
+```shell
+mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci-pnpm.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-ci-pnpm.yml
+```
+
+| Required | Key | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+|  | `directorys` | Target directorys (comma separated) | `string` | `.` |
+|  | `disabled-jobs` | Disable Jobs (comma separated) | `string` | `NULL` |
+|  | `install-apt-packages` | Install apt packages (space separated) | `string` |  |
+|  | `lock-path` | Lock file path | `string` | `{dir}/pnpm-lock.yaml` |
+|  | `check-git-diff` | Check git diff | `boolean` |  |
+
 ### nodejs-ci.yml
 
 ```shell
