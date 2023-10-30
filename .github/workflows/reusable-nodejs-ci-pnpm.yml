@@ -1,0 +1,225 @@
+# Node.js でビルド・テストを実行する。バージョンは .node-version に記載されているものを利用する
+
+name: Node CI for pnpm
+
+on:
+  workflow_call:
+    inputs:
+      directorys:
+        description: Target directorys (comma separated)
+        type: string
+        default: .
+      disabled-jobs:
+        description: Disable Jobs (comma separated)
+        type: string
+        default: "NULL"
+      install-apt-packages:
+        description: Install apt packages (space separated)
+        type: string
+        default: ""
+      lock-path:
+        description: Lock file path
+        type: string
+        default: "{dir}/pnpm-lock.yaml"
+      check-git-diff:
+        description: Check git diff
+        type: boolean
+        default: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    outputs:
+      directorys: ${{ steps.setup.outputs.directorys }}
+      disabled-jobs: ${{ steps.setup.outputs.disabled-jobs }}
+
+    steps:
+      - name: Setup
+        id: setup
+        run: |
+          DIRECTORYS=$(echo "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
+          echo "directorys=$DIRECTORYS" >> $GITHUB_OUTPUT
+          DISABLED_JOBS=$(echo "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
+          echo "disabled-jobs=$DISABLED_JOBS" >> $GITHUB_OUTPUT
+
+  node-ci:
+    runs-on: ubuntu-latest
+
+    needs:
+      - setup
+
+    strategy:
+      matrix:
+        directory: ${{ fromJson(needs.setup.outputs.directorys) }}
+      fail-fast: false
+
+    steps:
+      - name: 🛎 Checkout
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 📂 Set lock path
+        id: lock-path
+        run: |
+          LOCK_PATH=$(echo "${{ inputs.lock-path }}" | sed -e "s/{dir}/${{ matrix.directory }}/g")
+          echo "lock-path=$LOCK_PATH" >> $GITHUB_OUTPUT
+
+      - name: 🏗 Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ${{ matrix.directory }}/.node-version
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        id: pnpm-install
+        with:
+          run_install: false
+
+      - name: 👨🏻‍💻 Install apt packages
+        if: inputs.install-apt-packages != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ inputs.install-apt-packages }}
+
+      - name: 📃 Check package.json definition
+        id: package-json
+        working-directory: ${{ matrix.directory }}
+        run: |
+          compile=$(jq '.scripts | has("compile")' package.json)
+          build=$(jq '.scripts | has("build")' package.json)
+          generate=$(jq '.scripts | has("generate")' package.json)
+          package=$(jq '.scripts | has("package")' package.json)
+          lint=$(jq '.scripts | has("lint")' package.json)
+          test=$(jq '.scripts | has("test")' package.json)
+
+          echo "compile: $compile"
+          echo "build: $build"
+          echo "generate: $generate"
+          echo "package: $package"
+          echo "lint: $lint"
+          echo "test: $test"
+
+          echo "compile=$compile" >> $GITHUB_OUTPUT
+          echo "build=$build" >> $GITHUB_OUTPUT
+          echo "generate=$generate" >> $GITHUB_OUTPUT
+          echo "package=$package" >> $GITHUB_OUTPUT
+          echo "lint=$lint" >> $GITHUB_OUTPUT
+          echo "test=$test" >> $GITHUB_OUTPUT
+
+          echo "disabled-compile=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["compile"])')" >> $GITHUB_OUTPUT
+          echo "disabled-build=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["build"])')" >> $GITHUB_OUTPUT
+          echo "disabled-generate=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["generate"])')" >> $GITHUB_OUTPUT
+          echo "disabled-package=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["package"])')" >> $GITHUB_OUTPUT
+          echo "disabled-lint=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["lint"])')" >> $GITHUB_OUTPUT
+          echo "disabled-test=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["test"])')" >> $GITHUB_OUTPUT
+          echo "disabled-depcheck=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["depcheck"])')" >> $GITHUB_OUTPUT
+
+      - name: 📂 Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: 📂 Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 👨🏻‍💻 Install dependencies
+        working-directory: ${{ matrix.directory }}
+        run: |
+          pnpm install --frozen-lockfile --prefer-frozen-lockfile
+
+      - name: 👀 Run linter
+        if: steps.package-json.outputs.lint == 'true' && steps.package-json.outputs.disabled-lint == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: pnpm run lint
+
+      - name: 🎁 Run package
+        if: steps.package-json.outputs.package == 'true' && steps.package-json.outputs.disabled-package == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: pnpm run package
+
+      - name: 🏃 Run compile
+        if: steps.package-json.outputs.compile == 'true' && steps.package-json.outputs.disabled-compile == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: pnpm run compile
+
+      - name: 🏗️ Run build & generate (Nuxt.js)
+        if: >-
+          steps.package-json.outputs.build == 'true' &&
+          steps.package-json.outputs.disabled-build == 'false' &&
+          steps.package-json.outputs.generate == 'true' &&
+          steps.package-json.outputs.disabled-generate == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: |
+          pnpm run build
+          pnpm run generate
+
+      - name: 🧪 Run tests
+        if: steps.package-json.outputs.test == 'true' && steps.package-json.outputs.disabled-test == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: pnpm run test
+
+      - name: ☑️ Check Dependencies
+        if: steps.package-json.outputs.disabled-depcheck == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: npx depcheck
+
+      - name: Check exists dist directory
+        id: check-dist
+        working-directory: ${{ matrix.directory }}
+        run: |
+          IS_DIRECTORY=$(test -d dist && echo true || echo false)
+          IS_SYMLINK=$(test -L dist && echo true || echo false)
+          echo "exists=$(test $IS_DIRECTORY = true && $IS_NOT_SYMLINK = false && echo true || echo false)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Upload dist artifact
+        if: steps.check-dist.outputs.exists == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.directory }}-dist
+          path: ${{ matrix.directory }}/dist
+
+      - name: Check exists output directory
+        id: check-output
+        run: |
+          IS_DIRECTORY=$(test -d output && echo true || echo false)
+          IS_SYMLINK=$(test -L output && echo true || echo false)
+          echo "exists=$(test $IS_DIRECTORY = true && $IS_NOT_SYMLINK = false && echo true || echo false)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Upload output artifact
+        if: steps.check-output.outputs.exists == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.directory }}-output
+          path: ${{ matrix.directory }}/output
+
+      - name: 👀 Check git status
+        if: inputs.check-git-diff == true
+        run: |
+          git status
+          git diff --exit-code || (echo "Git status is not clean." && exit 1)
+
+  finished-node-ci:
+    name: Check finished Node CI
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - node-ci
+
+    steps:
+      - name: Workflow conclusion
+        uses: technote-space/workflow-conclusion-action@v3
+
+      - name: Check finished Node CI
+        run: |
+          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+            echo "Build failed"
+            exit 1
+          fi
