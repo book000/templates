@@ -1,27 +1,30 @@
 FROM node:20-alpine
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME/bin:$PATH"
+
 # hadolint ignore=DL3018
 RUN apk update && \
   apk upgrade && \
   apk add --update --no-cache tzdata && \
   cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
   echo "Asia/Tokyo" > /etc/timezone && \
-  apk del tzdata
+  apk del tzdata && \
+  corepack enable
 
 WORKDIR /app
 
-COPY package.json .
-COPY yarn.lock .
+COPY pnpm-lock.yaml ./
 
-RUN echo network-timeout 600000 > .yarnrc && \
-  yarn install --frozen-lockfile && \
-  yarn cache clean
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
+COPY package.json tsconfig.json ./
 COPY src src
-COPY tsconfig.json .
+
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
 
 ENV NODE_ENV production
 
