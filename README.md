@@ -86,6 +86,12 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 
 ## Dockerfile
 
+### node-app-pnpm.Dockerfile
+
+```shell
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/node-app-pnpm.Dockerfile
+```
+
 ### node-app.Dockerfile
 
 ```shell
@@ -120,12 +126,6 @@ wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/do
 
 ```shell
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer.Dockerfile
-```
-
-### puppeteer[old].Dockerfile
-
-```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer[old].Dockerfile
 ```
 
 ### python-app.Dockerfile
