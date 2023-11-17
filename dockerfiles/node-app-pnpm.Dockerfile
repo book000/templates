@@ -18,6 +18,9 @@ COPY pnpm-lock.yaml ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 COPY package.json tsconfig.json ./
 COPY src src
 
