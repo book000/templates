@@ -1,5 +1,5 @@
 {
-  "name": "node-app-test",
+  "name": "node-app-pnpm-test",
   "scripts": {
     "start": "tsx ./src/main.ts"
   },
