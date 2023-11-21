@@ -351,12 +351,13 @@ jobs:
         id: check-package-manager
         run: |
           if [ -f "yarn.lock" ]; then
-            echo "::set-output name=package-manager::yarn"
+            echo "package-manager=yarn" >> "$GITHUB_OUTPUT"
           elif [ -f "pnpm-lock.yaml" ]; then
-            echo "::set-output name=package-manager::pnpm"
+            echo "package-manager=pnpm" >> "$GITHUB_OUTPUT"
           else
-            echo "::set-output name=package-manager::npm"
+            echo "package-manager=npm" >> "$GITHUB_OUTPUT"
           fi
+
 
       - name: 📦 Install dependencies
         run: |
