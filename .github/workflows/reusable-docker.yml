@@ -72,14 +72,14 @@ jobs:
       need-upload: ${{ steps.need-upload.outputs.need-upload }}
 
     steps:
-      - name: Check out the repo
+      - name: 📥 Check out the repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
 
-      - name: Bump version and push tag
+      - name: 🏷️ Bump version and push tag
         id: tag-version
         uses: mathieudutour/github-tag-action@v6.1
         with:
@@ -89,7 +89,7 @@ jobs:
           dry_run: ${{ inputs.is-merged == true && 'false' || 'true' }}
           custom_tag: ${{ inputs.version }}
 
-      - name: Set platform matrix
+      - name: 📊 Set platform matrix
         id: platform-matrix
         run: |
           # shellcheck disable=SC2312
@@ -97,7 +97,7 @@ jobs:
           # ,があるときはneed-merge=true
           echo "need-merge=$(echo "${{ inputs.platforms }}" | grep -q ',' && echo true || echo false)" >> $GITHUB_OUTPUT
 
-      - name: Set targets matrix
+      - name: 🎯 Set targets matrix
         id: targets-matrix
         uses: actions/github-script@v7
         with:
@@ -106,7 +106,7 @@ jobs:
         env:
           TARGETS: ${{ inputs.targets }}
 
-      - name: Check if need package upload
+      - name: 📦 Check if need package upload
         id: need-upload
         run: |
           # package.json がない場合は false
@@ -132,13 +132,13 @@ jobs:
         target: ${{ fromJSON(needs.calc-version.outputs.targets-matrix) }}
 
     steps:
-      - name: Remove platform prefix
+      - name: 🗑️ Remove platform prefix
         id: platform
         run: |
           echo "shortPlatform=$(echo "${{ matrix.platform }}" | sed -r -e 's/^[^\/]+\///')" >> $GITHUB_OUTPUT
           echo "shortHyphenPlatform=$(echo "${{ matrix.platform }}" | sed -r -e 's/^[^\/]+\///' -e 's/\//-/g')" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub deployment
+      - name: 🚀 Create GitHub deployment
         uses: chrnorm/deployment-action@v2.0.5
         if: inputs.is-merged == true
         id: deployment
@@ -148,7 +148,7 @@ jobs:
           environment: "${{ matrix.target.packageName }}:${{ steps.platform.outputs.shortPlatform }}"
           environment-url: https://github.com/${{ github.repository }}/pkgs/container/${{ matrix.target.packageName }}
 
-      - name: Update deployment status (in_progress)
+      - name: 🔄 Update deployment status (in_progress)
         uses: chrnorm/deployment-status@v2.0.1
         if: inputs.is-merged == true
         with:
@@ -156,21 +156,21 @@ jobs:
           state: in_progress
           deployment-id: ${{ steps.deployment.outputs.deployment_id }}
 
-      - name: Check out the repo
+      - name: 📥 Check out the repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
 
-      - name: Set up QEMU
+      - name: 🛠️ Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Set up Docker Buildx
+      - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
-      - name: Login to ${{ inputs.registry }}
+      - name: 🔑 Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
         uses: docker/login-action@v3.0.0
         with:
@@ -178,12 +178,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: package.json update version
+      - name: 📝 package.json update version
         run: |
           find . -type d -name node_modules -prune -o -type f -name package.json -exec sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${{ needs.calc-version.outputs.version }}\"/" {} \;
           git diff
 
-      - name: Set tag suffix value
+      - name: 🏷️ Set tag suffix value
         id: tag
         run: |
           if [ "${{ needs.calc-version.outputs.need-merge }}" = "true" ]; then
@@ -192,7 +192,7 @@ jobs:
             echo "suffix=" >> $GITHUB_OUTPUT
           fi
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: 📦 Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5.0.0
         with:
@@ -203,7 +203,7 @@ jobs:
             type=raw,value=${{ needs.calc-version.outputs.tag }}${{ steps.tag.outputs.suffix }}
             type=raw,value=latest${{ steps.tag.outputs.suffix }}
 
-      - name: Build and push Docker image
+      - name: 🏗️ Build and push Docker image
         uses: docker/build-push-action@v5.1.0
         with:
           context: ${{ matrix.target.context }}
@@ -216,7 +216,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
           provenance: false
 
-      - name: Update deployment status (success)
+      - name: 🔄 Update deployment status (success)
         uses: chrnorm/deployment-status@v2.0.1
         if: ${{ success() && inputs.is-merged == true }}
         with:
@@ -224,7 +224,7 @@ jobs:
           state: success
           deployment-id: ${{ steps.deployment.outputs.deployment_id }}
 
-      - name: Update deployment status (failure)
+      - name: 🔄 Update deployment status (failure)
         if: ${{ failure() && inputs.is-merged == true }}
         uses: chrnorm/deployment-status@v2.0.1
         with:
@@ -243,10 +243,10 @@ jobs:
       actions: read
 
     steps:
-      - name: Workflow conclusion
+      - name: 🏁 Workflow conclusion
         uses: technote-space/workflow-conclusion-action@v3
 
-      - name: Check finished build
+      - name: 🏁 Check finished build
         run: |
           if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
             echo "Build failed"
@@ -269,7 +269,7 @@ jobs:
         target: ${{ fromJSON(needs.calc-version.outputs.targets-matrix) }}
 
     steps:
-      - name: Login to ${{ inputs.registry }}
+      - name: 🔑 Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
         uses: docker/login-action@v3.0.0
         with:
@@ -277,12 +277,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Create extra-images list
+      - name: 📝 Create extra-images list
         id: extra-images
         run: |
           echo "images=$(echo "${{ inputs.platforms }}" | sed -r 's#([a-z]+)\/([a-z0-9]+)#${{ inputs.registry }}\/${{ matrix.target.imageName }}:latest-\2#g')" >> $GITHUB_OUTPUT
 
-      - name: Create and push manifest images (latest)
+      - name: 📝 Create and push manifest images (latest)
         uses: Noelware/docker-manifest-action@0.4.0
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
@@ -291,7 +291,7 @@ jobs:
           inputs: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
           push: true
 
-      - name: Create and push manifest images (version)
+      - name: 📝 Create and push manifest images (version)
         uses: Noelware/docker-manifest-action@0.4.0
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
@@ -313,7 +313,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
-      - name: Create Release
+      - name: 📦 Create Release
         id: create_release
         uses: ncipollo/release-action@v1.13.0
         env:
@@ -336,24 +336,50 @@ jobs:
       - release
 
     steps:
-      - name: Check out the repo
+      - name: 📥 Check out the repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
 
-      - name: 🏗 Setup node env
+      - name: 🏗️ Setup node env
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: yarn
+      - name: 📝 Check package manager
+        id: check-package-manager
+        run: |
+          if [ -f "yarn.lock" ]; then
+            echo "package-manager=yarn" >> "$GITHUB_OUTPUT"
+          elif [ -f "pnpm-lock.yaml" ]; then
+            echo "package-manager=pnpm" >> "$GITHUB_OUTPUT"
+          else
+            echo "package-manager=npm" >> "$GITHUB_OUTPUT"
+          fi
+
+
+      - name: 📦 Install dependencies
+        run: |
+          if [ "${{ steps.check-package-manager.outputs.package-manager }}" == "yarn" ]; then
+            yarn
+          elif [ "${{ steps.check-package-manager.outputs.package-manager }}" == "pnpm" ]; then
+            pnpm install
+          else
+            npm install
+          fi
 
       - name: 🎁 Run package
-        run: yarn package
+        run: |
+          if [ "${{ steps.check-package-manager.outputs.package-manager }}" == "yarn" ]; then
+            yarn package
+          elif [ "${{ steps.check-package-manager.outputs.package-manager }}" == "pnpm" ]; then
+            pnpm run package
+          else
+            npm run package
+          fi
 
-      - name: Create zip
+      - name: 📦 Create zip
         id: create-zip
         run: |
           REPO="${GITHUB_REPOSITORY#"${GITHUB_REPOSITORY_OWNER}/"}"
@@ -364,12 +390,12 @@ jobs:
           echo "zip-path=${ZIP_PATH}" >> $GITHUB_OUTPUT
           echo "zip-filename=${ZIP_FILENAME}" >> $GITHUB_OUTPUT
 
-      - name: ls
+      - name: 📂 ls
         run: |
           pwd
           ls -la
 
-      - name: Upload Release Asset
+      - name: 📤 Upload Release Asset
         uses: shogo82148/actions-upload-release-asset@v1.7.2
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
