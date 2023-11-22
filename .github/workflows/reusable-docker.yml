@@ -359,7 +359,7 @@ jobs:
 
       - name: 🏗️ Setup node env
         if: ${{ steps.check-node-version-file.outputs.exists == 'false' }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
