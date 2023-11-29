@@ -84,7 +84,7 @@ jobs:
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: adopt
