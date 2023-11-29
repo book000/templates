@@ -27,6 +27,10 @@
       "matchPackageNames": ["node"],
       "matchManagers": ["dockerfile"],
       "enabled": false
+    },
+    {
+      "matchManagers": ["npm"],
+      "rangeStrategy": "pin"
     }
   ]
 }
