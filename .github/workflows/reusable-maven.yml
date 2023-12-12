@@ -141,12 +141,10 @@ jobs:
       actions: read
 
     steps:
-      - name: Workflow conclusion
-        uses: technote-space/workflow-conclusion-action@v3
-
-      - name: Check finished build
+      - name: Check build failure
         run: |
-          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+          echo "Build status: ${{ needs.build.result }}"
+          if [ "${{ needs.build.result }}" != "success" ]; then
             echo "Build failed"
             exit 1
           fi
