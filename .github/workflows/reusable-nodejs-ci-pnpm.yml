@@ -214,12 +214,10 @@ jobs:
       - node-ci
 
     steps:
-      - name: Workflow conclusion
-        uses: technote-space/workflow-conclusion-action@v3
-
-      - name: Check finished Node CI
+      - name: Check build failure
         run: |
-          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+          echo "Build status: ${{ needs.node-ci.result }}"
+          if [ "${{ needs.node-ci.result }}" != "success" ]; then
             echo "Build failed"
             exit 1
           fi
