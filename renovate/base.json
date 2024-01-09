@@ -5,7 +5,11 @@
   "dependencyDashboard": false,
   "automerge": true,
   "platformAutomerge": true,
+  "minimumReleaseAge": "3 days",
   "assignees": ["book000"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "regexManagers": [
     {
       "fileMatch": ["(^|/)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
