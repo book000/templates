@@ -113,7 +113,7 @@ jobs:
           echo "disabled-depcheck=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["depcheck"])')" >> $GITHUB_OUTPUT
 
       - name: 📂 Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
