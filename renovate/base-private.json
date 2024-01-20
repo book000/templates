@@ -1,0 +1,7 @@
+{
+  "extends": [
+    "github>book000/templates//renovate/base"
+  ],
+  "schedule": "after 5pm on friday",
+  "platformAutomerge": false
+}
