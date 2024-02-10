@@ -92,10 +92,10 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/node-app-pnpm.Dockerfile
 ```
 
-### node-app.Dockerfile
+### node-app-yarn.Dockerfile
 
 ```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/node-app.Dockerfile
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/node-app-yarn.Dockerfile
 ```
 
 ### node-ncc-app.Dockerfile
@@ -110,22 +110,16 @@ wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/do
 wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/php-app.Dockerfile
 ```
 
-### puppeteer-virtual-display.Dockerfile
+### puppeteer-pnpm.Dockerfile
 
 ```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer-virtual-display.Dockerfile
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer-pnpm.Dockerfile
 ```
 
-### puppeteer-virtual-display[old].Dockerfile
+### puppeteer-virtual-display-pnpm.Dockerfile
 
 ```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer-virtual-display[old].Dockerfile
-```
-
-### puppeteer.Dockerfile
-
-```shell
-wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer.Dockerfile
+wget -O Dockerfile https://raw.githubusercontent.com/book000/templates/master/dockerfiles/puppeteer-virtual-display-pnpm.Dockerfile
 ```
 
 ### python-app.Dockerfile
