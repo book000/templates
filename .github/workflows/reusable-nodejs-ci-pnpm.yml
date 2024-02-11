@@ -76,6 +76,7 @@ jobs:
         id: pnpm-install
         with:
           run_install: false
+          package_json_file: ${{ matrix.directory }}/package.json
 
       - name: 👨🏻‍💻 Install apt packages
         if: inputs.install-apt-packages != ''
