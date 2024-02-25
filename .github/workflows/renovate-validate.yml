@@ -1,0 +1,32 @@
+name: Validate Renovate Config
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - "renovate/**"
+      - "renovate.json"
+      - ".github/workflows/renovate-validate.yml"
+
+jobs:
+  renovate-validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛎 Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: 🧪 Validate Repository Renovate Config
+        uses: rinchsan/renovate-config-validator@main
+        with:
+          pattern: "renovate.json"
+
+      - name: 🧪 Validate Template Renovate Config
+        uses: rinchsan/renovate-config-validator@main
+        with:
+          pattern: "renovate/*.json"
