@@ -5,8 +5,9 @@
   "dependencyDashboard": false,
   "automerge": true,
   "platformAutomerge": true,
-  "minimumReleaseAge": "3 days",
+  "platformCommit": true,
   "assignees": ["book000"],
+  "configMigration": true,
   "lockFileMaintenance": {
     "enabled": true
   },
