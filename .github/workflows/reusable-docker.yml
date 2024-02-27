@@ -149,7 +149,7 @@ jobs:
           environment-url: https://github.com/${{ github.repository }}/pkgs/container/${{ matrix.target.packageName }}
 
       - name: 🔄 Update deployment status (in_progress)
-        uses: chrnorm/deployment-status@v2.0.1
+        uses: chrnorm/deployment-status@v2.0.2
         if: inputs.is-merged == true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -217,7 +217,7 @@ jobs:
           provenance: false
 
       - name: 🔄 Update deployment status (success)
-        uses: chrnorm/deployment-status@v2.0.1
+        uses: chrnorm/deployment-status@v2.0.2
         if: ${{ success() && inputs.is-merged == true }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -226,7 +226,7 @@ jobs:
 
       - name: 🔄 Update deployment status (failure)
         if: ${{ failure() && inputs.is-merged == true }}
-        uses: chrnorm/deployment-status@v2.0.1
+        uses: chrnorm/deployment-status@v2.0.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           state: failure
