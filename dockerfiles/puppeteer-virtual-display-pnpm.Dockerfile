@@ -13,7 +13,8 @@ RUN apk upgrade --no-cache --available && \
   cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
   echo "Asia/Tokyo" > /etc/timezone && \
   apk del tzdata && \
-  npm install -g pnpm
+  npm install -g corepack && \
+  corepack enable
 
 WORKDIR /app
 
