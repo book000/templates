@@ -9,6 +9,7 @@ on:
       - "renovate/**"
       - "renovate.json"
       - ".github/workflows/renovate-validate.yml"
+  merge_group:
 
 jobs:
   renovate-validate:

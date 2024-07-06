@@ -22,6 +22,7 @@ on:
       - synchronize
       - reopened
       - closed
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && github.base_ref || github.event.pull_request.head.sha }}

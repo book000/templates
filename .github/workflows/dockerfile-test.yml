@@ -8,6 +8,7 @@ on:
     paths:
       - "dockerfiles/**"
       - ".github/workflows/dockerfile-test.yml"
+  merge_group:
 
 jobs:
   list-files:
