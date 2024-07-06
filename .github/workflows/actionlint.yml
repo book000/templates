@@ -11,6 +11,7 @@ on:
       - master
     paths:
       - ".github/workflows/*"
+  merge_group:
 
 jobs:
   actionlint:

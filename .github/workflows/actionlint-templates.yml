@@ -12,6 +12,7 @@ on:
     paths:
       - "workflows/**"
       - ".github/workflows/actionlint.yml"
+  merge_group:
 
 jobs:
   actionlint:
