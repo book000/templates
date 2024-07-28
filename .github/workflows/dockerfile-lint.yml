@@ -46,6 +46,10 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      - name: Docker build check
+        run: |
+          docker build --check -f dockerfiles/${{ matrix.file }}.Dockerfile .
+
       - name: 🐳 hadolint
         uses: hadolint/hadolint-action@v3.1.0
         with:

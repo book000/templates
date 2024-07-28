@@ -1,4 +1,4 @@
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY tsconfig.json .
 
 RUN yarn package
 
-FROM node:20-alpine as runner
+FROM node:20-alpine AS runner
 
 # hadolint ignore=DL3018
 RUN apk update && \
@@ -28,7 +28,7 @@ WORKDIR /app
 
 COPY --from=builder /app/output .
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 VOLUME [ "/data" ]
 
