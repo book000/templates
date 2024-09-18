@@ -36,6 +36,11 @@
     {
       "matchManagers": ["npm"],
       "rangeStrategy": "pin"
+    },
+    {
+      "groupName": "fastify",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["fastify", "fastify-raw-body", "@fastify/**"]
     }
   ]
 }
