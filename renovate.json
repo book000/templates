@@ -6,5 +6,10 @@
     "fileMatch": [
       "^(workflows/.*\\.ya?ml|)$"
     ]
+  },
+  "node": {
+    "fileMatch": [
+      "^(dockerfiles/tests/.*/package.json|)$"
+    ]
   }
 }
