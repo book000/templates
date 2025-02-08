@@ -4,11 +4,11 @@
     "start": "tsx ./src/main.ts"
   },
   "dependencies": {
-    "puppeteer": "19.4.0"
+    "puppeteer": "19.4.0",
+    "tsx": "4.1.3"
   },
   "devDependencies": {
     "@types/node": "18.11.15",
-    "tsx": "4.1.3",
     "typescript": "4.9.4",
     "run-z": "2.0.0"
   },
