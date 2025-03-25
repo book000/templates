@@ -5,15 +5,13 @@
   "dependencyDashboard": false,
   "automerge": true,
   "platformAutomerge": true,
-  "platformCommit": true,
+  "platformCommit": "enabled",
   "assignees": ["book000"],
   "configMigration": true,
   "lockFileMaintenance": {
     "enabled": true
   },
-  "postUpdateOptions": [
-    "gomodTidy"
-  ],
+  "postUpdateOptions": ["gomodTidy"],
   "regexManagers": [
     {
       "fileMatch": ["(^|/)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
@@ -44,6 +42,11 @@
       "groupName": "fastify",
       "matchDatasources": ["npm"],
       "matchPackageNames": ["fastify", "fastify-raw-body", "@fastify/**"]
+    },
+    {
+      "matchPackagePatterns": ["*"],
+      "excludePackagePatterns": ["^@book000/"],
+      "stabilityDays": 3
     }
   ]
 }
