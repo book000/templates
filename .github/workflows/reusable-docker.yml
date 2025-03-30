@@ -415,7 +415,7 @@ jobs:
           ls -la
 
       - name: 📤 Upload Release Asset
-        uses: shogo82148/actions-upload-release-asset@v1.7.9
+        uses: shogo82148/actions-upload-release-asset@v1.8.0
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: ${{ steps.create-zip.outputs.zip-path }}
