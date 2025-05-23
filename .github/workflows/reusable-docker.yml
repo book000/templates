@@ -285,7 +285,7 @@ jobs:
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
-          images: ${{ steps.extra-images.outputs.images }}
+          tags: ${{ steps.extra-images.outputs.images }}
           inputs: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
           push: true
 
@@ -294,7 +294,7 @@ jobs:
         # プラットフォームがひとつの場合はマージ処理を行わない
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
-          images: ${{ steps.extra-images.outputs.images }}
+          tags: ${{ steps.extra-images.outputs.images }}
           inputs: ${{ inputs.registry }}/${{ matrix.target.imageName }}:${{ needs.calc-version.outputs.tag }}
           push: true
 
