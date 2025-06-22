@@ -216,6 +216,8 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
           provenance: false
+        env:
+          APPLICATION_VERSION: ${{ needs.calc-version.outputs.version }}
 
       - name: 🔄 Update deployment status (success)
         uses: chrnorm/deployment-status@v2.0.3
