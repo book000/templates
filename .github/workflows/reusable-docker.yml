@@ -183,7 +183,12 @@ jobs:
         run: |
           find . -type d -name node_modules -prune -o -type f -name package.json -exec sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${{ needs.calc-version.outputs.version }}\"/" {} \;
           git diff
-
+ 
+      - name: 📝 Create application version file
+        run: |
+          echo -n "${{ needs.calc-version.outputs.version }}" > .app-version
+          git diff
+  
       - name: 🏷️ Set tag suffix value
         id: tag
         run: |
