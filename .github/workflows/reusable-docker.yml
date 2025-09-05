@@ -321,7 +321,7 @@ jobs:
     steps:
       - name: 📦 Create Release
         id: create_release
-        uses: ncipollo/release-action@v1.19.1
+        uses: ncipollo/release-action@v1.20.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
