@@ -67,7 +67,7 @@ jobs:
           echo "lock-path=$LOCK_PATH" >> $GITHUB_OUTPUT
 
       - name: 🏗 Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: ${{ matrix.directory }}/.node-version
 
