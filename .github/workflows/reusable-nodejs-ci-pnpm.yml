@@ -66,17 +66,18 @@ jobs:
           LOCK_PATH=$(echo "${{ inputs.lock-path }}" | sed -e "s/{dir}/${{ matrix.directory }}/g")
           echo "lock-path=$LOCK_PATH" >> $GITHUB_OUTPUT
 
-      - name: 🏗 Setup node
-        uses: actions/setup-node@v5
-        with:
-          node-version-file: ${{ matrix.directory }}/.node-version
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         id: pnpm-install
         with:
           run_install: false
           package_json_file: ${{ matrix.directory }}/package.json
+
+      - name: 🏗 Setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: ${{ matrix.directory }}/.node-version
+          cache: pnpm
 
       - name: 👨🏻‍💻 Install apt packages
         if: inputs.install-apt-packages != ''
