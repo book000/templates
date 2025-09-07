@@ -358,14 +358,14 @@ jobs:
           fi
 
       - name: 🏗️ Setup node env
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         if: ${{ steps.check-node-version-file.outputs.exists == 'true' }}
         with:
           node-version-file: .node-version
 
       - name: 🏗️ Setup node env
         if: ${{ steps.check-node-version-file.outputs.exists == 'false' }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
