@@ -52,6 +52,15 @@ jobs:
     name: Test reusable-hadolint-ci
     uses: ./.github/workflows/reusable-hadolint-ci.yml
 
+  # Test Add Reviewer (only on pull requests to avoid issues)
+  test-add-reviewer:
+    name: Test reusable-add-reviewer
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/reusable-add-reviewer.yml
+    with:
+      actors: "github-actions[bot],test-user"
+      reviewers: "github-actions[bot]"
+
   # Test Docker workflow (dry run without pushing)
   test-docker:
     name: Test reusable-docker
@@ -83,6 +92,7 @@ jobs:
       - test-maven
       - test-actionlint
       - test-hadolint
+      - test-add-reviewer
       - test-docker
 
     steps:
@@ -93,14 +103,16 @@ jobs:
           echo "Maven result: ${{ needs.test-maven.result }}"
           echo "Actionlint result: ${{ needs.test-actionlint.result }}"
           echo "Hadolint result: ${{ needs.test-hadolint.result }}"
+          echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
           
-          # Check if any job failed
+          # Check if any job failed (skipped is OK for add-reviewer when not on PR)
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
              [[ "${{ needs.test-maven.result }}" != "success" ]] || \
              [[ "${{ needs.test-actionlint.result }}" != "success" ]] || \
              [[ "${{ needs.test-hadolint.result }}" != "success" ]] || \
+             [[ "${{ needs.test-add-reviewer.result }}" == "failure" ]] || \
              [[ "${{ needs.test-docker.result }}" != "success" ]]; then
             echo "❌ Some reusable workflow tests failed!"
             exit 1
