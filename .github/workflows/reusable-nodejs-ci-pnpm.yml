@@ -77,6 +77,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version-file: ${{ matrix.directory }}/.node-version
+          cache: pnpm
 
       - name: 👨🏻‍💻 Install apt packages
         if: inputs.install-apt-packages != ''
