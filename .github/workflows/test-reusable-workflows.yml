@@ -15,6 +15,10 @@ on:
       - ".github/workflows/test-reusable-workflows.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   # Test Node.js CI with yarn
   test-nodejs-ci:

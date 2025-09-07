@@ -3,6 +3,9 @@ name: Actionlint with reviewdog
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   actionlint:
     runs-on: ubuntu-latest

@@ -12,6 +12,10 @@ on:
         type: string
         default: book000
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   add-reviewer:
     runs-on: ubuntu-latest
@@ -20,9 +24,10 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          ACTORS=$(echo "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
+          # Use printf to safely handle the input without shell injection
+          ACTORS=$(printf '%s' "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "actors: $ACTORS"
-          echo "is-need-add-reviewer=$(echo $ACTORS | jq -r '. | contains(["${{ github.actor }}"]) | not')" >> $GITHUB_OUTPUT
+          echo "is-need-add-reviewer=$(printf '%s' "$ACTORS" | jq -r --arg actor "${{ github.actor }}" '. | contains([$actor]) | not')" >> "$GITHUB_OUTPUT"
 
       - name: Add reviewer
         uses: actions/github-script@v8

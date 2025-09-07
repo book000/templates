@@ -49,11 +49,17 @@ on:
         description: Docker registry username
         required: true
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   # バージョンを計算する
   calc-version:
     name: Calculate next version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating tags
 
     outputs:
       # バージョン
@@ -92,10 +98,16 @@ jobs:
       - name: 📊 Set platform matrix
         id: platform-matrix
         run: |
+          # Use printf and parameter expansion to safely handle platform input
+          platforms="${{ inputs.platforms }}"
           # shellcheck disable=SC2312
-          echo "matrix=[$(echo "${{ inputs.platforms }}" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> $GITHUB_OUTPUT
-          # ,があるときはneed-merge=true
-          echo "need-merge=$(echo "${{ inputs.platforms }}" | grep -q ',' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "matrix=[$(printf '%s' "$platforms" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> $GITHUB_OUTPUT
+          # Check if comma exists for need-merge determination
+          if [[ "$platforms" == *","* ]]; then
+            echo "need-merge=true" >> $GITHUB_OUTPUT
+          else
+            echo "need-merge=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: 🎯 Set targets matrix
         id: targets-matrix
@@ -136,11 +148,14 @@ jobs:
       - name: 🗑️ Remove platform prefix
         id: platform
         run: |
-          echo "shortPlatform=$(echo "${{ matrix.platform }}" | sed -r -e 's/^[^\/]+\///')" >> $GITHUB_OUTPUT
-          echo "shortHyphenPlatform=$(echo "${{ matrix.platform }}" | sed -r -e 's/^[^\/]+\///' -e 's/\//-/g')" >> $GITHUB_OUTPUT
+          # Use parameter expansion to safely process platform string
+          platform="${{ matrix.platform }}"
+          short_platform="${platform##*/}"
+          echo "shortPlatform=$short_platform" >> $GITHUB_OUTPUT
+          echo "shortHyphenPlatform=${short_platform//\//-}" >> $GITHUB_OUTPUT
 
       - name: 🚀 Create GitHub deployment
-        uses: chrnorm/deployment-action@v2.0.7
+        uses: chrnorm/deployment-action@v2.0.8
         if: inputs.is-merged == true
         id: deployment
         with:
@@ -150,7 +165,7 @@ jobs:
           environment-url: https://github.com/${{ github.repository }}/pkgs/container/${{ matrix.target.packageName }}
 
       - name: 🔄 Update deployment status (in_progress)
-        uses: chrnorm/deployment-status@v2.0.3
+        uses: chrnorm/deployment-status@v2.0.4
         if: inputs.is-merged == true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -173,7 +188,7 @@ jobs:
 
       - name: 🔑 Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
-        uses: docker/login-action@v3.5.0
+        uses: docker/login-action@v3.6.0
         with:
           registry: ${{ inputs.registry }}
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -200,7 +215,7 @@ jobs:
 
       - name: 📦 Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.8.1
         with:
           images: ${{ inputs.registry }}/${{ matrix.target.imageName }}
           tags: |
@@ -210,7 +225,7 @@ jobs:
             type=raw,value=latest${{ steps.tag.outputs.suffix }}
 
       - name: 🏗️ Build and push Docker image
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v6.19.0
         with:
           context: ${{ matrix.target.context }}
           file: ${{ matrix.target.file }}
@@ -225,7 +240,7 @@ jobs:
             APPLICATION_VERSION=${{ needs.calc-version.outputs.version }}
 
       - name: 🔄 Update deployment status (success)
-        uses: chrnorm/deployment-status@v2.0.3
+        uses: chrnorm/deployment-status@v2.0.4
         if: ${{ success() && inputs.is-merged == true }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -234,7 +249,7 @@ jobs:
 
       - name: 🔄 Update deployment status (failure)
         if: ${{ failure() && inputs.is-merged == true }}
-        uses: chrnorm/deployment-status@v2.0.3
+        uses: chrnorm/deployment-status@v2.0.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           state: failure
@@ -277,7 +292,7 @@ jobs:
     steps:
       - name: 🔑 Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
-        uses: docker/login-action@v3.5.0
+        uses: docker/login-action@v3.6.0
         with:
           registry: ${{ inputs.registry }}
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -286,7 +301,11 @@ jobs:
       - name: 📝 Create extra-images list
         id: extra-images
         run: |
-          echo "images=$(echo "${{ inputs.platforms }}" | sed -r 's#([a-z]+)\/([a-z0-9]+)#${{ inputs.registry }}\/${{ matrix.target.imageName }}:latest-\2#g')" >> $GITHUB_OUTPUT
+          # Use printf to safely handle platform input without shell injection
+          platforms="${{ inputs.platforms }}"
+          registry="${{ inputs.registry }}"
+          image_name="${{ matrix.target.imageName }}"
+          echo "images=$(printf '%s' "$platforms" | sed -r "s#([a-z]+)/([a-z0-9]+)#${registry}/${image_name}:latest-\2#g")" >> $GITHUB_OUTPUT
 
       - name: 📝 Create and push manifest images (latest)
         uses: Noelware/docker-manifest-action@0.4.3
@@ -314,6 +333,8 @@ jobs:
       - calc-version
       - build
       - merge-latest
+    permissions:
+      contents: write  # Required for creating releases
 
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
