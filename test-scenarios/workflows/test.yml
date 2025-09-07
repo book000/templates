@@ -1,0 +1,15 @@
+name: Test workflow for actionlint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run test
+        run: echo "This is a test workflow"

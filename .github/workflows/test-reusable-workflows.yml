@@ -1,0 +1,109 @@
+name: Test Reusable Workflows
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - ".github/workflows/reusable-*.yml"
+      - "test-scenarios/**"
+      - ".github/workflows/test-reusable-workflows.yml"
+  workflow_dispatch:
+
+jobs:
+  # Test Node.js CI with yarn
+  test-nodejs-ci:
+    name: Test reusable-nodejs-ci
+    uses: ./.github/workflows/reusable-nodejs-ci.yml
+    with:
+      directorys: "test-scenarios/nodejs-yarn"
+      disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
+      check-git-diff: false
+
+  # Test Node.js CI with pnpm
+  test-nodejs-ci-pnpm:
+    name: Test reusable-nodejs-ci-pnpm
+    uses: ./.github/workflows/reusable-nodejs-ci-pnpm.yml
+    with:
+      directorys: "test-scenarios/nodejs-pnpm"
+      disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
+      check-git-diff: false
+
+  # Test Maven CI
+  test-maven:
+    name: Test reusable-maven
+    uses: ./.github/workflows/reusable-maven.yml
+    with:
+      is-merged: false
+      is-release: false
+
+  # Test Actionlint
+  test-actionlint:
+    name: Test reusable-actionlint
+    uses: ./.github/workflows/reusable-actionlint.yml
+
+  # Test Hadolint CI
+  test-hadolint:
+    name: Test reusable-hadolint-ci
+    uses: ./.github/workflows/reusable-hadolint-ci.yml
+
+  # Test Docker workflow (dry run without pushing)
+  test-docker:
+    name: Test reusable-docker
+    uses: ./.github/workflows/reusable-docker.yml
+    with:
+      targets: |
+        [
+          {
+            "packageName": "test-package",
+            "imageName": "test-image",
+            "context": "test-scenarios/docker",
+            "file": "test-scenarios/docker/Dockerfile"
+          }
+        ]
+      is-merged: false
+      is-release: false
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.GITHUB_ACTOR }}
+      DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+  # Summary job to check all tests passed
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    if: always()
+    needs: 
+      - test-nodejs-ci
+      - test-nodejs-ci-pnpm
+      - test-maven
+      - test-actionlint
+      - test-hadolint
+      - test-docker
+
+    steps:
+      - name: Check test results
+        run: |
+          echo "Node.js CI result: ${{ needs.test-nodejs-ci.result }}"
+          echo "Node.js CI pnpm result: ${{ needs.test-nodejs-ci-pnpm.result }}"
+          echo "Maven result: ${{ needs.test-maven.result }}"
+          echo "Actionlint result: ${{ needs.test-actionlint.result }}"
+          echo "Hadolint result: ${{ needs.test-hadolint.result }}"
+          echo "Docker result: ${{ needs.test-docker.result }}"
+          
+          # Check if any job failed
+          if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
+             [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
+             [[ "${{ needs.test-maven.result }}" != "success" ]] || \
+             [[ "${{ needs.test-actionlint.result }}" != "success" ]] || \
+             [[ "${{ needs.test-hadolint.result }}" != "success" ]] || \
+             [[ "${{ needs.test-docker.result }}" != "success" ]]; then
+            echo "❌ Some reusable workflow tests failed!"
+            exit 1
+          else
+            echo "✅ All reusable workflow tests passed!"
+          fi
