@@ -121,7 +121,7 @@ jobs:
       - name: Calculate hash
         working-directory: ./target
         run: |
-          sha256sum *.jar > sha256sum.txt
+          sha256sum -- *.jar > sha256sum.txt
 
       - name: Create Release
         id: create_release
