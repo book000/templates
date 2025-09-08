@@ -17,7 +17,9 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write  # Needed for add-reviewer workflow
+  packages: write       # Needed for docker workflow
+  actions: read         # Needed for workflow execution
 
 jobs:
   # Test Node.js CI with yarn
