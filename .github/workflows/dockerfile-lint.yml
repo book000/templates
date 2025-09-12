@@ -27,8 +27,8 @@ jobs:
       - name: 📄 List Dockefile files
         id: list-files
         run: |
-          # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として $GITHUB_OUTPUT に files として出力する
-          echo "files=[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> $GITHUB_OUTPUT
+          # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として "$GITHUB_OUTPUT" に files として出力する
+          echo "files=[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '^dockerfiles/.+Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> "$GITHUB_OUTPUT"
 
   lint:
     runs-on: ubuntu-latest

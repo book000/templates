@@ -3,6 +3,9 @@ name: hadolint
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   hadolint:
     name: hadolint
