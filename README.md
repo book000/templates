@@ -35,6 +35,8 @@ mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.gi
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` |  |
 
+**Note**: In private repositories, the `linux/arm64` platform is automatically excluded from the build process, as `ubuntu-24.04-arm` runners are not available for private repositories.
+
 ### hadolint-ci.yml
 
 ```shell

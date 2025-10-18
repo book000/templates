@@ -101,6 +101,21 @@ jobs:
         run: |
           # Use printf and parameter expansion to safely handle platform input
           platforms="${{ inputs.platforms }}"
+          
+          # プライベートリポジトリの場合、arm64 プラットフォームを除外する
+          # ubuntu-24.04-arm ランナーはプライベートリポジトリでは利用できないため
+          if [[ "${{ github.event.repository.visibility }}" == "private" ]]; then
+            # linux/arm64 を除外
+            platforms="${platforms//linux\/arm64,/}"
+            platforms="${platforms//,linux\/arm64/}"
+            platforms="${platforms//linux\/arm64/}"
+            
+            # すべてのプラットフォームが除外された場合、linux/amd64 にフォールバック
+            if [[ -z "$platforms" ]]; then
+              platforms="linux/amd64"
+            fi
+          fi
+          
           # shellcheck disable=SC2312
           echo "matrix=[$(printf '%s' "$platforms" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> "$GITHUB_OUTPUT"
           # Check if comma exists for need-merge determination
