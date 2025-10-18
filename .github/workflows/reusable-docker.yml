@@ -105,10 +105,19 @@ jobs:
           # プライベートリポジトリの場合、arm64 プラットフォームを除外する
           # ubuntu-24.04-arm ランナーはプライベートリポジトリでは利用できないため
           if [[ "${{ github.event.repository.visibility }}" == "private" ]]; then
-            # linux/arm64 を除外
-            platforms="${platforms//linux\/arm64,/}"
-            platforms="${platforms//,linux\/arm64/}"
-            platforms="${platforms//linux\/arm64/}"
+            # カンマ区切りの文字列を配列に変換
+            IFS=',' read -ra platform_array <<< "$platforms"
+            filtered_platforms=()
+            
+            # linux/arm64 を除外してフィルタリング
+            for platform in "${platform_array[@]}"; do
+              if [[ "$platform" != "linux/arm64" ]]; then
+                filtered_platforms+=("$platform")
+              fi
+            done
+            
+            # 配列をカンマ区切りの文字列に変換
+            platforms=$(IFS=','; echo "${filtered_platforms[*]}")
             
             # すべてのプラットフォームが除外された場合、linux/amd64 にフォールバック
             if [[ -z "$platforms" ]]; then
