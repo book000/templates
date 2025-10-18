@@ -31,6 +31,10 @@ on:
         description: Next custom version (Not included prefix)
         type: string
         default: ""
+      is-private-repo:
+        description: Whether the repository is private (ubuntu-24.04-arm is not available for private repos)
+        type: boolean
+        default: false
     outputs:
       version:
         description: Next version
@@ -133,8 +137,9 @@ jobs:
   # Dockerイメージをビルドする
   build:
     name: Docker build (${{ matrix.target.packageName }}, ${{ matrix.platform }})
-    # matrix.platform が linux/arm64 の場合は ubuntu-24.04-arm を使う。それ以外の場合は ubuntu-latest を使う
-    runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    # matrix.platform が linux/arm64 かつ パブリックリポジトリの場合は ubuntu-24.04-arm を使う。それ以外の場合は ubuntu-latest を使う
+    # プライベートリポジトリでは ubuntu-24.04-arm が利用できないため、ubuntu-latest を使う
+    runs-on: ${{ matrix.platform == 'linux/arm64' && !inputs.is-private-repo && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     needs: calc-version
 
     strategy:

@@ -38,6 +38,7 @@ jobs:
         ]
       # registry: registry.hub.docker.com # default: ghcr.io
       # platforms: linux/amd64 # default: linux/amd64,linux/arm64
+      # is-private-repo: true # Set to true for private repositories (ubuntu-24.04-arm is not available for private repos)
     secrets:
       DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
