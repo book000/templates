@@ -34,7 +34,6 @@ mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.gi
 |  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` | `` |
-|  | `is-private-repo` | Whether the repository is private (ubuntu-24.04-arm is not available for private repos) | `boolean` | `false` |
 
 ### hadolint-ci.yml
 

@@ -31,10 +31,6 @@ on:
         description: Next custom version (Not included prefix)
         type: string
         default: ""
-      is-private-repo:
-        description: Whether the repository is private (ubuntu-24.04-arm is not available for private repos)
-        type: boolean
-        default: false
     outputs:
       version:
         description: Next version
@@ -81,6 +77,8 @@ jobs:
       targets-matrix: ${{ steps.targets-matrix.outputs.matrix }}
       # パッケージのアップロードが必要かどうか
       need-upload: ${{ steps.need-upload.outputs.need-upload }}
+      # リポジトリがプライベートかどうか
+      is-private-repo: ${{ steps.check-repo-visibility.outputs.is-private }}
 
     steps:
       - name: 📥 Check out the repo
@@ -89,6 +87,19 @@ jobs:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
+
+      - name: 🔍 Check repository visibility
+        id: check-repo-visibility
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const repo = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const isPrivate = repo.data.private;
+            core.setOutput('is-private', isPrivate);
+            core.info(`Repository is ${isPrivate ? 'private' : 'public'}`);
 
       - name: 🏷️ Bump version and push tag
         id: tag-version
@@ -139,7 +150,7 @@ jobs:
     name: Docker build (${{ matrix.target.packageName }}, ${{ matrix.platform }})
     # matrix.platform が linux/arm64 かつ パブリックリポジトリの場合は ubuntu-24.04-arm を使う。それ以外の場合は ubuntu-latest を使う
     # プライベートリポジトリでは ubuntu-24.04-arm が利用できないため、ubuntu-latest を使う
-    runs-on: ${{ matrix.platform == 'linux/arm64' && !inputs.is-private-repo && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.platform == 'linux/arm64' && needs.calc-version.outputs.is-private-repo == 'false' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     needs: calc-version
 
     strategy:
