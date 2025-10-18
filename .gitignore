@@ -9,3 +9,7 @@ test-scenarios/*/coverage/
 test-scenarios/*/.DS_Store
 test-scenarios/*/.env
 test-scenarios/*/.env.local
+
+# Dependencies installed for scripts
+node_modules/
+package-lock.json

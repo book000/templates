@@ -32,7 +32,10 @@ function getWorkflowText(path) {
     const required = input.required ? "✔" : "";
     const description = input.description || "";
     const type = input.type ? `\`${input.type}\`` : "";
-    const defaultVal = input.default ? `\`${input.default}\`` : "";
+    // Check if default exists (not undefined, not null)
+    // Allow false, 0, and empty string as valid defaults
+    const hasDefault = input.default !== undefined && input.default !== null;
+    const defaultVal = hasDefault ? `\`${input.default}\`` : "";
     const line = [
       required,
       `\`${key}\``,
