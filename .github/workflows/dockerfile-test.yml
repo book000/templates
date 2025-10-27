@@ -67,7 +67,7 @@ jobs:
           fi
 
       - name: 📦 Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: steps.test.outputs.success == 'true'
         with:
           name: ${{ matrix.file }}.tar

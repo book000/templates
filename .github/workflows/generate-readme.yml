@@ -38,7 +38,7 @@ jobs:
             true
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: github.event_name == 'pull_request'
         with:
           name: README.md
