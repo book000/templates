@@ -41,6 +41,12 @@ on:
       changelog:
         description: Changelog
         value: ${{ jobs.calc-version.outputs.changelog }}
+      upload_url:
+        description: Release upload URL
+        value: ${{ jobs.release.outputs.upload_url }}
+      release_id:
+        description: Release ID
+        value: ${{ jobs.release.outputs.release_id }}
     secrets:
       DOCKER_USERNAME:
         description: Docker registry password
@@ -60,7 +66,7 @@ jobs:
     name: Calculate next version
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required for creating tags
+      contents: write # Required for creating tags
 
     outputs:
       # バージョン
@@ -215,12 +221,12 @@ jobs:
         run: |
           find . -type d -name node_modules -prune -o -type f -name package.json -exec sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${{ needs.calc-version.outputs.version }}\"/" {} \;
           git diff
- 
+
       - name: 📝 Create application version file
         run: |
           echo -n "${{ needs.calc-version.outputs.version }}" > .app-version
           git diff
-  
+
       - name: 🏷️ Set tag suffix value
         id: tag
         run: |
@@ -351,10 +357,11 @@ jobs:
       - build
       - merge-latest
     permissions:
-      contents: write  # Required for creating releases
+      contents: write # Required for creating releases
 
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.create_release.outputs.id }}
 
     steps:
       - name: 📦 Create Release
