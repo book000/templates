@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
