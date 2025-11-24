@@ -27,6 +27,7 @@ jobs:
 
       - name: 🧪 Validate Template Renovate Config
         run: |
+          set -e
           for file in renovate/*.json; do
             echo "Validating $file..."
             npx --yes -p renovate renovate-config-validator "$file"
