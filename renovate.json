@@ -3,8 +3,8 @@
     "github>book000/templates//renovate/base"
   ],
   "github-actions": {
-    "managerFilePatterns": [
-      "/^(workflows/.*\\.ya?ml|)$/"
+    "fileMatch": [
+      "^workflows/.*\\.ya?ml$"
     ]
   }
 }
