@@ -4,7 +4,7 @@
   ],
   "github-actions": {
     "managerFilePatterns": [
-      "/^(workflows/.*\\.ya?ml|)$/"
+      "/^workflows/.*\\.ya?ml$/"
     ]
   }
 }
