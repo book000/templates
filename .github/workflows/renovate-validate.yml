@@ -23,11 +23,20 @@ jobs:
           fetch-depth: 0
 
       - name: 🧪 Validate Repository Renovate Config
-        uses: rinchsan/renovate-config-validator@main
-        with:
-          pattern: "renovate.json"
+        run: |
+          set -e
+          npx --yes -p renovate@latest renovate-config-validator renovate.json
 
       - name: 🧪 Validate Template Renovate Config
-        uses: rinchsan/renovate-config-validator@main
-        with:
-          pattern: "renovate/*.json"
+        run: |
+          set -e
+          shopt -s nullglob
+          files=(renovate/*.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No JSON files found in renovate directory"
+            exit 0
+          fi
+          for file in "${files[@]}"; do
+            echo "Validating $file..."
+            npx --yes -p renovate@latest renovate-config-validator "$file"
+          done
