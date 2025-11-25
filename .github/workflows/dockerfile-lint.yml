@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: 🛎 Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
@@ -27,8 +27,8 @@ jobs:
       - name: 📄 List Dockefile files
         id: list-files
         run: |
-          # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として $GITHUB_OUTPUT に files として出力する
-          echo "files=[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E 'Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> $GITHUB_OUTPUT
+          # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として "$GITHUB_OUTPUT" に files として出力する
+          echo "files=[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '^dockerfiles/.+Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> "$GITHUB_OUTPUT"
 
   lint:
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: 🛎 Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
@@ -51,6 +51,6 @@ jobs:
           docker build --check -f dockerfiles/${{ matrix.file }}.Dockerfile .
 
       - name: 🐳 hadolint
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: dockerfiles/${{ matrix.file }}.Dockerfile

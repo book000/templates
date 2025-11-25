@@ -1,0 +1,15 @@
+# Test scenario build artifacts - these are only for local testing
+test-scenarios/*/node_modules/
+test-scenarios/*/target/
+test-scenarios/*/dist/
+test-scenarios/*/build/
+test-scenarios/*/coverage/
+
+# Temporary files
+test-scenarios/*/.DS_Store
+test-scenarios/*/.env
+test-scenarios/*/.env.local
+
+# Dependencies installed for scripts
+node_modules/
+package-lock.json

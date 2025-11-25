@@ -3,6 +3,9 @@ name: hadolint
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   hadolint:
     name: hadolint
@@ -10,9 +13,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
 
       - name: hadolint
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           recursive: true

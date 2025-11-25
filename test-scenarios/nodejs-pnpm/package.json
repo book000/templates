@@ -1,0 +1,17 @@
+{
+  "name": "test-nodejs-pnpm",
+  "version": "1.0.0",
+  "description": "Test project for reusable-nodejs-ci-pnpm workflow",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "lint": "echo 'Linting passed'",
+    "build": "echo 'Build completed'"
+  },
+  "dependencies": {
+    "date-fns": "4.1.0"
+  },
+  "devDependencies": {},
+  "author": "test",
+  "license": "MIT"
+}

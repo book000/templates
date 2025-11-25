@@ -41,6 +41,12 @@ on:
       changelog:
         description: Changelog
         value: ${{ jobs.calc-version.outputs.changelog }}
+      upload_url:
+        description: Release upload URL
+        value: ${{ jobs.release.outputs.upload_url }}
+      release_id:
+        description: Release ID
+        value: ${{ jobs.release.outputs.release_id }}
     secrets:
       DOCKER_USERNAME:
         description: Docker registry password
@@ -49,11 +55,18 @@ on:
         description: Docker registry username
         required: true
 
+permissions:
+  contents: read
+  packages: write
+  deployments: write
+
 jobs:
   # バージョンを計算する
   calc-version:
     name: Calculate next version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for creating tags
 
     outputs:
       # バージョン
@@ -70,14 +83,29 @@ jobs:
       targets-matrix: ${{ steps.targets-matrix.outputs.matrix }}
       # パッケージのアップロードが必要かどうか
       need-upload: ${{ steps.need-upload.outputs.need-upload }}
+      # リポジトリがプライベートかどうか
+      is-private-repo: ${{ steps.check-repo-visibility.outputs.is-private }}
 
     steps:
       - name: 📥 Check out the repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
+
+      - name: 🔍 Check repository visibility
+        id: check-repo-visibility
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const repo = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const isPrivate = repo.data.private;
+            core.setOutput('is-private', isPrivate);
+            core.info(`Repository is ${isPrivate ? 'private' : 'public'}`);
 
       - name: 🏷️ Bump version and push tag
         id: tag-version
@@ -92,14 +120,20 @@ jobs:
       - name: 📊 Set platform matrix
         id: platform-matrix
         run: |
+          # Use printf and parameter expansion to safely handle platform input
+          platforms="${{ inputs.platforms }}"
           # shellcheck disable=SC2312
-          echo "matrix=[$(echo "${{ inputs.platforms }}" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> $GITHUB_OUTPUT
-          # ,があるときはneed-merge=true
-          echo "need-merge=$(echo "${{ inputs.platforms }}" | grep -q ',' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "matrix=[$(printf '%s' "$platforms" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> "$GITHUB_OUTPUT"
+          # Check if comma exists for need-merge determination
+          if [[ "$platforms" == *","* ]]; then
+            echo "need-merge=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "need-merge=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: 🎯 Set targets matrix
         id: targets-matrix
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             core.setOutput('matrix', process.env.TARGETS)
@@ -111,16 +145,18 @@ jobs:
         run: |
           # package.json がない場合は false
           if [ ! -f package.json ]; then
-            echo "need-upload=false" >> $GITHUB_OUTPUT
+            echo "need-upload=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           # "ncc build" が package.json にある場合は true、ない場合は false
-          echo "need-upload=$(grep -q 'ncc build' package.json && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "need-upload=$(grep -q 'ncc build' package.json && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   # Dockerイメージをビルドする
   build:
     name: Docker build (${{ matrix.target.packageName }}, ${{ matrix.platform }})
-    runs-on: ubuntu-latest
+    # matrix.platform が linux/arm64 かつ パブリックリポジトリの場合は ubuntu-24.04-arm を使う。それ以外の場合は ubuntu-latest を使う
+    # プライベートリポジトリでは ubuntu-24.04-arm が利用できないため、ubuntu-latest を使う
+    runs-on: ${{ matrix.platform == 'linux/arm64' && needs.calc-version.outputs.is-private-repo == 'false' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     needs: calc-version
 
     strategy:
@@ -135,8 +171,11 @@ jobs:
       - name: 🗑️ Remove platform prefix
         id: platform
         run: |
-          echo "shortPlatform=$(echo "${{ matrix.platform }}" | sed -r -e 's/^[^\/]+\///')" >> $GITHUB_OUTPUT
-          echo "shortHyphenPlatform=$(echo "${{ matrix.platform }}" | sed -r -e 's/^[^\/]+\///' -e 's/\//-/g')" >> $GITHUB_OUTPUT
+          # Use parameter expansion to safely process platform string
+          platform="${{ matrix.platform }}"
+          short_platform="${platform##*/}"
+          echo "shortPlatform=$short_platform" >> "$GITHUB_OUTPUT"
+          echo "shortHyphenPlatform=${short_platform//\//-}" >> "$GITHUB_OUTPUT"
 
       - name: 🚀 Create GitHub deployment
         uses: chrnorm/deployment-action@v2.0.7
@@ -157,7 +196,7 @@ jobs:
           deployment-id: ${{ steps.deployment.outputs.deployment_id }}
 
       - name: 📥 Check out the repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
@@ -172,7 +211,7 @@ jobs:
 
       - name: 🔑 Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
-        uses: docker/login-action@v3.4.0
+        uses: docker/login-action@v3.6.0
         with:
           registry: ${{ inputs.registry }}
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -183,18 +222,23 @@ jobs:
           find . -type d -name node_modules -prune -o -type f -name package.json -exec sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${{ needs.calc-version.outputs.version }}\"/" {} \;
           git diff
 
+      - name: 📝 Create application version file
+        run: |
+          echo -n "${{ needs.calc-version.outputs.version }}" > .app-version
+          git diff
+
       - name: 🏷️ Set tag suffix value
         id: tag
         run: |
           if [ "${{ needs.calc-version.outputs.need-merge }}" = "true" ]; then
-            echo "suffix=-${{ steps.platform.outputs.shortHyphenPlatform }}" >> $GITHUB_OUTPUT
+            echo "suffix=-${{ steps.platform.outputs.shortHyphenPlatform }}" >> "$GITHUB_OUTPUT"
           else
-            echo "suffix=" >> $GITHUB_OUTPUT
+            echo "suffix=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: 📦 Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.7.0
+        uses: docker/metadata-action@v5.9.0
         with:
           images: ${{ inputs.registry }}/${{ matrix.target.imageName }}
           tags: |
@@ -204,7 +248,7 @@ jobs:
             type=raw,value=latest${{ steps.tag.outputs.suffix }}
 
       - name: 🏗️ Build and push Docker image
-        uses: docker/build-push-action@v6.16.0
+        uses: docker/build-push-action@v6.18.0
         with:
           context: ${{ matrix.target.context }}
           file: ${{ matrix.target.file }}
@@ -215,6 +259,8 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
           provenance: false
+          build-args: |
+            APPLICATION_VERSION=${{ needs.calc-version.outputs.version }}
 
       - name: 🔄 Update deployment status (success)
         uses: chrnorm/deployment-status@v2.0.3
@@ -269,7 +315,7 @@ jobs:
     steps:
       - name: 🔑 Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
-        uses: docker/login-action@v3.4.0
+        uses: docker/login-action@v3.6.0
         with:
           registry: ${{ inputs.registry }}
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -278,7 +324,11 @@ jobs:
       - name: 📝 Create extra-images list
         id: extra-images
         run: |
-          echo "images=$(echo "${{ inputs.platforms }}" | sed -r 's#([a-z]+)\/([a-z0-9]+)#${{ inputs.registry }}\/${{ matrix.target.imageName }}:latest-\2#g')" >> $GITHUB_OUTPUT
+          # Use printf to safely handle platform input without shell injection
+          platforms="${{ inputs.platforms }}"
+          registry="${{ inputs.registry }}"
+          image_name="${{ matrix.target.imageName }}"
+          echo "images=$(printf '%s' "$platforms" | sed -r "s#([a-z]+)/([a-z0-9]+)#${registry}/${image_name}:latest-\2#g")" >> "$GITHUB_OUTPUT"
 
       - name: 📝 Create and push manifest images (latest)
         uses: Noelware/docker-manifest-action@0.4.3
@@ -306,14 +356,17 @@ jobs:
       - calc-version
       - build
       - merge-latest
+    permissions:
+      contents: write # Required for creating releases
 
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.create_release.outputs.id }}
 
     steps:
       - name: 📦 Create Release
         id: create_release
-        uses: ncipollo/release-action@v1.16.0
+        uses: ncipollo/release-action@v1.20.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -335,7 +388,7 @@ jobs:
 
     steps:
       - name: 📥 Check out the repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
@@ -344,32 +397,32 @@ jobs:
         id: check-node-version-file
         run: |
           if [ ! -f ".node-version" ]; then
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
           else
-            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "exists=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: 🏗️ Setup node env
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         if: ${{ steps.check-node-version-file.outputs.exists == 'true' }}
         with:
           node-version-file: .node-version
 
       - name: 🏗️ Setup node env
         if: ${{ steps.check-node-version-file.outputs.exists == 'false' }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 18
+          node-version: 24
 
       - name: 📝 Check package manager
         id: check-package-manager
         run: |
           if [ -f "yarn.lock" ]; then
-            echo "package-manager=yarn" >> "$GITHUB_OUTPUT"
+            echo "package-manager=yarn" >> ""$GITHUB_OUTPUT""
           elif [ -f "pnpm-lock.yaml" ]; then
-            echo "package-manager=pnpm" >> "$GITHUB_OUTPUT"
+            echo "package-manager=pnpm" >> ""$GITHUB_OUTPUT""
           else
-            echo "package-manager=npm" >> "$GITHUB_OUTPUT"
+            echo "package-manager=npm" >> ""$GITHUB_OUTPUT""
           fi
 
       - name: Setup pnpm
@@ -406,8 +459,8 @@ jobs:
           ZIP_PATH=$(pwd)/output/${ZIP_FILENAME}
           cd output
           zip -r ${ZIP_PATH} ./*
-          echo "zip-path=${ZIP_PATH}" >> $GITHUB_OUTPUT
-          echo "zip-filename=${ZIP_FILENAME}" >> $GITHUB_OUTPUT
+          echo "zip-path=${ZIP_PATH}" >> "$GITHUB_OUTPUT"
+          echo "zip-filename=${ZIP_FILENAME}" >> "$GITHUB_OUTPUT"
 
       - name: 📂 ls
         run: |
@@ -415,7 +468,7 @@ jobs:
           ls -la
 
       - name: 📤 Upload Release Asset
-        uses: shogo82148/actions-upload-release-asset@v1.8.0
+        uses: shogo82148/actions-upload-release-asset@v1.9.1
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: ${{ steps.create-zip.outputs.zip-path }}

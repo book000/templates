@@ -33,7 +33,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.gi
 |  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
 |  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
-|  | `version` | Next custom version (Not included prefix) | `string` |  |
+|  | `version` | Next custom version (Not included prefix) | `string` | `` |
 
 ### hadolint-ci.yml
 
@@ -54,7 +54,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.
 |  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
 |  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
-|  | `version` | Next custom version (Not included prefix) | `string` |  |
+|  | `version` | Next custom version (Not included prefix) | `string` | `` |
 
 ### nodejs-ci-pnpm.yml
 
@@ -66,9 +66,9 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci-pnpm.yml https:
 | --- | --- | --- | --- | --- |
 |  | `directorys` | Target directorys (comma separated) | `string` | `.` |
 |  | `disabled-jobs` | Disable Jobs (comma separated) | `string` | `NULL` |
-|  | `install-apt-packages` | Install apt packages (space separated) | `string` |  |
+|  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
 |  | `lock-path` | Lock file path | `string` | `{dir}/pnpm-lock.yaml` |
-|  | `check-git-diff` | Check git diff | `boolean` |  |
+|  | `check-git-diff` | Check git diff | `boolean` | `false` |
 
 ### nodejs-ci.yml
 
@@ -80,9 +80,9 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 | --- | --- | --- | --- | --- |
 |  | `directorys` | Target directorys (comma separated) | `string` | `.` |
 |  | `disabled-jobs` | Disable Jobs (comma separated) | `string` | `NULL` |
-|  | `install-apt-packages` | Install apt packages (space separated) | `string` |  |
+|  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
 |  | `lock-path` | yarn.lock path | `string` | `{dir}/yarn.lock` |
-|  | `check-git-diff` | Check git diff | `boolean` |  |
+|  | `check-git-diff` | Check git diff | `boolean` | `false` |
 
 ## Dockerfile
 

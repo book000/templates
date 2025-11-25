@@ -1,0 +1,17 @@
+{
+  "name": "test-nodejs-yarn",
+  "version": "1.0.0",
+  "description": "Test project for reusable-nodejs-ci workflow",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "lint": "echo 'Linting passed'",
+    "build": "echo 'Build completed'"
+  },
+  "dependencies": {
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {},
+  "author": "test",
+  "license": "MIT"
+}
