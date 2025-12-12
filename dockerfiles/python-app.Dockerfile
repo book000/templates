@@ -1,4 +1,4 @@
-FROM python:3.14.1-alpine
+FROM python:3.14.2-alpine
 
 # hadolint ignore=DL3018
 RUN apk update && \
