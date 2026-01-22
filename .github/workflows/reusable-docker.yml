@@ -202,12 +202,15 @@ jobs:
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
 
       - name: 🛠️ Set up QEMU
+        # QEMU はクロスコンパイル時のみ必要。ネイティブビルド時はスキップする
+        # - linux/amd64 を ubuntu-latest (amd64) でビルドする場合は不要
+        # - linux/arm64 を ubuntu-24.04-arm (arm64) でビルドする場合は不要
+        # - linux/arm64 をプライベートリポジトリで ubuntu-latest (amd64) でビルドする場合のみ必要
+        if: matrix.platform == 'linux/arm64' && needs.calc-version.outputs.is-private-repo == 'true'
         uses: docker/setup-qemu-action@v3
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: 🔑 Login to ${{ inputs.registry }}
         if: inputs.is-merged == true
