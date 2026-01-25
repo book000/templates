@@ -23,8 +23,8 @@
 
 - **目的**: GitHub Actions Reusable Workflows、Dockerfile テンプレート、Renovate 設定を一元管理し、複数プロジェクト間で再利用可能なテンプレートを提供する
 - **主な機能**:
-  - GitHub Actions Reusable Workflows の提供（Node.js、Maven、Docker、Actionlint、Hadolint など 8 種類）
-  - Docker コンテナ化のための Dockerfile テンプレート（Node.js、Python、PHP、Puppeteer など 8 種類）
+  - GitHub Actions Reusable Workflows の提供（Node.js、Maven、Docker、Actionlint、Hadolint など 7 種類）
+  - Docker コンテナ化のための Dockerfile テンプレート（Node.js、Python、PHP、Puppeteer など 7 種類）
   - Renovate 設定ファイルのベーステンプレート
   - CI/CD パイプラインの標準化と自動テスト
   - README.md の自動生成

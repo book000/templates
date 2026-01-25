@@ -22,8 +22,8 @@
 
 - **目的**: GitHub Actions Reusable Workflows、Dockerfile テンプレート、Renovate 設定を一元管理し、複数プロジェクト間で再利用可能なテンプレートを提供する
 - **主な機能**:
-  - GitHub Actions Reusable Workflows の提供（Node.js、Maven、Docker、Actionlint、Hadolint など 8 種類）
-  - Docker コンテナ化のための Dockerfile テンプレート（Node.js、Python、PHP、Puppeteer など 8 種類）
+  - GitHub Actions Reusable Workflows の提供（Node.js、Maven、Docker、Actionlint、Hadolint など 7 種類）
+  - Docker コンテナ化のための Dockerfile テンプレート（Node.js、Python、PHP、Puppeteer など 7 種類）
   - Renovate 設定ファイルのベーステンプレート
   - CI/CD パイプラインの標準化と自動テスト
   - README.md の自動生成
@@ -116,9 +116,9 @@ docker run --rm -i hadolint/hadolint < dockerfiles/node-app-pnpm.Dockerfile
 ### 主要ディレクトリ
 
 ```
-.github/workflows/      # Reusable workflow 定義（13 ファイル）
-workflows/              # Reusable workflow の source（9 ファイル）
-dockerfiles/            # Docker テンプレート（8 ファイル）
+.github/workflows/      # Reusable workflow 定義（14 ファイル）
+workflows/              # Reusable workflow の source（7 ファイル）
+dockerfiles/            # Docker テンプレート（7 ファイル）
 renovate/               # Renovate 設定ファイル
 test-scenarios/         # テストシナリオ
 scripts/                # ユーティリティスクリプト
