@@ -83,8 +83,6 @@ jobs:
       targets-matrix: ${{ steps.targets-matrix.outputs.matrix }}
       # パッケージのアップロードが必要かどうか
       need-upload: ${{ steps.need-upload.outputs.need-upload }}
-      # リポジトリがプライベートかどうか
-      is-private-repo: ${{ steps.check-repo-visibility.outputs.is-private }}
 
     steps:
       - name: 📥 Check out the repo
@@ -93,19 +91,6 @@ jobs:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
-
-      - name: 🔍 Check repository visibility
-        id: check-repo-visibility
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const repo = await github.rest.repos.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-            const isPrivate = repo.data.private;
-            core.setOutput('is-private', isPrivate);
-            core.info(`Repository is ${isPrivate ? 'private' : 'public'}`);
 
       - name: 🏷️ Bump version and push tag
         id: tag-version
@@ -154,9 +139,8 @@ jobs:
   # Dockerイメージをビルドする
   build:
     name: Docker build (${{ matrix.target.packageName }}, ${{ matrix.platform }})
-    # matrix.platform が linux/arm64 かつ パブリックリポジトリの場合は ubuntu-24.04-arm を使う。それ以外の場合は ubuntu-latest を使う
-    # プライベートリポジトリでは ubuntu-24.04-arm が利用できないため、ubuntu-latest を使う
-    runs-on: ${{ matrix.platform == 'linux/arm64' && needs.calc-version.outputs.is-private-repo == 'false' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    # matrix.platform が linux/arm64 の場合は ubuntu-24.04-arm を使う。それ以外の場合は ubuntu-latest を使う
+    runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     needs: calc-version
 
     strategy:
@@ -200,14 +184,6 @@ jobs:
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
-
-      - name: 🛠️ Set up QEMU
-        # QEMU はクロスコンパイル時のみ必要。ネイティブビルド時はスキップする
-        # - linux/amd64 を ubuntu-latest (amd64) でビルドする場合は不要
-        # - linux/arm64 を ubuntu-24.04-arm (arm64) でビルドする場合は不要
-        # - linux/arm64 をプライベートリポジトリで ubuntu-latest (amd64) でビルドする場合のみ必要
-        if: matrix.platform == 'linux/arm64' && needs.calc-version.outputs.is-private-repo == 'true'
-        uses: docker/setup-qemu-action@v3
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

@@ -12,4 +12,5 @@ test-scenarios/*/.env.local
 
 # Dependencies installed for scripts
 node_modules/
+package.json
 package-lock.json
