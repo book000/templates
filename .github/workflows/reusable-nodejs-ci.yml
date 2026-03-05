@@ -23,6 +23,10 @@ on:
         description: Check git diff
         type: boolean
         default: false
+      environment:
+        description: フォークリポジトリからの PR の場合に Environment による承認を要求する際の Environment 名
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -45,11 +49,26 @@ jobs:
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
           echo "disabled-jobs=$DISABLED_JOBS" >> ""$GITHUB_OUTPUT""
 
+  # フォークリポジトリからの PR（pull_request_target イベント）の場合は Environment による承認を要求する
+  approve-for-fork:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: ✅ フォーク PR の承認確認
+        run: echo "フォークリポジトリからの PR が Environment により承認されました"
+
   node-ci:
     runs-on: ubuntu-latest
 
     needs:
       - setup
+      - approve-for-fork
+    if: >-
+      always() &&
+      needs.setup.result == 'success' &&
+      (needs.approve-for-fork.result == 'success' || needs.approve-for-fork.result == 'skipped')
 
     strategy:
       matrix:
