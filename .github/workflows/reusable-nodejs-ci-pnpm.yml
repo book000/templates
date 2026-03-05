@@ -25,6 +25,10 @@ on:
         description: Check git diff
         type: boolean
         default: false
+      environment:
+        description: フォークリポジトリからの PR の場合に Environment による承認を要求する際の Environment 名
+        type: string
+        default: node-ci
 
 permissions:
   contents: read
@@ -47,11 +51,50 @@ jobs:
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
           echo "disabled-jobs=$DISABLED_JOBS" >> ""$GITHUB_OUTPUT""
 
+  # フォークリポジトリからの PR に承認リクエストコメントを投稿する
+  post-approval-request:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: 💬 承認リクエストコメントを投稿
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## ⏳ Environment 承認待ち
+
+            この PR はフォークリポジトリからの PR です。CI を実行するには、Environment `${{ inputs.environment }}` の承認が必要です。
+
+            [Actions run を確認して承認してください](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}?pr=${{ github.event.pull_request.number }})
+
+  # フォークリポジトリからの PR （pull_request_target イベント）の場合は Environment による承認を要求する
+  approve-for-fork:
+    runs-on: ubuntu-latest
+    needs:
+      - post-approval-request
+    if: >-
+      always() &&
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.full_name != github.repository
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: ✅ フォーク PR の承認確認
+        run: echo "フォークリポジトリからの PR が Environment により承認されました"
+
   node-ci:
     runs-on: ubuntu-latest
 
     needs:
       - setup
+      - approve-for-fork
+    if: >-
+      always() &&
+      needs.setup.result == 'success' &&
+      (needs.approve-for-fork.result == 'success' || needs.approve-for-fork.result == 'skipped')
 
     strategy:
       matrix:
