@@ -26,7 +26,7 @@ on:
       environment:
         description: フォークリポジトリからの PR の場合に Environment による承認を要求する際の Environment 名
         type: string
-        default: ""
+        default: node-ci
 
 permissions:
   contents: read
