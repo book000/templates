@@ -49,10 +49,10 @@ jobs:
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
           echo "disabled-jobs=$DISABLED_JOBS" >> ""$GITHUB_OUTPUT""
 
-  # フォークリポジトリからの PR（pull_request_target イベント）の場合は Environment による承認を要求する
+  # フォークリポジトリからの PR （pull_request_target イベント）の場合は Environment による承認を要求する
   approve-for-fork:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository
     environment: ${{ inputs.environment }}
 
     steps:
