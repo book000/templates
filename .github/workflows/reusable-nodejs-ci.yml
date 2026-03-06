@@ -77,7 +77,13 @@ jobs:
       always() &&
       github.event_name == 'pull_request_target' &&
       github.event.pull_request.head.repo.full_name != github.repository
-    environment: ${{ inputs.environment }}
+    # environment フィールドは if 条件より前に評価されるため、フォーク PR 以外では空文字列を設定して environment を無効化する
+    environment: >-
+      ${{
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.head.repo.full_name != github.repository &&
+        inputs.environment || ''
+      }}
 
     steps:
       - name: ✅ フォーク PR の承認確認
