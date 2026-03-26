@@ -172,7 +172,7 @@ jobs:
           environment-url: https://github.com/${{ github.repository }}/pkgs/container/${{ matrix.target.packageName }}
 
       - name: 🔄 Update deployment status (in_progress)
-        uses: chrnorm/deployment-status@v2.0.3
+        uses: chrnorm/deployment-status@v2.0.4
         if: inputs.is-merged == true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -242,7 +242,7 @@ jobs:
             APPLICATION_VERSION=${{ needs.calc-version.outputs.version }}
 
       - name: 🔄 Update deployment status (success)
-        uses: chrnorm/deployment-status@v2.0.3
+        uses: chrnorm/deployment-status@v2.0.4
         if: ${{ success() && inputs.is-merged == true }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -251,7 +251,7 @@ jobs:
 
       - name: 🔄 Update deployment status (failure)
         if: ${{ failure() && inputs.is-merged == true }}
-        uses: chrnorm/deployment-status@v2.0.3
+        uses: chrnorm/deployment-status@v2.0.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           state: failure
