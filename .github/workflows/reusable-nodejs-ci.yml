@@ -114,7 +114,7 @@ jobs:
       - name: 📂 Set lock path
         id: lock-path
         run: |
-          LOCK_PATH=$(echo "${{ inputs.lock-path }}" | sed -e "s/{dir}/${{ matrix.directory }}/g")
+          LOCK_PATH=$(echo "${{ inputs.lock-path }}" | sed -e "s|{dir}|${{ matrix.directory }}|g")
           echo "lock-path=$LOCK_PATH" >> "$GITHUB_OUTPUT"
 
       - name: 🏗 Setup node
