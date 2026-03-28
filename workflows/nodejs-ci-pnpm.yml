@@ -19,7 +19,6 @@ on:
       - opened
       - synchronize
       - reopened
-      - closed
   merge_group:
 
 concurrency:
@@ -76,5 +75,5 @@ jobs:
   node-ci:
     name: Node CI
     needs: approval-gate
-    if: always() && needs.approval-gate.result == 'success' && (github.event.action != 'closed' || github.event.pull_request.merged == true)
+    if: always() && needs.approval-gate.result == 'success'
     uses: book000/templates/.github/workflows/reusable-nodejs-ci-pnpm.yml@master
