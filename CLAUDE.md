@@ -123,7 +123,6 @@ renovate/               # Renovate 設定ファイル
 test-scenarios/         # テストシナリオ
 scripts/                # ユーティリティスクリプト
 docs/                   # ドキュメント
-man/                    # man ページ（actionlint）
 ```
 
 ### 主要ファイル
