@@ -30,7 +30,7 @@ jobs:
           echo "is-need-add-reviewer=$(printf '%s' "$ACTORS" | jq -r --arg actor "${{ github.actor }}" '. | contains([$actor]) | not')" >> ""$GITHUB_OUTPUT""
 
       - name: Add reviewer
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         if: ${{ steps.setup.outputs.is-need-add-reviewer == 'true' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
