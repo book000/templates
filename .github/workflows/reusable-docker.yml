@@ -405,7 +405,7 @@ jobs:
           fi
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
         if: ${{ steps.check-package-manager.outputs.package-manager == 'pnpm' }}
         with:
           run_install: false
