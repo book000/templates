@@ -53,13 +53,11 @@ jobs:
     name: Test reusable-hadolint-ci
     uses: ./.github/workflows/reusable-hadolint-ci.yml
 
-  # Test Add Reviewer (only on pull requests to avoid issues)
+  # Test Add Reviewer (only on pull requests from the same repo to avoid issues)
   test-add-reviewer:
     name: Test reusable-add-reviewer
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/reusable-add-reviewer.yml
-    permissions:
-      pull-requests: write
     with:
       actors: "github-actions[bot],test-user"
       reviewers: "github-actions[bot]"
