@@ -1,6 +1,7 @@
 FROM alpine:3.23
 
 # Install basic tools
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
     curl \
     bash \
