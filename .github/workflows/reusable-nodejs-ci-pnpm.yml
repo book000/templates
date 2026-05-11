@@ -139,7 +139,14 @@ jobs:
       - name: 👨🏻‍💻 Install dependencies
         working-directory: ${{ matrix.directory }}
         run: |
-          pnpm install --frozen-lockfile --prefer-frozen-lockfile
+          set -o pipefail
+          pnpm install --frozen-lockfile --prefer-frozen-lockfile 2>&1 | tee /tmp/pnpm-install.log
+          if grep -qF "Ignored build scripts" /tmp/pnpm-install.log; then
+            echo ""
+            echo "::error::pnpm がビルドスクリプトを無視しました。pnpm-workspace.yaml の allowBuilds に追加してください:"
+            grep "Ignored build scripts" /tmp/pnpm-install.log
+            exit 1
+          fi
 
       - name: 👀 Run linter
         if: steps.package-json.outputs.lint == 'true' && steps.package-json.outputs.disabled-lint == 'false'
