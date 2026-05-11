@@ -204,7 +204,7 @@ jobs:
         run: |
           IS_DIRECTORY=$(test -d output && echo true || echo false)
           IS_SYMLINK=$(test -L output && echo true || echo false)
-          echo "exists=$(test $IS_DIRECTORY = true && $IS_NOT_SYMLINK = false && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "exists=$([ "$IS_DIRECTORY" = "true" ] && [ "$IS_SYMLINK" = "false" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: 📦 Upload output artifact
         if: steps.check-output.outputs.exists == 'true'

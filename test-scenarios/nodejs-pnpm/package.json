@@ -13,5 +13,6 @@
   },
   "devDependencies": {},
   "author": "test",
-  "license": "MIT"
+  "license": "MIT",
+  "packageManager": "pnpm@11.0.0-rc.5"
 }
