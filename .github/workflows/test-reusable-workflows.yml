@@ -67,6 +67,15 @@ jobs:
       actors: "github-actions[bot],test-user"
       reviewers: "github-actions[bot]"
 
+  # ネガティブテスト: allowBuilds 未設定で Ignored build scripts が検出されることを確認
+  test-nodejs-ci-pnpm-ignored-build:
+    name: Test reusable-nodejs-ci-pnpm (Ignored build scripts を検出して失敗すること)
+    uses: ./.github/workflows/reusable-nodejs-ci-pnpm.yml
+    continue-on-error: true
+    with:
+      directorys: "test-scenarios/nodejs-pnpm-ignored-build-scripts"
+      disabled-jobs: "lint,test,build,compile,generate,package,depcheck"
+
   # Test Docker workflow (dry run without pushing)
   test-docker:
     name: Test reusable-docker
@@ -92,9 +101,10 @@ jobs:
     name: Test Summary
     runs-on: ubuntu-latest
     if: always()
-    needs: 
+    needs:
       - test-nodejs-ci
       - test-nodejs-ci-pnpm
+      - test-nodejs-ci-pnpm-ignored-build
       - test-maven
       - test-actionlint
       - test-hadolint
@@ -106,13 +116,21 @@ jobs:
         run: |
           echo "Node.js CI result: ${{ needs.test-nodejs-ci.result }}"
           echo "Node.js CI pnpm result: ${{ needs.test-nodejs-ci-pnpm.result }}"
+          echo "Node.js CI pnpm (ignored build scripts) result: ${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}"
           echo "Maven result: ${{ needs.test-maven.result }}"
           echo "Actionlint result: ${{ needs.test-actionlint.result }}"
           echo "Hadolint result: ${{ needs.test-hadolint.result }}"
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
-          
-          # Check if any job failed (skipped is OK for add-reviewer when not on PR)
+
+          # ネガティブテスト: Ignored build scripts を検出して失敗することを確認
+          if [[ "${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}" != "failure" ]]; then
+            echo "❌ 'Ignored build scripts' の検出テストが想定通り失敗しませんでした (result: ${{ needs.test-nodejs-ci-pnpm-ignored-build.result }})"
+            exit 1
+          fi
+          echo "✅ Ignored build scripts の検出が正常に機能しています"
+
+          # Check if any positive test failed (skipped is OK for add-reviewer when not on PR)
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
              [[ "${{ needs.test-maven.result }}" != "success" ]] || \
