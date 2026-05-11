@@ -15,13 +15,6 @@ on:
       - ".github/workflows/test-reusable-workflows.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pull-requests: write  # Needed for add-reviewer workflow
-  packages: write       # Needed for docker workflow
-  deployments: write    # Needed for docker workflow
-  actions: read         # Needed for workflow execution
-
 jobs:
   # Test Node.js CI with yarn
   test-nodejs-ci:
