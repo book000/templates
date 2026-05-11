@@ -4,6 +4,6 @@
   "description": "pnpm v11 の Ignored build scripts 検出テスト用プロジェクト",
   "packageManager": "pnpm@11.0.0-rc.5",
   "dependencies": {
-    "esbuild": "0.27.7"
+    "esbuild": "^0.27.7"
   }
 }
