@@ -139,7 +139,7 @@ jobs:
       is-merged: false
       is-release: false
     secrets:
-      DOCKER_USERNAME: ${{ secrets.GITHUB_ACTOR }}
+      DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
   # Summary job to check all tests passed
