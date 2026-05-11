@@ -68,13 +68,59 @@ jobs:
       reviewers: "github-actions[bot]"
 
   # ネガティブテスト: allowBuilds 未設定で Ignored build scripts が検出されることを確認
+  # reusable workflow は continue-on-error に対応していないため直接スクリプトをテストする
   test-nodejs-ci-pnpm-ignored-build:
-    name: Test reusable-nodejs-ci-pnpm (Ignored build scripts を検出して失敗すること)
-    uses: ./.github/workflows/reusable-nodejs-ci-pnpm.yml
-    continue-on-error: true
-    with:
-      directorys: "test-scenarios/nodejs-pnpm-ignored-build-scripts"
-      disabled-jobs: "lint,test,build,compile,generate,package,depcheck"
+    name: Test Ignored build scripts detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎 Checkout
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          package_json_file: test-scenarios/nodejs-pnpm-ignored-build-scripts/package.json
+
+      - name: 🏗 Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: test-scenarios/nodejs-pnpm-ignored-build-scripts/.node-version
+
+      - name: 📂 Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: 📂 Setup pnpm cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-ignored-build-test-${{ hashFiles('test-scenarios/nodejs-pnpm-ignored-build-scripts/pnpm-lock.yaml') }}
+
+      - name: 👨🏻‍💻 Install dependencies (Ignored build scripts が発生するため失敗が期待される)
+        id: install
+        continue-on-error: true
+        working-directory: test-scenarios/nodejs-pnpm-ignored-build-scripts
+        run: |
+          set -o pipefail
+          pnpm install --frozen-lockfile --prefer-frozen-lockfile 2>&1 | tee /tmp/pnpm-install.log
+          if grep -qF "Ignored build scripts" /tmp/pnpm-install.log; then
+            echo ""
+            echo "::error::pnpm がビルドスクリプトを無視しました。pnpm-workspace.yaml の allowBuilds に追加してください:"
+            grep "Ignored build scripts" /tmp/pnpm-install.log
+            exit 1
+          fi
+
+      - name: ✅ Ignored build scripts 検出の確認
+        run: |
+          if [[ "${{ steps.install.outcome }}" != "failure" ]]; then
+            echo "❌ 検出テスト失敗: install ステップが失敗しませんでした (outcome: ${{ steps.install.outcome }})"
+            echo "   allowBuilds 未設定で esbuild を依存に持つ場合、検出して失敗するはずです"
+            exit 1
+          fi
+          echo "✅ Ignored build scripts の検出が正常に機能しています"
 
   # Test Docker workflow (dry run without pushing)
   test-docker:
@@ -116,23 +162,17 @@ jobs:
         run: |
           echo "Node.js CI result: ${{ needs.test-nodejs-ci.result }}"
           echo "Node.js CI pnpm result: ${{ needs.test-nodejs-ci-pnpm.result }}"
-          echo "Node.js CI pnpm (ignored build scripts) result: ${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}"
+          echo "Node.js CI pnpm (ignored build scripts detection) result: ${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}"
           echo "Maven result: ${{ needs.test-maven.result }}"
           echo "Actionlint result: ${{ needs.test-actionlint.result }}"
           echo "Hadolint result: ${{ needs.test-hadolint.result }}"
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
 
-          # ネガティブテスト: Ignored build scripts を検出して失敗することを確認
-          if [[ "${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}" != "failure" ]]; then
-            echo "❌ 'Ignored build scripts' の検出テストが想定通り失敗しませんでした (result: ${{ needs.test-nodejs-ci-pnpm-ignored-build.result }})"
-            exit 1
-          fi
-          echo "✅ Ignored build scripts の検出が正常に機能しています"
-
           # Check if any positive test failed (skipped is OK for add-reviewer when not on PR)
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
+             [[ "${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}" != "success" ]] || \
              [[ "${{ needs.test-maven.result }}" != "success" ]] || \
              [[ "${{ needs.test-actionlint.result }}" != "success" ]] || \
              [[ "${{ needs.test-hadolint.result }}" != "success" ]] || \
