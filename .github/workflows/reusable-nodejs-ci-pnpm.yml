@@ -60,18 +60,20 @@ jobs:
 
     steps:
       - name: 🛎 Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 📂 Set lock path
         id: lock-path
         run: |
-          LOCK_PATH=$(echo "${{ inputs.lock-path }}" | sed -e "s/{dir}/${{ matrix.directory }}/g")
+          LOCK_PATH_TEMPLATE="${{ inputs.lock-path }}"
+          DIR="${{ matrix.directory }}"
+          LOCK_PATH="${LOCK_PATH_TEMPLATE//\{dir\}/$DIR}"
           echo "lock-path=$LOCK_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         id: pnpm-install
         with:
           run_install: false
@@ -82,6 +84,7 @@ jobs:
         with:
           node-version-file: ${{ matrix.directory }}/.node-version
           cache: pnpm
+          cache-dependency-path: ${{ steps.lock-path.outputs.lock-path }}
 
       - name: 👨🏻‍💻 Install apt packages
         if: inputs.install-apt-packages != ''
@@ -194,7 +197,7 @@ jobs:
 
       - name: 📦 Upload dist artifact
         if: steps.check-dist.outputs.exists == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.directory }}-dist
           path: ${{ matrix.directory }}/dist
@@ -208,7 +211,7 @@ jobs:
 
       - name: 📦 Upload output artifact
         if: steps.check-output.outputs.exists == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.directory }}-output
           path: ${{ matrix.directory }}/output
