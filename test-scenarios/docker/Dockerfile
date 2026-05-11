@@ -1,9 +1,10 @@
 FROM alpine:3.23
 
 # Install basic tools
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
-    curl=8.12.1-r0 \
-    bash=5.2.26-r0 \
+    curl \
+    bash \
     && addgroup -g 1000 appgroup \
     && adduser -u 1000 -G appgroup -s /bin/bash -D appuser
 

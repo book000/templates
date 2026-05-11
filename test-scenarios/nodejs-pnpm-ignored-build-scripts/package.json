@@ -1,0 +1,9 @@
+{
+  "name": "test-nodejs-pnpm-ignored-build-scripts",
+  "version": "1.0.0",
+  "description": "pnpm v11 の Ignored build scripts 検出テスト用プロジェクト",
+  "packageManager": "pnpm@11.0.0-rc.5",
+  "dependencies": {
+    "esbuild": "^0.27.7"
+  }
+}
