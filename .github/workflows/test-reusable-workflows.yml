@@ -41,6 +41,7 @@ jobs:
     with:
       is-merged: false
       is-release: false
+      directory: test-scenarios/maven
 
   # Test Actionlint
   test-actionlint:
@@ -57,6 +58,8 @@ jobs:
     name: Test reusable-add-reviewer
     if: github.event_name == 'pull_request'
     uses: ./.github/workflows/reusable-add-reviewer.yml
+    permissions:
+      pull-requests: write
     with:
       actors: "github-actions[bot],test-user"
       reviewers: "github-actions[bot]"
@@ -73,7 +76,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           run_install: false
           package_json_file: test-scenarios/nodejs-pnpm-ignored-build-scripts/package.json
@@ -112,6 +115,12 @@ jobs:
           if [[ "${{ steps.install.outcome }}" != "failure" ]]; then
             echo "❌ 検出テスト失敗: install ステップが失敗しませんでした (outcome: ${{ steps.install.outcome }})"
             echo "   allowBuilds 未設定で esbuild を依存に持つ場合、検出して失敗するはずです"
+            exit 1
+          fi
+          if ! grep -qF "Ignored build scripts" /tmp/pnpm-install.log; then
+            echo "❌ 検出テスト失敗: 'Ignored build scripts' がログに見つかりませんでした"
+            echo "   install ステップが別の理由で失敗した可能性があります"
+            cat /tmp/pnpm-install.log
             exit 1
           fi
           echo "✅ Ignored build scripts の検出が正常に機能しています"

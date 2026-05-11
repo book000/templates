@@ -27,6 +27,10 @@ on:
         description: Next custom version (Not included prefix)
         type: string
         default: ""
+      directory:
+        description: Working directory containing pom.xml
+        type: string
+        default: .
     outputs:
       version:
         description: Next version
@@ -105,21 +109,23 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Replace pom.xml version
+        working-directory: ${{ inputs.directory }}
         run: |
           sed -r -i "1,/version/s#<version>(.+?)</version>#<version>${{ needs.calc-version.outputs.version }}</version>#" pom.xml
           git diff
 
       - name: Build with Maven
+        working-directory: ${{ inputs.directory }}
         run: mvn -B package --file pom.xml
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
           name: artifact
-          path: target/*.jar
+          path: ${{ inputs.directory }}/target/*.jar
 
       - name: Calculate hash
-        working-directory: ./target
+        working-directory: ${{ inputs.directory }}/target
         run: |
           sha256sum -- *.jar > sha256sum.txt
 
@@ -134,8 +140,8 @@ jobs:
           name: ${{ needs.calc-version.outputs.tag }}
           body: ${{ needs.calc-version.outputs.changelog }}
           artifacts: |
-            target/*.jar
-            target/sha256sum.txt
+            ${{ inputs.directory }}/target/*.jar
+            ${{ inputs.directory }}/target/sha256sum.txt
 
   finished-build:
     name: Check finished Maven build
