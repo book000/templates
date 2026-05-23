@@ -397,11 +397,11 @@ jobs:
         id: check-package-manager
         run: |
           if [ -f "yarn.lock" ]; then
-            echo "package-manager=yarn" >> ""$GITHUB_OUTPUT""
+            echo "package-manager=yarn" >> "$GITHUB_OUTPUT"
           elif [ -f "pnpm-lock.yaml" ]; then
-            echo "package-manager=pnpm" >> ""$GITHUB_OUTPUT""
+            echo "package-manager=pnpm" >> "$GITHUB_OUTPUT"
           else
-            echo "package-manager=npm" >> ""$GITHUB_OUTPUT""
+            echo "package-manager=npm" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Setup pnpm
@@ -434,10 +434,10 @@ jobs:
         id: create-zip
         run: |
           REPO="${GITHUB_REPOSITORY#"${GITHUB_REPOSITORY_OWNER}/"}"
-          ZIP_FILENAME=${REPO}_${{ needs.calc-version.outputs.tag }}.zip
-          ZIP_PATH=$(pwd)/output/${ZIP_FILENAME}
+          ZIP_FILENAME="${REPO}_${{ needs.calc-version.outputs.tag }}.zip"
+          ZIP_PATH="$(pwd)/output/${ZIP_FILENAME}"
           cd output
-          zip -r ${ZIP_PATH} ./*
+          zip -r "${ZIP_PATH}" ./*
           echo "zip-path=${ZIP_PATH}" >> "$GITHUB_OUTPUT"
           echo "zip-filename=${ZIP_FILENAME}" >> "$GITHUB_OUTPUT"
 

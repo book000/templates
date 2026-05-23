@@ -42,9 +42,9 @@ jobs:
         run: |
           # Use printf to safely handle the input without shell injection
           DIRECTORYS=$(printf '%s' "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
-          echo "directorys=$DIRECTORYS" >> ""$GITHUB_OUTPUT""
+          echo "directorys=$DIRECTORYS" >> "$GITHUB_OUTPUT"
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
-          echo "disabled-jobs=$DISABLED_JOBS" >> ""$GITHUB_OUTPUT""
+          echo "disabled-jobs=$DISABLED_JOBS" >> "$GITHUB_OUTPUT"
 
   node-ci:
     runs-on: ubuntu-latest

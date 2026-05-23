@@ -40,9 +40,9 @@ jobs:
         run: |
           # Use printf to safely handle the input without shell injection
           DIRECTORYS=$(printf '%s' "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
-          echo "directorys=$DIRECTORYS" >> ""$GITHUB_OUTPUT""
+          echo "directorys=$DIRECTORYS" >> "$GITHUB_OUTPUT"
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
-          echo "disabled-jobs=$DISABLED_JOBS" >> ""$GITHUB_OUTPUT""
+          echo "disabled-jobs=$DISABLED_JOBS" >> "$GITHUB_OUTPUT"
 
   node-ci:
     runs-on: ubuntu-latest
@@ -100,20 +100,24 @@ jobs:
           echo "lint: $lint"
           echo "test: $test"
 
-          echo "compile=$compile" >> "$GITHUB_OUTPUT"
-          echo "build=$build" >> "$GITHUB_OUTPUT"
-          echo "generate=$generate" >> "$GITHUB_OUTPUT"
-          echo "package=$package" >> "$GITHUB_OUTPUT"
-          echo "lint=$lint" >> "$GITHUB_OUTPUT"
-          echo "test=$test" >> "$GITHUB_OUTPUT"
+          {
+            echo "compile=$compile"
+            echo "build=$build"
+            echo "generate=$generate"
+            echo "package=$package"
+            echo "lint=$lint"
+            echo "test=$test"
+          } >> "$GITHUB_OUTPUT"
 
-          echo "disabled-compile=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["compile"])')" >> "$GITHUB_OUTPUT"
-          echo "disabled-build=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["build"])')" >> "$GITHUB_OUTPUT"
-          echo "disabled-generate=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["generate"])')" >> "$GITHUB_OUTPUT"
-          echo "disabled-package=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["package"])')" >> "$GITHUB_OUTPUT"
-          echo "disabled-lint=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["lint"])')" >> "$GITHUB_OUTPUT"
-          echo "disabled-test=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["test"])')" >> "$GITHUB_OUTPUT"
-          echo "disabled-depcheck=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["depcheck"])')" >> "$GITHUB_OUTPUT"
+          {
+            echo "disabled-compile=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["compile"])')"
+            echo "disabled-build=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["build"])')"
+            echo "disabled-generate=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["generate"])')"
+            echo "disabled-package=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["package"])')"
+            echo "disabled-lint=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["lint"])')"
+            echo "disabled-test=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["test"])')"
+            echo "disabled-depcheck=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["depcheck"])')"
+          } >> "$GITHUB_OUTPUT"
 
       - name: 📂 Cache node_modules
         uses: actions/cache@v5
@@ -169,7 +173,7 @@ jobs:
         run: |
           IS_DIRECTORY=$(test -d dist && echo true || echo false)
           IS_SYMLINK=$(test -L dist && echo true || echo false)
-          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> ""$GITHUB_OUTPUT""
+          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: 📦 Upload dist artifact
         if: steps.check-dist.outputs.exists == 'true'
@@ -183,7 +187,7 @@ jobs:
         run: |
           IS_DIRECTORY=$(test -d output && echo true || echo false)
           IS_SYMLINK=$(test -L output && echo true || echo false)
-          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> ""$GITHUB_OUTPUT""
+          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: 📦 Upload output artifact
         if: steps.check-output.outputs.exists == 'true'
