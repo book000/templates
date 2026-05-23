@@ -433,11 +433,11 @@ jobs:
       - name: 📦 Create zip
         id: create-zip
         run: |
-          REPO="${GITHUB_REPOSITORY#${GITHUB_REPOSITORY_OWNER}/}"
-          ZIP_FILENAME=${REPO}_${{ needs.calc-version.outputs.tag }}.zip
-          ZIP_PATH=$(pwd)/output/${ZIP_FILENAME}
+          REPO="${GITHUB_REPOSITORY#"${GITHUB_REPOSITORY_OWNER}/"}"
+          ZIP_FILENAME="${REPO}_${{ needs.calc-version.outputs.tag }}.zip"
+          ZIP_PATH="$(pwd)/output/${ZIP_FILENAME}"
           cd output
-          zip -r ${ZIP_PATH} ./*
+          zip -r "${ZIP_PATH}" ./*
           echo "zip-path=${ZIP_PATH}" >> "$GITHUB_OUTPUT"
           echo "zip-filename=${ZIP_FILENAME}" >> "$GITHUB_OUTPUT"
 
