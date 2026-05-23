@@ -40,9 +40,9 @@ jobs:
         run: |
           # Use printf to safely handle the input without shell injection
           DIRECTORYS=$(printf '%s' "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
-          echo "directorys=$DIRECTORYS" >> ""$GITHUB_OUTPUT""
+          echo "directorys=$DIRECTORYS" >> "$GITHUB_OUTPUT"
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
-          echo "disabled-jobs=$DISABLED_JOBS" >> ""$GITHUB_OUTPUT""
+          echo "disabled-jobs=$DISABLED_JOBS" >> "$GITHUB_OUTPUT"
 
   node-ci:
     runs-on: ubuntu-latest
@@ -169,7 +169,7 @@ jobs:
         run: |
           IS_DIRECTORY=$(test -d dist && echo true || echo false)
           IS_SYMLINK=$(test -L dist && echo true || echo false)
-          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> ""$GITHUB_OUTPUT""
+          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: 📦 Upload dist artifact
         if: steps.check-dist.outputs.exists == 'true'
@@ -183,7 +183,7 @@ jobs:
         run: |
           IS_DIRECTORY=$(test -d output && echo true || echo false)
           IS_SYMLINK=$(test -L output && echo true || echo false)
-          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> ""$GITHUB_OUTPUT""
+          echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: 📦 Upload output artifact
         if: steps.check-output.outputs.exists == 'true'
