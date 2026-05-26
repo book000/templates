@@ -9,7 +9,7 @@
     "build": "echo 'Build completed'"
   },
   "dependencies": {
-    "date-fns": "4.2.1"
+    "date-fns": "4.3.0"
   },
   "devDependencies": {},
   "author": "test",
