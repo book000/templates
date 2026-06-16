@@ -11,12 +11,11 @@ RUN apk update && \
   echo "Asia/Tokyo" > /etc/timezone && \
   apk del tzdata && \
   npm install -g corepack@latest && \
-  pnpm approve-builds && \
   corepack enable
 
 WORKDIR /app
 
-COPY pnpm-lock.yaml ./
+COPY pnpm-lock.yaml package.json ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 
@@ -26,8 +25,7 @@ RUN chmod +x entrypoint.sh
 COPY package.json tsconfig.json ./
 COPY src src
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline && \
-  pnpm approve-builds
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
 
 ENV NODE_ENV=production
 
