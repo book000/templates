@@ -231,12 +231,15 @@ $tsconfig.compilerOptions.types = @($tsconfig.compilerOptions.types)
 $tsconfig.compilerOptions.lib   = @($tsconfig.compilerOptions.lib)
 
 # モジュール形式を設定
+# CJS 既定: module=commonjs + moduleResolution=node16（bundler は ESM でのみ有効）
+# ESM 選択時: module=es2015 + moduleResolution=bundler（tsx + bundler 解決で拡張子なし import を許可）
 if ($UseESM) {
   $tsconfig.compilerOptions.module = 'es2015'
-  Write-Host '  module: es2015 (ESM)' -ForegroundColor Gray
+  $tsconfig.compilerOptions.moduleResolution = 'bundler'
+  Write-Host '  module: es2015, moduleResolution: bundler (ESM)' -ForegroundColor Gray
 }
 else {
-  Write-Host '  module: commonjs (CJS)' -ForegroundColor Gray
+  Write-Host '  module: commonjs, moduleResolution: node16 (CJS)' -ForegroundColor Gray
 }
 
 # test 選択時: types に "jest" を追加
@@ -325,9 +328,10 @@ Write-Host '  取得: .github/workflows/nodejs-ci-pnpm.yml' -ForegroundColor Gra
 # docker.yml（Dockerfile 選択時）
 if ($UseDockerfile) {
   $dockerContent = (Invoke-WebRequest -Uri "$TEMPLATES_BASE_URL/workflows/docker.yml" -UseBasicParsing).Content
-  $imageRef = "$OrgName/$ProjectName"
+  # GHCR の image path はリポジトリ名に合わせる（npm パッケージ名 $ProjectName とは独立）
+  $imageRef = "$OrgName/$Repository"
   $dockerContent = $dockerContent.Replace('tomacheese/twitter-dm-memo', $imageRef)
-  $dockerContent = $dockerContent.Replace('packageName: "twitter-dm-memo"', "packageName: `"$ProjectName`"")
+  $dockerContent = $dockerContent.Replace('packageName: "twitter-dm-memo"', "packageName: `"$Repository`"")
   $dockerContent | Set-Content '.github/workflows/docker.yml' -Encoding UTF8
   Write-Host '  取得: .github/workflows/docker.yml' -ForegroundColor Gray
 }
@@ -455,7 +459,7 @@ if ($UseTest) {
       preset                  = 'ts-jest/presets/default-esm'
       extensionsToTreatAsEsm  = @('.ts')
       transform               = [ordered]@{
-        '^.+\\.tsx?$' = @('ts-jest', [ordered]@{ useESM = $true })
+        '^.+\.tsx?$' = @('ts-jest', [ordered]@{ useESM = $true })
       }
     }
   }

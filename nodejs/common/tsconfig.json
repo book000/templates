@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "commonjs",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node16",
     "lib": ["ESNext", "esnext.AsyncIterable"],
     "outDir": "./dist",
     "removeComments": true,
