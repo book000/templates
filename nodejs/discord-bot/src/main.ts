@@ -1,21 +1,33 @@
 import { Client, GatewayIntentBits } from 'discord.js'
-import { readFileSync } from 'node:fs'
+import { ConfigFramework } from '@book000/node-utils'
 import { ConfigInterface } from './config'
 import { Discord } from './discord'
 
 /**
- * 設定ファイルを読み込む
+ * 設定フレームワーク実装
  */
-function loadConfig(path: string): ConfigInterface {
-  const raw = readFileSync(path, 'utf8')
-  return JSON.parse(raw) as ConfigInterface
+class Configuration extends ConfigFramework<ConfigInterface> {
+  protected validates(): Record<string, (config: ConfigInterface) => boolean> {
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      'token is required': (config) => config.token !== undefined,
+      'token is string': (config) => typeof config.token === 'string',
+      // TODO: バリデーションルールを追加する
+    }
+  }
 }
 
 /**
  * エントリポイント
  */
 async function main(): Promise<void> {
-  const config = loadConfig('./data/config.json')
+  const config = new Configuration('./data/config.json')
+  config.load()
+  if (!config.validate()) {
+    throw new Error(
+      `Configuration validation failed: ${config.getValidateFailures().join(', ')}`
+    )
+  }
 
   const client = new Client({
     intents: [GatewayIntentBits.Guilds],
@@ -28,7 +40,7 @@ async function main(): Promise<void> {
     discord.onReady()
   })
 
-  await client.login(config.token)
+  await client.login(config.get('token'))
 }
 
 main().catch((error: unknown) => {

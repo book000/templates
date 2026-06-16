@@ -1,21 +1,30 @@
-import { readFileSync } from 'node:fs'
+import { ConfigFramework } from '@book000/node-utils'
 import { ConfigInterface } from './config'
 
 /**
- * 設定ファイルを読み込む
+ * 設定フレームワーク実装
  */
-function loadConfig(path: string): ConfigInterface {
-  const raw = readFileSync(path, 'utf8')
-  return JSON.parse(raw) as ConfigInterface
+class Configuration extends ConfigFramework<ConfigInterface> {
+  protected validates(): Record<string, (config: ConfigInterface) => boolean> {
+    return {
+      // TODO: バリデーションルールを追加する
+      // 例: 'someKey is required': (config) => config.someKey !== undefined,
+    }
+  }
 }
 
 /**
  * エントリポイント
  */
 async function main(): Promise<void> {
-  const config = loadConfig('./data/config.json')
-  // TODO: 実装
-  console.log(config)
+  const config = new Configuration('./data/config.json')
+  config.load()
+  if (!config.validate()) {
+    throw new Error(
+      `Configuration validation failed: ${config.getValidateFailures().join(', ')}`
+    )
+  }
+  // TODO: config.get('key') でアクセスして処理を実装する
 }
 
 main().catch((error: unknown) => {

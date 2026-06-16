@@ -1,5 +1,7 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+// fastify-raw-body は生の POST ボディが必要な場合に利用する（Webhook 署名検証など）
+// import fastifyRawBody from 'fastify-raw-body'
 
 /** Fastify インスタンス */
 const fastify = Fastify({
@@ -13,6 +15,9 @@ async function main(): Promise<void> {
   await fastify.register(cors, {
     origin: true,
   })
+
+  // fastify-raw-body を使う場合は以下を有効にする
+  // await fastify.register(fastifyRawBody)
 
   fastify.get('/', async (_request, _reply) => {
     return { status: 'ok' }

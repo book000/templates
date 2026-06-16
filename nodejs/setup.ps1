@@ -106,6 +106,21 @@ function Prompt-Input {
   }
 }
 
+<#
+.SYNOPSIS
+  template.json のプロパティに安全にアクセスする（StrictMode 対応）
+#>
+function Get-TemplateProperty {
+  param(
+    [PSCustomObject]$Template,
+    [string]$PropertyName,
+    $DefaultValue = $null
+  )
+  $prop = $Template.PSObject.Properties[$PropertyName]
+  if ($null -eq $prop) { return $DefaultValue }
+  return $prop.Value
+}
+
 # -------------------------------------------------------------------
 # 前提チェック
 # -------------------------------------------------------------------
@@ -128,7 +143,16 @@ if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
 # 対話入力フェーズ
 # -------------------------------------------------------------------
 
-$ProjectName = Prompt-Input 'プロジェクト名 (例: my-app)'
+# プロジェクト名（npm パッケージ名規則のバリデーションあり）
+$ProjectName = ''
+do {
+  $ProjectName = Prompt-Input 'プロジェクト名 (例: my-app)'
+  if ($ProjectName -cnotmatch '^[a-z0-9][a-z0-9\-_\.]*$' -or $ProjectName.Length -gt 214) {
+    Write-Host '  プロジェクト名は小文字英数字・ハイフン・アンダースコア・ドットのみ使用できます。' -ForegroundColor Yellow
+    $ProjectName = ''
+  }
+} while ([string]::IsNullOrEmpty($ProjectName))
+
 $OrgName = Prompt-Input 'GitHub 組織 / ユーザー名' 'book000'
 $Repository = Prompt-Input 'リポジトリ名' $ProjectName
 $Description = Prompt-Input 'プロジェクトの説明'
@@ -162,6 +186,23 @@ $UseTest = Prompt-YesNo 'テスト (Jest) を追加しますか？' $false
 $UseDockerfile = Prompt-YesNo 'Dockerfile を追加しますか？' $false
 $IgnoreDataDir = Prompt-YesNo 'data/ ディレクトリを .gitignore に追加しますか？' $false
 $UseAddReviewer = Prompt-YesNo 'add-reviewer ワークフローを追加しますか？' $false
+
+# -------------------------------------------------------------------
+# 既存ファイルの上書き確認
+# -------------------------------------------------------------------
+
+$existingFiles = @('package.json', 'tsconfig.json', 'src')
+$hasExisting = $existingFiles | Where-Object { Test-Path $_ }
+if ($hasExisting) {
+  Write-Host ''
+  Write-Host '以下のファイル / ディレクトリが既に存在します:' -ForegroundColor Yellow
+  $hasExisting | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+  $overwrite = Prompt-YesNo '上書きして続行しますか？' $false
+  if (-not $overwrite) {
+    Write-Host 'セットアップを中断しました。' -ForegroundColor Red
+    exit 0
+  }
+}
 
 Write-Host ''
 Write-Host 'セットアップを開始します...' -ForegroundColor Green
@@ -206,16 +247,19 @@ foreach ($file in $commonFiles) {
 
 Write-Host '[3/9] バリアントファイルを取得しています...' -ForegroundColor Cyan
 
-foreach ($srcFile in $templateConfig.src) {
+$templateSrc = Get-TemplateProperty -Template $templateConfig -PropertyName 'src' -DefaultValue @()
+foreach ($srcFile in $templateSrc) {
   $url = "$NODEJS_BASE_URL/$Variant/$srcFile"
   Fetch-File -Url $url -Destination $srcFile
   Write-Host "  取得: $srcFile" -ForegroundColor Gray
 }
 
-# Dockerfile（選択時のみ）
+# Dockerfile + entrypoint.sh（選択時のみ）
 if ($UseDockerfile) {
   Fetch-File -Url "$NODEJS_BASE_URL/common/Dockerfile" -Destination 'Dockerfile'
   Write-Host '  取得: Dockerfile' -ForegroundColor Gray
+  Fetch-File -Url "$NODEJS_BASE_URL/common/entrypoint.sh" -Destination 'entrypoint.sh'
+  Write-Host '  取得: entrypoint.sh' -ForegroundColor Gray
 }
 
 # -------------------------------------------------------------------
@@ -257,7 +301,7 @@ $tsconfig | ConvertTo-Json -Depth 10 | Set-Content 'tsconfig.json' -Encoding UTF
 # .gitignore の生成
 # -------------------------------------------------------------------
 
-Write-Host '[5/9] .gitignore を生成しています...' -ForegroundColor Cyan
+Write-Host '[5/9] .gitignore / .node-version を生成しています...' -ForegroundColor Cyan
 
 $gitignoreContent = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/github/gitignore/main/Node.gitignore' -UseBasicParsing).Content
 
@@ -280,10 +324,6 @@ data/
 }
 
 $gitignoreContent | Set-Content '.gitignore' -Encoding UTF8
-
-# -------------------------------------------------------------------
-# .node-version の生成
-# -------------------------------------------------------------------
 
 $nodeVersion = (node --version).TrimStart('v')
 # BOM なし UTF-8 で書き込む（PS5.1 の Set-Content -Encoding UTF8 は BOM を付与するため）
@@ -371,8 +411,9 @@ if ($UseTest) {
 }
 
 # バリアント固有スクリプト
-if ($templateConfig.scripts) {
-  $templateConfig.scripts.PSObject.Properties | ForEach-Object {
+$variantScripts = Get-TemplateProperty -Template $templateConfig -PropertyName 'scripts'
+if ($variantScripts) {
+  $variantScripts.PSObject.Properties | ForEach-Object {
     $scripts[$_.Name] = $_.Value
   }
 }
@@ -435,8 +476,9 @@ if ($UseTest) {
 
 # バリアント固有 devDependencies
 $variantDevDeps = @()
-if ($templateConfig.devDependencies -and $templateConfig.devDependencies.Count -gt 0) {
-  $variantDevDeps = [string[]]$templateConfig.devDependencies
+$templateDevDeps = Get-TemplateProperty -Template $templateConfig -PropertyName 'devDependencies' -DefaultValue @()
+if ($templateDevDeps.Count -gt 0) {
+  $variantDevDeps = [string[]]$templateDevDeps
 }
 
 $allDevDeps = $commonDevDeps + $testDevDeps + $variantDevDeps
@@ -479,16 +521,15 @@ if ($UseTest) {
 # .depcheckrc.json の更新
 # -------------------------------------------------------------------
 
-if (($templateConfig.depcheckIgnore -and $templateConfig.depcheckIgnore.Count -gt 0) -or $UseTest) {
+$templateDepcheckIgnore = Get-TemplateProperty -Template $templateConfig -PropertyName 'depcheckIgnore' -DefaultValue @()
+if ($templateDepcheckIgnore.Count -gt 0 -or $UseTest) {
   $depcheck = Get-Content '.depcheckrc.json' -Raw | ConvertFrom-Json
   $existingIgnores = if ($depcheck.ignores) { @($depcheck.ignores) } else { @() }
 
   # バリアント固有の無視パッケージを追加
-  if ($templateConfig.depcheckIgnore) {
-    foreach ($item in $templateConfig.depcheckIgnore) {
-      if ($existingIgnores -notcontains $item) {
-        $existingIgnores += $item
-      }
+  foreach ($item in $templateDepcheckIgnore) {
+    if ($existingIgnores -notcontains $item) {
+      $existingIgnores += $item
     }
   }
 
@@ -505,7 +546,7 @@ if (($templateConfig.depcheckIgnore -and $templateConfig.depcheckIgnore.Count -g
 # schema/ ディレクトリの作成（configSchema ありのバリアント）
 # -------------------------------------------------------------------
 
-if ($templateConfig.configSchema) {
+if (Get-TemplateProperty -Template $templateConfig -PropertyName 'configSchema' -DefaultValue $false) {
   New-Item -ItemType Directory -Path 'schema' -Force | Out-Null
   Write-Host '  schema/ ディレクトリを作成しました' -ForegroundColor Gray
 }
@@ -544,7 +585,7 @@ Write-Host ''
 Write-Host '次のステップ:' -ForegroundColor Yellow
 Write-Host '  1. git init && git add . && git commit -m "feat: 初期コミット"'
 Write-Host '  2. pnpm run lint        # lint 確認'
-if ($templateConfig.configSchema) {
+if (Get-TemplateProperty -Template $templateConfig -PropertyName 'configSchema' -DefaultValue $false) {
   Write-Host '  3. pnpm run generate-schema  # スキーマ生成'
 }
 if ($UseTest) {

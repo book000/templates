@@ -1,4 +1,5 @@
 import { Client } from 'discord.js'
+import { ConfigFramework } from '@book000/node-utils'
 import { ConfigInterface } from './config'
 
 /**
@@ -6,9 +7,9 @@ import { ConfigInterface } from './config'
  */
 export class Discord {
   private readonly client: Client
-  private readonly config: ConfigInterface
+  private readonly config: ConfigFramework<ConfigInterface>
 
-  constructor(client: Client, config: ConfigInterface) {
+  constructor(client: Client, config: ConfigFramework<ConfigInterface>) {
     this.client = client
     this.config = config
   }
@@ -19,5 +20,6 @@ export class Discord {
   public onReady(): void {
     console.log('Discord bot is ready')
     // TODO: 実装
+    // 設定値へのアクセス例: this.config.get('token')
   }
 }
