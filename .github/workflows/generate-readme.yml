@@ -21,6 +21,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+          ref: ${{ github.ref }}
 
       - name: Install dependencies
         run: |
@@ -73,8 +74,8 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add README.md
           if git commit -m "feat: Update README.md [skip ci]"; then
-            git pull --rebase origin master
-            git push origin HEAD:master
+            git pull --rebase origin "$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
           fi
 
       - name: Upload artifact
