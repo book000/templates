@@ -44,8 +44,7 @@
       "matchPackageNames": ["fastify", "fastify-raw-body", "@fastify/**"]
     },
     {
-      "matchPackagePatterns": ["*"],
-      "excludePackagePatterns": ["^@book000/"],
+      "matchPackageNames": ["!/^@book000//"],
       "stabilityDays": 3
     },
     {
