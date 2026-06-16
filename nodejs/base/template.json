@@ -1,0 +1,7 @@
+{
+  "configSchema": false,
+  "devDependencies": [],
+  "scripts": {},
+  "depcheckIgnore": [],
+  "src": ["src/main.ts"]
+}

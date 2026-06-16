@@ -1,0 +1,4 @@
+{
+  "required": ["name", "version", "description"],
+  "sortPackageScripts": true
+}

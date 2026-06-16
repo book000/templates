@@ -1,0 +1,7 @@
+{
+  "configSchema": false,
+  "devDependencies": ["fastify", "@fastify/cors", "fastify-raw-body"],
+  "scripts": {},
+  "depcheckIgnore": [],
+  "src": ["src/main.ts"]
+}

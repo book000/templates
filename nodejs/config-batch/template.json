@@ -1,0 +1,9 @@
+{
+  "configSchema": true,
+  "devDependencies": ["typescript-json-schema"],
+  "scripts": {
+    "generate-schema": "typescript-json-schema --required src/config.ts ConfigInterface -o schema/Configuration.json"
+  },
+  "depcheckIgnore": ["typescript-json-schema"],
+  "src": ["src/main.ts", "src/config.ts"]
+}
