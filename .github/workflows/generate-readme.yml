@@ -34,7 +34,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add README.md
           if git commit -m "feat: Update README.md"; then
-            git push
+            git push || true
           fi
 
       - name: Upload artifact
