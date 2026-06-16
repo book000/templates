@@ -55,6 +55,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.
 |  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` | `` |
+|  | `directory` | Working directory containing pom.xml | `string` | `.` |
 
 ### nodejs-ci-pnpm.yml
 
