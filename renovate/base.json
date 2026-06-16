@@ -47,6 +47,16 @@
       "matchPackagePatterns": ["*"],
       "excludePackagePatterns": ["^@book000/"],
       "stabilityDays": 3
+    },
+    {
+      "groupName": "Node.js",
+      "matchManagers": ["node-version"],
+      "matchPackageNames": ["node"]
+    },
+    {
+      "groupName": "Node.js",
+      "matchManagers": ["devcontainer"],
+      "matchPackageNames": ["mcr.microsoft.com/devcontainers/typescript-node"]
     }
   ]
 }
