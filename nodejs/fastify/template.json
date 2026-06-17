@@ -1,6 +1,7 @@
 {
   "configSchema": false,
-  "devDependencies": ["fastify", "@fastify/cors", "fastify-raw-body"],
+  "dependencies": ["fastify", "@fastify/cors"],
+  "devDependencies": ["fastify-raw-body"],
   "scripts": {},
   "depcheckIgnore": ["fastify-raw-body"],
   "src": ["src/main.ts"]

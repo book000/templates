@@ -9,6 +9,10 @@ export class Discord {
   private readonly client: Client
   private readonly config: ConfigFramework<ConfigInterface>
 
+  /**
+   * @param client - Discord クライアント
+   * @param config - 設定フレームワーク
+   */
   constructor(client: Client, config: ConfigFramework<ConfigInterface>) {
     this.client = client
     this.config = config

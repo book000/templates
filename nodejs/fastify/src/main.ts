@@ -13,7 +13,8 @@ const fastify = Fastify({
  */
 async function main(): Promise<void> {
   await fastify.register(cors, {
-    origin: true,
+    // TODO: 本番環境では許可するオリジンを明示的に設定すること（例: origin: 'https://example.com'）
+    origin: false,
   })
 
   // fastify-raw-body を使う場合は以下を有効にする

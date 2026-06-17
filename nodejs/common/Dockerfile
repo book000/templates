@@ -21,7 +21,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-COPY package.json tsconfig.json ./
+COPY tsconfig.json ./
 COPY src src
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline

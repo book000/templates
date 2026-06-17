@@ -108,6 +108,23 @@ function Prompt-Input {
 
 <#
 .SYNOPSIS
+  BOM なし UTF-8 でファイルに書き込む
+.DESCRIPTION
+  PS5.1 の Set-Content -Encoding UTF8 は BOM (U+FEFF) 付き UTF-8 で書き込むため、
+  JSON / YAML / シェルスクリプト等では [System.IO.File]::WriteAllText を使う。
+#>
+function Write-Utf8NoBom {
+  param(
+    [string]$Path,
+    [string]$Content
+  )
+  $encoding = New-Object System.Text.UTF8Encoding $false
+  $absolutePath = Join-Path (Get-Location).Path $Path
+  [System.IO.File]::WriteAllText($absolutePath, $Content, $encoding)
+}
+
+<#
+.SYNOPSIS
   template.json のプロパティに安全にアクセスする（StrictMode 対応）
 #>
 function Get-TemplateProperty {
@@ -153,11 +170,35 @@ do {
   }
 } while ([string]::IsNullOrEmpty($ProjectName))
 
-$OrgName = Prompt-Input 'GitHub 組織 / ユーザー名' 'book000'
-$Repository = Prompt-Input 'リポジトリ名' $ProjectName
+$OrgName = ''
+do {
+  $OrgName = Prompt-Input 'GitHub 組織 / ユーザー名' 'book000'
+  if ($OrgName -cnotmatch '^[a-zA-Z0-9][a-zA-Z0-9\-\.]*$') {
+    Write-Host '  組織 / ユーザー名は英数字・ハイフン・ドットのみ使用できます。' -ForegroundColor Yellow
+    $OrgName = ''
+  }
+} while ([string]::IsNullOrEmpty($OrgName))
+
+$Repository = ''
+do {
+  $Repository = Prompt-Input 'リポジトリ名' $ProjectName
+  if ($Repository -cnotmatch '^[a-zA-Z0-9_][a-zA-Z0-9\-_\.]*$') {
+    Write-Host '  リポジトリ名は英数字・ハイフン・アンダースコア・ドットのみ使用できます。' -ForegroundColor Yellow
+    $Repository = ''
+  }
+} while ([string]::IsNullOrEmpty($Repository))
+
 $Description = Prompt-Input 'プロジェクトの説明'
 $Author = Prompt-Input '作者名' $OrgName
-$LicenseType = Prompt-Input 'ライセンス' 'MIT'
+
+$LicenseType = ''
+do {
+  $LicenseType = Prompt-Input 'ライセンス' 'MIT'
+  if ($LicenseType -cnotmatch '^[a-zA-Z0-9.\-]+$') {
+    Write-Host '  ライセンス識別子は英数字・ドット・ハイフンのみ使用できます（例: MIT, Apache-2.0）。' -ForegroundColor Yellow
+    $LicenseType = ''
+  }
+} while ([string]::IsNullOrEmpty($LicenseType))
 $Homepage = Prompt-Input 'ホームページ URL (任意・Enter でスキップ)' ''
 $BugUrl = Prompt-Input 'バグ報告 URL' "https://github.com/$OrgName/$Repository/issues"
 $RepositoryUrl = "https://github.com/$OrgName/$Repository"
@@ -295,7 +336,7 @@ if ($UseTest) {
   }
 }
 
-$tsconfig | ConvertTo-Json -Depth 10 | Set-Content 'tsconfig.json' -Encoding UTF8
+Write-Utf8NoBom -Path 'tsconfig.json' -Content ($tsconfig | ConvertTo-Json -Depth 10)
 
 # -------------------------------------------------------------------
 # .gitignore の生成
@@ -323,12 +364,10 @@ data/
 '@
 }
 
-$gitignoreContent | Set-Content '.gitignore' -Encoding UTF8
+Write-Utf8NoBom -Path '.gitignore' -Content $gitignoreContent
 
 $nodeVersion = (node --version).TrimStart('v')
-# BOM なし UTF-8 で書き込む（PS5.1 の Set-Content -Encoding UTF8 は BOM を付与するため）
-$utf8NoBom = New-Object System.Text.UTF8Encoding $false
-[System.IO.File]::WriteAllText((Join-Path (Get-Location).Path '.node-version'), $nodeVersion, $utf8NoBom)
+Write-Utf8NoBom -Path '.node-version' -Content $nodeVersion
 Write-Host "  .node-version: $nodeVersion" -ForegroundColor Gray
 
 # -------------------------------------------------------------------
@@ -344,7 +383,7 @@ try {
   $licenseText = $licenseResponse.body
   $licenseText = $licenseText -replace '\[year\]', $year
   $licenseText = $licenseText -replace '\[fullname\]', $Author
-  $licenseText | Set-Content 'LICENSE' -Encoding UTF8
+  Write-Utf8NoBom -Path 'LICENSE' -Content $licenseText
   Write-Host "  $LicenseType ライセンスを生成しました" -ForegroundColor Gray
 }
 catch {
@@ -372,7 +411,11 @@ if ($UseDockerfile) {
   $imageRef = "$OrgName/$Repository"
   $dockerContent = $dockerContent.Replace('tomacheese/twitter-dm-memo', $imageRef)
   $dockerContent = $dockerContent.Replace('packageName: "twitter-dm-memo"', "packageName: `"$Repository`"")
-  $dockerContent | Set-Content '.github/workflows/docker.yml' -Encoding UTF8
+  # 置換が実際に行われたか確認（テンプレート側のプレースホルダーが変更された場合の検知）
+  if (-not $dockerContent.Contains($imageRef)) {
+    Write-Host '  警告: docker.yml のイメージ名置換に失敗した可能性があります。手動で確認してください。' -ForegroundColor Yellow
+  }
+  Write-Utf8NoBom -Path '.github/workflows/docker.yml' -Content $dockerContent
   Write-Host '  取得: .github/workflows/docker.yml' -ForegroundColor Gray
 }
 
@@ -446,7 +489,7 @@ if ($UseESM) {
   $packageJson['type'] = 'module'
 }
 
-$packageJson | ConvertTo-Json -Depth 10 | Set-Content 'package.json' -Encoding UTF8
+Write-Utf8NoBom -Path 'package.json' -Content ($packageJson | ConvertTo-Json -Depth 10)
 
 # -------------------------------------------------------------------
 # 依存パッケージのインストール（pnpm add）
@@ -486,6 +529,14 @@ $allDevDeps = $commonDevDeps + $testDevDeps + $variantDevDeps
 Write-Host "  pnpm add -D -E ($($allDevDeps.Count) パッケージ)..." -ForegroundColor Gray
 pnpm add -D -E $allDevDeps
 
+# バリアント固有 dependencies（ランタイム依存）
+$templateRuntimeDeps = Get-TemplateProperty -Template $templateConfig -PropertyName 'dependencies' -DefaultValue @()
+if ($templateRuntimeDeps.Count -gt 0) {
+  $variantRuntimeDeps = [string[]]$templateRuntimeDeps
+  Write-Host "  pnpm add -E ($($variantRuntimeDeps.Count) ランタイムパッケージ)..." -ForegroundColor Gray
+  pnpm add -E $variantRuntimeDeps
+}
+
 # -------------------------------------------------------------------
 # Jest 設定の追記（test 選択時）
 # -------------------------------------------------------------------
@@ -514,7 +565,7 @@ if ($UseTest) {
   }
 
   Add-Member -InputObject $pkg -MemberType NoteProperty -Name 'jest' -Value $jestConfig -Force
-  $pkg | ConvertTo-Json -Depth 10 | Set-Content 'package.json' -Encoding UTF8
+  Write-Utf8NoBom -Path 'package.json' -Content ($pkg | ConvertTo-Json -Depth 10)
 }
 
 # -------------------------------------------------------------------
@@ -539,7 +590,7 @@ if ($templateDepcheckIgnore.Count -gt 0 -or $UseTest) {
   }
 
   $depcheck.ignores = $existingIgnores
-  $depcheck | ConvertTo-Json -Depth 10 | Set-Content '.depcheckrc.json' -Encoding UTF8
+  Write-Utf8NoBom -Path '.depcheckrc.json' -Content ($depcheck | ConvertTo-Json -Depth 10)
 }
 
 # -------------------------------------------------------------------
