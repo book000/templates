@@ -1,6 +1,6 @@
 {
   "configSchema": true,
-  "dependencies": ["discord.js"],
+  "dependencies": ["discord.js", "@book000/node-utils"],
   "devDependencies": ["typescript-json-schema"],
   "scripts": {
     "generate-schema": "typescript-json-schema --required src/config.ts ConfigInterface -o schema/Configuration.json"

@@ -10,9 +10,6 @@
     irm https://raw.githubusercontent.com/book000/templates/master/nodejs/setup.ps1 | iex
 #>
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-
 # テンプレートのベース URL
 $TEMPLATES_BASE_URL = 'https://raw.githubusercontent.com/book000/templates/master'
 $NODEJS_BASE_URL = "$TEMPLATES_BASE_URL/nodejs"
@@ -139,6 +136,15 @@ function Get-TemplateProperty {
 }
 
 # -------------------------------------------------------------------
+# メイン処理
+# 関数化することで irm | iex 実行時に Set-StrictMode / $ErrorActionPreference が
+# ユーザーの PS セッションに残留するのを防ぐ
+# -------------------------------------------------------------------
+function Invoke-NodejsProjectSetup {
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# -------------------------------------------------------------------
 # 前提チェック
 # -------------------------------------------------------------------
 
@@ -148,12 +154,14 @@ Write-Host ''
 
 # node の存在確認
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-  Write-Error 'node が見つかりません。Node.js をインストールしてください。'
+  Write-Host 'Error: node が見つかりません。Node.js をインストールしてください。' -ForegroundColor Red
+  return
 }
 
 # pnpm の存在確認
 if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
-  Write-Error 'pnpm が見つかりません。corepack enable または npm install -g pnpm でインストールしてください。'
+  Write-Host 'Error: pnpm が見つかりません。corepack enable または npm install -g pnpm でインストールしてください。' -ForegroundColor Red
+  return
 }
 
 # -------------------------------------------------------------------
@@ -241,7 +249,7 @@ if ($hasExisting) {
   $overwrite = Prompt-YesNo '上書きして続行しますか？' $false
   if (-not $overwrite) {
     Write-Host 'セットアップを中断しました。' -ForegroundColor Red
-    exit 0
+    return
   }
 }
 
@@ -503,7 +511,6 @@ $commonDevDeps = @(
   'prettier',
   'eslint',
   'run-z',
-  '@book000/node-utils',
   '@book000/eslint-config'
 )
 
@@ -643,3 +650,7 @@ if ($UseTest) {
   Write-Host '  3. pnpm run test        # テスト実行'
 }
 Write-Host ''
+}
+
+# エントリポイント
+Invoke-NodejsProjectSetup
