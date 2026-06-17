@@ -354,12 +354,12 @@ Write-Host '[5/9] .gitignore / .node-version を生成しています...' -Foreg
 
 $gitignoreContent = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/github/gitignore/main/Node.gitignore' -UseBasicParsing).Content
 
-# pnpm 追記
+# pnpm 追記（pnpm-lock.yaml はコミット対象のためここには含めない）
 $gitignoreContent += @'
 
 
 # pnpm
-pnpm-lock.yaml
+pnpm-debug.log*
 '@
 
 # data/ ディレクトリ（選択時）
@@ -416,7 +416,8 @@ Write-Host '  取得: .github/workflows/nodejs-ci-pnpm.yml' -ForegroundColor Gra
 if ($UseDockerfile) {
   $dockerContent = (Invoke-WebRequest -Uri "$TEMPLATES_BASE_URL/workflows/docker.yml" -UseBasicParsing).Content
   # GHCR の image path はリポジトリ名に合わせる（npm パッケージ名 $ProjectName とは独立）
-  $imageRef = "$OrgName/$Repository"
+  # GHCR イメージ名は小文字必須
+  $imageRef = "$($OrgName.ToLower())/$($Repository.ToLower())"
   $dockerContent = $dockerContent.Replace('tomacheese/twitter-dm-memo', $imageRef)
   $dockerContent = $dockerContent.Replace('packageName: "twitter-dm-memo"', "packageName: `"$Repository`"")
   # 置換が実際に行われたか確認（テンプレート側のプレースホルダーが変更された場合の検知）
@@ -450,7 +451,7 @@ $scripts = [ordered]@{
   'lint'          = 'run-z lint:prettier,lint:eslint,lint:tsc'
   'lint:prettier' = 'prettier --check src'
   'lint:eslint'   = 'eslint . -c eslint.config.mjs'
-  'lint:tsc'      = 'tsc'
+  'lint:tsc'      = 'tsc --noEmit'
   'fix'           = 'run-z fix:prettier fix:eslint'
   'fix:eslint'    = 'eslint . -c eslint.config.mjs --fix'
   'fix:prettier'  = 'prettier --write src'
@@ -471,7 +472,8 @@ if ($variantScripts) {
 
 # package.json オブジェクトを構築
 $packageJson = [ordered]@{
-  name        = "@$OrgName/$ProjectName"
+  # npm スコープ名は小文字必須
+  name        = "@$($OrgName.ToLower())/$ProjectName"
   version     = '1.0.0'
   description = $Description
   license     = $LicenseType
