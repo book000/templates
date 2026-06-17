@@ -478,12 +478,9 @@ if ($UseESM) {
   Add-Member -InputObject $packageJson -MemberType NoteProperty -Name 'jest' -Value $jestConfig -Force
 }
 
-# test を使わない場合: jest 関連を package.json から除去
+# test を使わない場合: scripts と jest config のみ package.json から除去する
+# （devDependencies はこの時点で除去しない — lockfile と一致させて --frozen-lockfile を通すため）
 if (-not $UseTest) {
-  # devDependencies から jest 関連を削除
-  foreach ($dep in @('jest', '@types/jest', 'ts-jest')) {
-    $packageJson.devDependencies.PSObject.Properties.Remove($dep)
-  }
   # scripts から test を削除
   $packageJson.scripts.PSObject.Properties.Remove('test')
   # jest 設定を削除
@@ -492,13 +489,26 @@ if (-not $UseTest) {
 
 Write-Utf8NoBom -Path 'package.json' -Content ($packageJson | ConvertTo-Json -Depth 10)
 
+# バリアントの pnpm-lock.yaml を取得する（CI テスト済みの固定バージョンを使うため）
+# devDependencies は lockfile と完全一致させ、--frozen-lockfile による再現性を保証する。
+# テスト不使用時の jest 関連は install 完了後に pnpm remove で除去する。
+Fetch-File -Url "$NODEJS_BASE_URL/$Variant/pnpm-lock.yaml" -Destination 'pnpm-lock.yaml'
+Write-Host "  CI テスト済みの pnpm-lock.yaml を取得しました" -ForegroundColor Gray
+
 # -------------------------------------------------------------------
-# 依存パッケージのインストール（pnpm install）
-# テスト済みのピン留めバージョンで再現性のあるインストールを行う
+# 依存パッケージのインストール（pnpm install --frozen-lockfile）
+# lockfile を固定することで CI テスト済みバージョンと完全一致する再現性を保証する
 # -------------------------------------------------------------------
 
-Write-Host "  pnpm install（CI テスト済みバージョン）..." -ForegroundColor Gray
-pnpm install
+Write-Host "  pnpm install --frozen-lockfile（CI テスト済みバージョン固定）..." -ForegroundColor Gray
+pnpm install --frozen-lockfile
+
+# test を使わない場合: jest 関連パッケージを除去する
+# （package.json・pnpm-lock.yaml・node_modules を一括更新）
+if (-not $UseTest) {
+  Write-Host "  テスト不使用のため jest 関連パッケージを除去しています..." -ForegroundColor Gray
+  pnpm remove jest "@types/jest" ts-jest
+}
 
 # -------------------------------------------------------------------
 # .depcheckrc.json の更新

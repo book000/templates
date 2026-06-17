@@ -131,10 +131,14 @@ prepare_test_script() {
     -e "s|https://api.github.com/licenses|$mock_base/api-licenses|g" \
     "$REPO_ROOT/nodejs/setup.ps1" > "$tmp_script"
 
-  # --full なしの場合: pnpm install をスキップしてファイル生成確認に集中する
+  # --full なしの場合: pnpm 操作と lockfile 取得をスキップしてファイル生成確認に集中する
   if [[ "$skip_install" == "true" ]]; then
-    # "pnpm install" 行をコメントアウト
-    sed -i 's/^pnpm install$/# [TEST] pnpm install skipped for speed/' "$tmp_script"
+    # "pnpm install --frozen-lockfile" 行をコメントアウト
+    sed -i 's/^pnpm install --frozen-lockfile$/# [TEST] pnpm install skipped for speed/' "$tmp_script"
+    # pnpm-lock.yaml の Fetch-File 行もスキップ（network fetch なしでファイル生成のみ確認）
+    sed -i 's/Fetch-File.*pnpm-lock\.yaml.*/# [TEST] lockfile fetch skipped/' "$tmp_script"
+    # テスト不使用時の "pnpm remove jest ..." 行もスキップ
+    sed -i 's/^pnpm remove jest.*$/# [TEST] pnpm remove skipped for speed/' "$tmp_script"
   fi
 
   echo "$tmp_script"
