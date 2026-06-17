@@ -443,60 +443,41 @@ Write-Host '[8/9] package.json を生成しています...' -ForegroundColor Cya
 # エンジン設定（メジャーバージョン取得）
 $nodeMajor = $nodeVersion.Split('.')[0]
 
-# 共通スクリプト
-$scripts = [ordered]@{
-  'preinstall'    = 'npx only-allow pnpm'
-  'start'         = 'tsx ./src/main.ts'
-  'dev'           = 'tsx watch ./src/main.ts'
-  'lint'          = 'run-z lint:prettier,lint:eslint,lint:tsc'
-  'lint:prettier' = 'prettier --check src'
-  'lint:eslint'   = 'eslint . -c eslint.config.mjs'
-  'lint:tsc'      = 'tsc --noEmit'
-  'fix'           = 'run-z fix:prettier fix:eslint'
-  'fix:eslint'    = 'eslint . -c eslint.config.mjs --fix'
-  'fix:prettier'  = 'prettier --write src'
+# テンプレートの package.json を取得してベースにする
+$packageJsonContent = (Invoke-WebRequest -Uri "$NODEJS_BASE_URL/common/package.json" -UseBasicParsing).Content
+$packageJson = $packageJsonContent | ConvertFrom-Json
+
+# プロジェクト固有の値を上書き
+# npm スコープ名は小文字必須
+$packageJson.name        = "@$($OrgName.ToLower())/$ProjectName"
+$packageJson.description = $Description
+$packageJson.license     = $LicenseType
+$packageJson.author      = $Author
+$packageJson.engines.node = ">=$nodeMajor"
+$packageJson.repository.url = "git+$RepositoryUrl.git"
+$packageJson.bugs.url    = $BugUrl
+
+# homepage（入力ありの場合）
+if ($Homepage) {
+  Add-Member -InputObject $packageJson -MemberType NoteProperty -Name 'homepage' -Value $Homepage -Force
+}
+
+# ESM: type: module を追加
+if ($UseESM) {
+  Add-Member -InputObject $packageJson -MemberType NoteProperty -Name 'type' -Value 'module' -Force
 }
 
 # test スクリプト
 if ($UseTest) {
-  $scripts['test'] = 'jest --runInBand --passWithNoTests --detectOpenHandles --forceExit'
+  $packageJson.scripts | Add-Member -MemberType NoteProperty -Name 'test' -Value 'jest --runInBand --passWithNoTests --detectOpenHandles --forceExit' -Force
 }
 
 # バリアント固有スクリプト
 $variantScripts = Get-TemplateProperty -Template $templateConfig -PropertyName 'scripts'
 if ($variantScripts) {
   $variantScripts.PSObject.Properties | ForEach-Object {
-    $scripts[$_.Name] = $_.Value
+    $packageJson.scripts | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value -Force
   }
-}
-
-# package.json オブジェクトを構築
-$packageJson = [ordered]@{
-  # npm スコープ名は小文字必須
-  name        = "@$($OrgName.ToLower())/$ProjectName"
-  version     = '1.0.0'
-  description = $Description
-  license     = $LicenseType
-  author      = $Author
-  scripts     = $scripts
-  engines     = [ordered]@{ node = ">=$nodeMajor" }
-  repository  = [ordered]@{
-    type = 'git'
-    url  = "git+$RepositoryUrl.git"
-  }
-  bugs        = [ordered]@{
-    url = $BugUrl
-  }
-}
-
-# homepage（入力ありの場合）
-if ($Homepage) {
-  $packageJson['homepage'] = $Homepage
-}
-
-# ESM: type: module を追加
-if ($UseESM) {
-  $packageJson['type'] = 'module'
 }
 
 Write-Utf8NoBom -Path 'package.json' -Content ($packageJson | ConvertTo-Json -Depth 10)
