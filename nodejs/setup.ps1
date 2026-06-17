@@ -296,7 +296,8 @@ foreach ($file in $commonFiles) {
 
 Write-Host '[3/9] バリアントファイルを取得しています...' -ForegroundColor Cyan
 
-$templateSrc = Get-TemplateProperty -Template $templateConfig -PropertyName 'src' -DefaultValue @()
+# 空配列を返す関数は PS pipeline で $null になるため @() でラップして配列を保証する
+$templateSrc = @(Get-TemplateProperty -Template $templateConfig -PropertyName 'src' -DefaultValue @())
 foreach ($srcFile in $templateSrc) {
   $url = "$NODEJS_BASE_URL/$Variant/$srcFile"
   Fetch-File -Url $url -Destination $srcFile
@@ -503,7 +504,8 @@ pnpm install
 # .depcheckrc.json の更新
 # -------------------------------------------------------------------
 
-$templateDepcheckIgnore = Get-TemplateProperty -Template $templateConfig -PropertyName 'depcheckIgnore' -DefaultValue @()
+# 空配列を返す関数は PS pipeline で $null になるため @() でラップして配列を保証する
+$templateDepcheckIgnore = @(Get-TemplateProperty -Template $templateConfig -PropertyName 'depcheckIgnore' -DefaultValue @())
 if ($templateDepcheckIgnore.Count -gt 0 -or $UseTest) {
   $depcheck = Get-Content '.depcheckrc.json' -Raw | ConvertFrom-Json
   $existingIgnores = if ($depcheck.ignores) { @($depcheck.ignores) } else { @() }
