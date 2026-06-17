@@ -3,7 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "customizations": {
     "vscode": {
-      "extensions": ["esbenp.prettier-vscode"]
+      "extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
     }
   }
 }

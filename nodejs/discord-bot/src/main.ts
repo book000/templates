@@ -7,6 +7,9 @@ import { Discord } from './discord'
  * 設定フレームワーク実装
  */
 class Configuration extends ConfigFramework<ConfigInterface> {
+  /**
+   * バリデーションルールを返す
+   */
   protected validates(): Record<string, (config: ConfigInterface) => boolean> {
     return {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
