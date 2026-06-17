@@ -324,15 +324,16 @@ $tsconfig.compilerOptions.types = @($tsconfig.compilerOptions.types)
 $tsconfig.compilerOptions.lib   = @($tsconfig.compilerOptions.lib)
 
 # モジュール形式を設定
-# CJS 既定: module=commonjs + moduleResolution=node16（bundler は ESM でのみ有効）
-# ESM 選択時: module=es2015 + moduleResolution=bundler（tsx + bundler 解決で拡張子なし import を許可）
+# CJS 既定: テンプレートのまま（module=node16 + moduleResolution=node16）
+# ESM 選択時: module=es2015 + moduleResolution=bundler に変更する
+#             （tsx + bundler 解決で拡張子なし import を許可）
 if ($UseESM) {
   $tsconfig.compilerOptions.module = 'es2015'
   $tsconfig.compilerOptions.moduleResolution = 'bundler'
   Write-Host '  module: es2015, moduleResolution: bundler (ESM)' -ForegroundColor Gray
 }
 else {
-  Write-Host '  module: commonjs, moduleResolution: node16 (CJS)' -ForegroundColor Gray
+  Write-Host '  module: node16, moduleResolution: node16 (CJS)' -ForegroundColor Gray
 }
 
 # test 選択時: types に "jest" を追加
@@ -443,120 +444,60 @@ Write-Host '[8/9] package.json を生成しています...' -ForegroundColor Cya
 # エンジン設定（メジャーバージョン取得）
 $nodeMajor = $nodeVersion.Split('.')[0]
 
-# テンプレートの package.json を取得してベースにする
-$packageJsonContent = (Invoke-WebRequest -Uri "$NODEJS_BASE_URL/common/package.json" -UseBasicParsing).Content
+# バリアントの package.json を取得してベースにする。
+# このファイルには CI でテスト済みのピン留めバージョンが含まれている。
+$packageJsonContent = (Invoke-WebRequest -Uri "$NODEJS_BASE_URL/$Variant/package.json" -UseBasicParsing).Content
 $packageJson = $packageJsonContent | ConvertFrom-Json
 
 # プロジェクト固有の値を上書き
 # npm スコープ名は小文字必須
-$packageJson.name        = "@$($OrgName.ToLower())/$ProjectName"
-$packageJson.description = $Description
-$packageJson.license     = $LicenseType
-$packageJson.author      = $Author
-$packageJson.engines.node = ">=$nodeMajor"
-$packageJson.repository.url = "git+$RepositoryUrl.git"
-$packageJson.bugs.url    = $BugUrl
+$packageJson.name             = "@$($OrgName.ToLower())/$ProjectName"
+$packageJson.description      = $Description
+$packageJson.license          = $LicenseType
+$packageJson.author           = $Author
+$packageJson.engines.node     = ">=$nodeMajor"
+$packageJson.repository.url   = "git+$RepositoryUrl.git"
+$packageJson.bugs.url         = $BugUrl
 
 # homepage（入力ありの場合）
 if ($Homepage) {
   Add-Member -InputObject $packageJson -MemberType NoteProperty -Name 'homepage' -Value $Homepage -Force
 }
 
-# ESM: type: module を追加
+# ESM: type: module を追加 + jest config を ESM 用に変更
 if ($UseESM) {
   Add-Member -InputObject $packageJson -MemberType NoteProperty -Name 'type' -Value 'module' -Force
-}
-
-# test スクリプト
-if ($UseTest) {
-  $packageJson.scripts | Add-Member -MemberType NoteProperty -Name 'test' -Value 'jest --runInBand --passWithNoTests --detectOpenHandles --forceExit' -Force
-}
-
-# バリアント固有スクリプト
-$variantScripts = Get-TemplateProperty -Template $templateConfig -PropertyName 'scripts'
-if ($variantScripts) {
-  $variantScripts.PSObject.Properties | ForEach-Object {
-    $packageJson.scripts | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value -Force
+  $jestConfig = [ordered]@{
+    preset                  = 'ts-jest/presets/default-esm'
+    extensionsToTreatAsEsm  = @('.ts')
+    transform               = [ordered]@{
+      '^.+\.tsx?$' = @('ts-jest', [ordered]@{ useESM = $true })
+    }
   }
+  Add-Member -InputObject $packageJson -MemberType NoteProperty -Name 'jest' -Value $jestConfig -Force
+}
+
+# test を使わない場合: jest 関連を package.json から除去
+if (-not $UseTest) {
+  # devDependencies から jest 関連を削除
+  foreach ($dep in @('jest', '@types/jest', 'ts-jest')) {
+    $packageJson.devDependencies.PSObject.Properties.Remove($dep)
+  }
+  # scripts から test を削除
+  $packageJson.scripts.PSObject.Properties.Remove('test')
+  # jest 設定を削除
+  $packageJson.PSObject.Properties.Remove('jest')
 }
 
 Write-Utf8NoBom -Path 'package.json' -Content ($packageJson | ConvertTo-Json -Depth 10)
 
 # -------------------------------------------------------------------
-# 依存パッケージのインストール（pnpm add）
+# 依存パッケージのインストール（pnpm install）
+# テスト済みのピン留めバージョンで再現性のあるインストールを行う
 # -------------------------------------------------------------------
 
-# 共通 devDependencies
-$commonDevDeps = @(
-  'typescript',
-  '@types/node',
-  'tsx',
-  'prettier',
-  'eslint',
-  'run-z',
-  '@book000/eslint-config'
-)
-
-# test 用 devDependencies
-$testDevDeps = @()
-if ($UseTest) {
-  $testDevDeps = @(
-    'jest',
-    '@types/jest',
-    'ts-jest'
-  )
-}
-
-# バリアント固有 devDependencies
-$variantDevDeps = @()
-$templateDevDeps = Get-TemplateProperty -Template $templateConfig -PropertyName 'devDependencies' -DefaultValue @()
-if ($templateDevDeps.Count -gt 0) {
-  $variantDevDeps = [string[]]$templateDevDeps
-}
-
-$allDevDeps = $commonDevDeps + $testDevDeps + $variantDevDeps
-
-Write-Host "  pnpm add -D -E ($($allDevDeps.Count) パッケージ)..." -ForegroundColor Gray
-pnpm add -D -E $allDevDeps
-
-# バリアント固有 dependencies（ランタイム依存）
-$templateRuntimeDeps = Get-TemplateProperty -Template $templateConfig -PropertyName 'dependencies' -DefaultValue @()
-if ($templateRuntimeDeps.Count -gt 0) {
-  $variantRuntimeDeps = [string[]]$templateRuntimeDeps
-  Write-Host "  pnpm add -E ($($variantRuntimeDeps.Count) ランタイムパッケージ)..." -ForegroundColor Gray
-  pnpm add -E $variantRuntimeDeps
-}
-
-# -------------------------------------------------------------------
-# Jest 設定の追記（test 選択時）
-# -------------------------------------------------------------------
-
-if ($UseTest) {
-  Write-Host '  Jest 設定を package.json に追加しています...' -ForegroundColor Gray
-
-  $pkg = Get-Content 'package.json' -Raw | ConvertFrom-Json
-
-  if ($UseESM) {
-    # ESM + Jest
-    $jestConfig = [ordered]@{
-      preset                  = 'ts-jest/presets/default-esm'
-      extensionsToTreatAsEsm  = @('.ts')
-      transform               = [ordered]@{
-        '^.+\.tsx?$' = @('ts-jest', [ordered]@{ useESM = $true })
-      }
-    }
-  }
-  else {
-    # CommonJS + Jest
-    $jestConfig = [ordered]@{
-      preset          = 'ts-jest'
-      testEnvironment = 'node'
-    }
-  }
-
-  Add-Member -InputObject $pkg -MemberType NoteProperty -Name 'jest' -Value $jestConfig -Force
-  Write-Utf8NoBom -Path 'package.json' -Content ($pkg | ConvertTo-Json -Depth 10)
-}
+Write-Host "  pnpm install（CI テスト済みバージョン）..." -ForegroundColor Gray
+pnpm install
 
 # -------------------------------------------------------------------
 # .depcheckrc.json の更新

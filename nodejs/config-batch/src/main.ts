@@ -19,6 +19,7 @@ class Configuration extends ConfigFramework<ConfigInterface> {
 /**
  * エントリポイント
  */
+// eslint-disable-next-line @typescript-eslint/require-await
 async function main(): Promise<void> {
   const config = new Configuration('./data/config.json')
   config.load()
@@ -32,5 +33,6 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   console.error(error)
+  // eslint-disable-next-line unicorn/no-process-exit
   process.exit(1)
 })

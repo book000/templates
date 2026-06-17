@@ -19,11 +19,17 @@ export class Discord {
   }
 
   /**
+   * 設定フレームワークを返す
+   */
+  protected getConfig(): ConfigFramework<ConfigInterface> {
+    return this.config
+  }
+
+  /**
    * Bot の準備完了時に呼ばれる
    */
   public onReady(): void {
-    console.log('Discord bot is ready')
-    // TODO: 実装
-    // 設定値へのアクセス例: this.config.get('token')
+    console.log(`Logged in as ${this.client.user?.tag ?? 'unknown'}`)
+    // TODO: this.getConfig().get('key') で設定値を取得して処理を実装する
   }
 }

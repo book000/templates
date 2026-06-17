@@ -1,0 +1,54 @@
+{
+  "name": "@book000/template",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "book000",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "start": "tsx ./src/main.ts",
+    "dev": "tsx watch ./src/main.ts",
+    "test": "jest --runInBand --passWithNoTests --detectOpenHandles --forceExit",
+    "lint": "run-z lint:prettier,lint:eslint,lint:tsc",
+    "lint:prettier": "prettier --check src/",
+    "lint:eslint": "eslint src/ -c eslint.config.mjs",
+    "lint:tsc": "tsc --noEmit",
+    "fix": "run-z fix:prettier fix:eslint",
+    "fix:eslint": "eslint src/ -c eslint.config.mjs --fix",
+    "fix:prettier": "prettier --write src/"
+  },
+  "devDependencies": {
+    "@book000/eslint-config": "*",
+    "@types/jest": "*",
+    "@types/node": "*",
+    "eslint": "*",
+    "jest": "*",
+    "prettier": "*",
+    "run-z": "*",
+    "ts-jest": "*",
+    "tsx": "*",
+    "typescript": "*"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/book000/template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/book000/template/issues"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.test.json"
+        }
+      ]
+    }
+  }
+}

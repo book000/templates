@@ -20,7 +20,7 @@ async function main(): Promise<void> {
   // fastify-raw-body を使う場合は以下を有効にする
   // await fastify.register(fastifyRawBody)
 
-  fastify.get('/', async (_request, _reply) => {
+  fastify.get('/', (): { status: string } => {
     return { status: 'ok' }
   })
 
@@ -29,5 +29,6 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   fastify.log.error(error)
+  // eslint-disable-next-line unicorn/no-process-exit
   process.exit(1)
 })

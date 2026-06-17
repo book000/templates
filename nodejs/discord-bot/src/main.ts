@@ -48,5 +48,6 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   console.error(error)
+  // eslint-disable-next-line unicorn/no-process-exit
   process.exit(1)
 })
