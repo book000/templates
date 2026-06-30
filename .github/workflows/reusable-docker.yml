@@ -236,7 +236,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }},ignore-error=true
           provenance: false
           build-args: |
             APPLICATION_VERSION=${{ needs.calc-version.outputs.version }}
