@@ -76,4 +76,4 @@ jobs:
     name: Node CI
     needs: approval-gate
     if: always() && needs.approval-gate.result == 'success'
-    uses: book000/templates/.github/workflows/reusable-nodejs-ci-pnpm.yml@master
+    uses: book000/templates/.github/workflows/reusable-nodejs-ci-pnpm.yml@052041d0119ac65c18cbb1347cf9de0fa41e46ec # master

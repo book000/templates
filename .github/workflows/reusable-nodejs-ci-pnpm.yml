@@ -72,14 +72,14 @@ jobs:
           echo "lock-path=$LOCK_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
         id: pnpm-install
         with:
           run_install: false
           package_json_file: ${{ matrix.directory }}/package.json
 
       - name: 🏗 Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: ${{ matrix.directory }}/.node-version
           cache: pnpm
@@ -135,7 +135,7 @@ jobs:
           echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: 📂 Setup pnpm cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -200,7 +200,7 @@ jobs:
 
       - name: 📦 Upload dist artifact
         if: steps.check-dist.outputs.exists == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ matrix.directory }}-dist
           path: ${{ matrix.directory }}/dist
@@ -214,7 +214,7 @@ jobs:
 
       - name: 📦 Upload output artifact
         if: steps.check-output.outputs.exists == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ matrix.directory }}-output
           path: ${{ matrix.directory }}/output
