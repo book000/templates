@@ -11,4 +11,4 @@ on:
 jobs:
   actionlint:
     name: Actionlint with reviewdog
-    uses: book000/templates/.github/workflows/reusable-actionlint.yml@052041d0119ac65c18cbb1347cf9de0fa41e46ec # master
+    uses: book000/templates/.github/workflows/reusable-actionlint.yml@0973a96ab08cb4eb8820eaa5b35bde6d4f745118 # master
