@@ -31,6 +31,15 @@ on:
         description: Next custom version (Not included prefix)
         type: string
         default: ""
+      allow-unsafe-pr-checkout:
+        description: >-
+          Allow checking out a fork pull request's head SHA from a
+          pull_request_target-triggered workflow. Only set this to true
+          after the caller workflow has gated it behind a manual review
+          step (e.g. an Environment approval), since this defeats
+          actions/checkout's default pwn-request protection.
+        type: boolean
+        default: false
     outputs:
       version:
         description: Next version
@@ -91,6 +100,7 @@ jobs:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
+          allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
 
       - name: 🏷️ Bump version and push tag
         id: tag-version
@@ -184,6 +194,7 @@ jobs:
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
+          allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
@@ -371,6 +382,7 @@ jobs:
         with:
           # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
+          allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
 
       - name: 📂 Check exists .node-version
         id: check-node-version-file
