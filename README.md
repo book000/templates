@@ -34,6 +34,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.gi
 |  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` | `` |
+|  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
 
 ### hadolint-ci.yml
 
