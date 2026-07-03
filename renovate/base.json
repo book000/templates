@@ -34,6 +34,10 @@
   ],
   "packageRules": [
     {
+      "matchDepNames": ["book000/templates"],
+      "pinDigests": false
+    },
+    {
       "matchPackageNames": ["node"],
       "matchManagers": ["dockerfile"],
       "enabled": false
