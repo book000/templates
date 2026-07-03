@@ -79,7 +79,7 @@ jobs:
     name: Docker CI
     needs: approval-gate
     if: always() && needs.approval-gate.result == 'success' && (github.event.action != 'closed' || github.event.pull_request.merged == true)
-    uses: book000/templates/.github/workflows/reusable-docker.yml@1d3c112ba6b8e5ac13c24a8e3892f92b98ea35ac # master
+    uses: book000/templates/.github/workflows/reusable-docker.yml@master
     with:
       targets: >-
         [
@@ -87,6 +87,7 @@ jobs:
         ]
       # registry: registry.hub.docker.com # default: ghcr.io
       # platforms: linux/amd64 # default: linux/amd64,linux/arm64
+      allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
     secrets:
       DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
