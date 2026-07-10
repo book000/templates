@@ -1,83 +1,31 @@
-# GitHub Copilot Instructions
+# GitHub Copilot レビュー方針
 
-## プロジェクト概要
+このファイルは GitHub Copilot のコードレビュー機能向けの指示です。開発作業全体の方針は `CLAUDE.md` を参照してください。ここではレビュー時に重点的に確認すべき点のみを記載します。
 
-- **目的**: GitHub Actions Reusable Workflows、Dockerfile テンプレート、Renovate 設定を一元管理し、複数プロジェクト間で再利用可能なテンプレートを提供する
-- **主な機能**:
-  - GitHub Actions Reusable Workflows の提供（Node.js、Maven、Docker、Actionlint、Hadolint など 7 種類）
-  - Docker コンテナ化のための Dockerfile テンプレート（Node.js、Python、PHP、Puppeteer など 7 種類）
-  - Renovate 設定ファイルのベーステンプレート
-  - CI/CD パイプラインの標準化と自動テスト
-- **対象ユーザー**: 開発者（複数プロジェクトで CI/CD とコンテナ化を統一したい開発チーム）
+## このリポジトリの性質
 
-## 共通ルール
+- **book000/templates は再利用可能な GitHub Actions Reusable Workflow / Dockerfile / Renovate 設定の提供元**であり、実行アプリケーションではない。
+- ここで公開される Reusable Workflow は `book000/templates/.github/workflows/reusable-*.yml` として **他の多数のリポジトリから参照される**。破壊的変更（`inputs` / `secrets` の削除・必須化・意味変更、ジョブ名やアウトプットの変更）は下流のリポジトリの CI を壊すため、後方互換性の観点を最優先でレビューする。
 
-- 会話は日本語で行う。
-- PR とコミットは Conventional Commits に従う。`<description>` は日本語で記載する。
-  - 例: `feat: Reusable Workflow にテストステップを追加`
-- 日本語と英数字の間には半角スペースを入れる。
+## レビューの重点
 
-## 技術スタック
+- **後方互換性**: `workflows/` および `.github/workflows/reusable-*.yml` の変更で、既存 `inputs`/`secrets`/`outputs` が削除・リネーム・必須化されていないか。デフォルト値の変更が挙動を変えないか。
+- **セキュリティ**:
+  - `secrets` を `echo` や `run` で標準出力・ログに出していないか（マスクされない箇所での漏洩）。
+  - `allow-unsafe-pr-checkout` のような信頼境界に関わる入力を、デフォルトで安全側（無効）にしているか。fork PR のコードを特権コンテキストでチェックアウト・実行していないか。
+  - `pull_request_target` 使用時に、信頼できない PR のコードを実行していないか。
+  - サードパーティ Action は原則タグではなくコミット SHA で固定する意図か（ただしこのリポジトリ自身の参照は Renovate 運用に従う。過去に digest 固定を意図的に無効化した経緯があるため、`book000/templates` 自身への参照の固定方式変更は慎重に確認する）。
+- **Dockerfile**: Hadolint のベストプラクティスに従っているか（バージョン固定、`--no-cache`、レイヤー最適化）。Alpine ベース・マルチステージ・`Asia/Tokyo` タイムゾーンという既存方針から逸脱していないか。
+- **エラーハンドリング**: シェルステップで `set -euo pipefail` 相当の失敗検知があるか。パイプの失敗が握りつぶされていないか。
+- **YAML**: GitHub Actions YAML は 2 スペースインデント。actionlint で検出される式の誤りや権限（`permissions`）の過剰付与がないか。
 
-- **言語**: YAML、Dockerfile、JavaScript (Node.js)、Shell
-- **CI/CD**: GitHub Actions (Reusable Workflows)
-- **コンテナ**: Docker (Alpine ベースイメージ)
-- **パッケージマネージャー**: pnpm、yarn、Maven、pip
-- **品質チェックツール**: actionlint、Hadolint
-- **依存管理**: Renovate
+## Copilot が誤検知しやすい・フラグすべきでないパターン
 
-## コーディング規約
+- `README.md` は `scripts/generate-readme.js` により **自動生成される**。README への直接編集は誤りだが、逆に「README を手で更新せよ」という指摘は不要。README の変更は `.github/templates.md` の編集と再生成で行う。
+- `actionlint`（リポジトリ直下）は **チェックイン済みの Linux 64-bit ELF バイナリ**であり、テキストソースではない。「巨大ファイル」「バイナリをコミットするな」という指摘は不要。
+- このリポジトリには `package.json` が存在しない。「`npm install` / `npm test` を追加せよ」といった Node.js プロジェクト前提の指摘は不要。
+- `workflows/` にソースを置き `.github/workflows/reusable-*.yml` でラップする二層構成は意図的な設計。重複に見えても指摘不要。
 
-- **フォーマット**: GitHub Actions YAML は 2 スペースインデント
-- **Dockerfile**: Hadolint のベストプラクティスに従う
-- **命名規則**:
-  - Reusable Workflows: `reusable-*.yml`
-  - Dockerfile テンプレート: `*-app.Dockerfile` または `*-pnpm.Dockerfile`
-- **Lint/Format ルール**: actionlint、Hadolint の警告・エラーを解消する
+## コメント言語
 
-## 開発コマンド
-
-```bash
-# README.md の自動生成
-node scripts/generate-readme.js
-
-# actionlint の実行（ワークフローの検証）
-./actionlint
-
-# Hadolint の実行（Dockerfile の検証）
-docker run --rm -i hadolint/hadolint < dockerfiles/node-app-pnpm.Dockerfile
-
-# テストシナリオの実行（GitHub Actions 上で自動実行）
-# .github/workflows/test-reusable-workflows.yml を参照
-```
-
-## テスト方針
-
-- **テストフレームワーク**: GitHub Actions ワークフロー（`.github/workflows/test-reusable-workflows.yml`）
-- **テスト対象**: 全 Reusable Workflows と Dockerfile テンプレート
-- **テスト追加の方針**:
-  - 新しい Reusable Workflow を追加した場合は、`test-scenarios/` にテストシナリオを追加する
-  - Dockerfile を追加した場合は、`dockerfiles/tests/` にテストアプリケーションを追加する
-
-## セキュリティ / 機密情報
-
-- GitHub Secrets や認証情報は `.env` ファイルやコミットに含めない。
-- ログに個人情報や認証情報を出力しない。
-- Reusable Workflow で使用する Secrets は、呼び出し側のリポジトリで管理する。
-
-## ドキュメント更新
-
-- 以下のドキュメントは変更時に更新が必要：
-  - `README.md`: 自動生成されるため、手動編集せず `scripts/generate-readme.js` を実行する
-  - `.github/templates.md`: README のテンプレート（手動編集）
-  - `docs/`: 各種ドキュメント（手動編集）
-
-## リポジトリ固有
-
-- このリポジトリは **テンプレートの提供** が目的であり、実行可能なアプリケーションではない。
-- Reusable Workflows は `workflows/` ディレクトリに配置し、`.github/workflows/reusable-*.yml` でラップして公開する。
-- README.md は自動生成されるため、手動で編集してはならない。変更は `.github/templates.md` で行う。
-- actionlint バイナリは Linux 64-bit ELF 形式であり、CI 環境で実行される。
-- Renovate 設定は `renovate/` ディレクトリに配置し、`base.json`、`public.json`、`private.json` で分類する。
-- Docker テンプレートは Alpine ベースイメージを使用し、タイムゾーンは `Asia/Tokyo` に設定する。
-- `test-scenarios/` のテストシナリオは、GitHub Actions で定期的に実行され、テンプレートの品質を保証する。
+- レビューコメントは日本語で行う。コミット・PR は Conventional Commits に従い、`<description>` は日本語。
