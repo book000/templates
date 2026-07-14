@@ -1,0 +1,72 @@
+name: Check typescript-eslint TypeScript 7 support
+
+# 目的: typescript-eslint が TypeScript 7 系に対応したかを定期的に検知する。
+#
+# 背景: TypeScript 7 (Go ネイティブコンパイラ) は tsc の内部 API (ts.Extension.Cjs 等) を
+# 提供していないため、typescript-eslint@8.63.0 系はこれに依存する起動時コードで
+# クラッシュする。typescript-eslint 側も peerDependencies で typescript を
+# <6.1.0 までに制限しており、対応は TS7 の新API公開待ち
+# (https://github.com/typescript-eslint/typescript-eslint/issues/10940)。
+#
+# renovate/base.json では暫定的に typescript のメジャー更新をブロックしているため、
+# 対応が入ったタイミングに気づけるよう、npm 上の typescript-eslint の
+# peerDependencies.typescript が TypeScript 7 系を許容するようになったかを
+# 週次でチェックし、対応が確認できた場合のみ Issue を起票する。
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # 毎週月曜 00:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check typescript-eslint peer range
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write # 対応検知時に Issue を起票するため
+
+    steps:
+      - name: Install semver
+        run: npm install --global semver
+
+      - name: Check typescript-eslint peerDependencies.typescript range
+        id: check
+        run: |
+          RANGE=$(npm view typescript-eslint peerDependencies.typescript)
+          if [ -z "$RANGE" ]; then
+            echo "::error::typescript-eslint の peerDependencies.typescript を取得できませんでした"
+            exit 1
+          fi
+
+          SUPPORTS_TS7=$(node -e "
+            const semver = require('$(npm root -g)/semver');
+            console.log(semver.intersects(process.argv[1], '>=7.0.0', { includePrerelease: true }));
+          " "$RANGE")
+
+          echo "range=$RANGE" >> "$GITHUB_OUTPUT"
+          echo "supports_ts7=$SUPPORTS_TS7" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing tracking issue
+        if: steps.check.outputs.supports_ts7 == 'true'
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COUNT=$(gh issue list --repo "${{ github.repository }}" \
+            --search "TypeScript 7 in:title" --state open --json number --jq 'length')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Create tracking issue
+        if: steps.check.outputs.supports_ts7 == 'true' && steps.existing.outputs.count == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RANGE: ${{ steps.check.outputs.range }}
+        run: |
+          BODY=$(printf 'typescript-eslint の `peerDependencies.typescript` が `%s` に更新され、TypeScript 7 系を許容するようになった可能性があります。\n\nrenovate/base.json に暫定で入れている typescript のメジャー更新ブロックルールを解除できるか確認してください。\n\n- 検知元: このリポジトリの `check-typescript-eslint-ts7-support` ワークフロー\n- 確認事項: 実際に `typescript@7.x` + 最新の `typescript-eslint` で ESLint が正常動作するか、対象リポジトリの1つで動作確認してから解除すること' "$RANGE")
+          gh issue create --repo "${{ github.repository }}" \
+            --title "typescript-eslint が TypeScript 7 に対応した可能性 — Renovate のブロックルール解除を検討" \
+            --assignee book000 \
+            --body "$BODY"
