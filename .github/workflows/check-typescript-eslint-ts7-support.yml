@@ -63,13 +63,10 @@ jobs:
         if: steps.check.outputs.supports_ts7 == 'true' && steps.existing.outputs.count == '0'
         env:
           GH_TOKEN: ${{ github.token }}
+          RANGE: ${{ steps.check.outputs.range }}
         run: |
+          BODY=$(printf 'typescript-eslint の `peerDependencies.typescript` が `%s` に更新され、TypeScript 7 系を許容するようになった可能性があります。\n\nrenovate/base.json に暫定で入れている typescript のメジャー更新ブロックルールを解除できるか確認してください。\n\n- 検知元: このリポジトリの `check-typescript-eslint-ts7-support` ワークフロー\n- 確認事項: 実際に `typescript@7.x` + 最新の `typescript-eslint` で ESLint が正常動作するか、対象リポジトリの1つで動作確認してから解除すること' "$RANGE")
           gh issue create --repo "${{ github.repository }}" \
             --title "typescript-eslint が TypeScript 7 に対応した可能性 — Renovate のブロックルール解除を検討" \
             --assignee book000 \
-            --body "typescript-eslint の \`peerDependencies.typescript\` が \`${{ steps.check.outputs.range }}\` に更新され、TypeScript 7 系を許容するようになった可能性があります。
-
-renovate/base.json に暫定で入れている typescript のメジャー更新ブロックルールを解除できるか確認してください。
-
-- 検知元: このリポジトリの \`check-typescript-eslint-ts7-support\` ワークフロー
-- 確認事項: 実際に \`typescript@7.x\` + 最新の \`typescript-eslint\` で ESLint が正常動作するか、対象リポジトリの1つで動作確認してから解除すること"
+            --body "$BODY"
