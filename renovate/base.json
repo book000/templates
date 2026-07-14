@@ -58,8 +58,7 @@
       "enabled": false
     },
     {
-      "matchPackagePatterns": ["*"],
-      "excludePackagePatterns": ["^@book000/"],
+      "matchPackageNames": ["!/^@book000\\//"],
       "stabilityDays": 3
     }
   ]
