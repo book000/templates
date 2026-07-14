@@ -52,6 +52,12 @@
       "matchPackageNames": ["fastify", "fastify-raw-body", "@fastify/**"]
     },
     {
+      "description": "TypeScript 7 は tsc の内部API (ts.Extension.Cjs 等) をまだ提供しておらず、typescript-eslint@8.63.0 系がこれに依存する起動時コードでクラッシュするため、typescript のメジャー更新を暫定的にブロックする。typescript-eslint 側の対応状況は check-typescript-eslint-ts7-support ワークフローで検知するので、対応が確認できたらこのルールを削除すること (typescript-eslint/typescript-eslint#10940)",
+      "matchPackageNames": ["typescript"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       "matchPackagePatterns": ["*"],
       "excludePackagePatterns": ["^@book000/"],
       "stabilityDays": 3
