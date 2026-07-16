@@ -9,10 +9,6 @@ on:
     branches:
       - main
       - master
-    paths:
-      - ".github/workflows/reusable-*.yml"
-      - "test-scenarios/**"
-      - ".github/workflows/test-reusable-workflows.yml"
   workflow_dispatch:
 
 jobs:
@@ -144,8 +140,13 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
   # Summary job to check all tests passed
+  # ジョブ名の末尾に " Finished" を含める: book000/sync-repo-settings の
+  # detect_status_checks() が必須ステータスチェックを自動検出する際、
+  # prefer_finished_jobs: true の設定により "finished" を含むジョブ名を
+  # 優先して選択する。これにより、全テストジョブの成否を集約するこの
+  # ジョブだけが必須チェックとして登録されるようにする。
   test-summary:
-    name: Test Summary
+    name: Test Summary Finished
     runs-on: ubuntu-latest
     if: always()
     needs:
