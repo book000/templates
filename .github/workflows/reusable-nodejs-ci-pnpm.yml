@@ -172,7 +172,7 @@ jobs:
         run: npx depcheck
         background: true
 
-      - name: 👀 Wait for linter/tests/depcheck
+      - name: ⏳ Wait for parallel steps
         wait-all: true
 
       - name: 🎁 Run package
