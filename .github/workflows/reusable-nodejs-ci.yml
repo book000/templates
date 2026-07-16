@@ -135,6 +135,22 @@ jobs:
         if: steps.package-json.outputs.lint == 'true' && steps.package-json.outputs.disabled-lint == 'false'
         working-directory: ${{ matrix.directory }}
         run: yarn lint
+        background: true
+
+      - name: 🧪 Run tests
+        if: steps.package-json.outputs.test == 'true' && steps.package-json.outputs.disabled-test == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: yarn test
+        background: true
+
+      - name: ☑️ Check Dependencies
+        if: steps.package-json.outputs.disabled-depcheck == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: npx depcheck
+        background: true
+
+      - name: ⏳ Wait for parallel steps
+        wait-all: true
 
       - name: 🎁 Run package
         if: steps.package-json.outputs.package == 'true' && steps.package-json.outputs.disabled-package == 'false'
@@ -156,16 +172,6 @@ jobs:
         run: |
           yarn build
           yarn generate
-
-      - name: 🧪 Run tests
-        if: steps.package-json.outputs.test == 'true' && steps.package-json.outputs.disabled-test == 'false'
-        working-directory: ${{ matrix.directory }}
-        run: yarn test
-
-      - name: ☑️ Check Dependencies
-        if: steps.package-json.outputs.disabled-depcheck == 'false'
-        working-directory: ${{ matrix.directory }}
-        run: npx depcheck
 
       - name: Check exists dist directory
         id: check-dist
