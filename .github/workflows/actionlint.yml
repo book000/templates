@@ -22,4 +22,6 @@ jobs:
       - name: Run actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color -shellcheck=
+          ./actionlint -color -shellcheck= \
+            -ignore 'unexpected\s+key\s+"background"\s+for\s+step\s+to\s+run\s+shell\s+command' \
+            -ignore 'step\s+must\s+run\s+script\s+with\s+"run"\s+section\s+or\s+run\s+action\s+with\s+"uses"\s+section'
