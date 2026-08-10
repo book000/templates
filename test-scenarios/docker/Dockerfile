@@ -1,5 +1,10 @@
 FROM alpine:3.24
 
+ARG GIT_REVISION=unknown
+ARG BUILD_TIME=unknown
+RUN test "$GIT_REVISION" != "unknown" \
+    && test "$BUILD_TIME" != "unknown"
+
 # Install basic tools
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
