@@ -22,6 +22,8 @@ jobs:
       - name: Run actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          # GitHub Actions の background/wait-all は 2026-06-25 導入済みだが、
+          # actionlint v1.7.12 は未対応のため、その既知誤検知だけを除外する。
           ./actionlint -color -shellcheck= \
-            -ignore 'unexpected\s+key\s+"background"\s+for\s+step\s+to\s+run\s+shell\s+command' \
-            -ignore 'step\s+must\s+run\s+script\s+with\s+"run"\s+section\s+or\s+run\s+action\s+with\s+"uses"\s+section'
+            -ignore='unexpected.*key.*background' \
+            -ignore='step.*must.*run.*script.*with.*run.*section.*or.*run.*action.*with.*uses.*section'
