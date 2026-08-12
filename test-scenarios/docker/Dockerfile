@@ -28,7 +28,7 @@ WORKDIR /app
 RUN chown -R appuser:appgroup /app
 
 # Switch to non-root user
-USER appuser
+USER 1000:1000
 
 # Default command
 CMD ["/usr/local/bin/test.sh"]
