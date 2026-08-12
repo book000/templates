@@ -27,7 +27,7 @@ WORKDIR /app
 # Change ownership to non-root user
 RUN chown -R appuser:appgroup /app
 
-# 非 root ユーザーへ切り替え（DL3066: ホストが解決可能な数値 UID:GID を使用）
+# Switch to non-root user
 USER 1000:1000
 
 # Default command
