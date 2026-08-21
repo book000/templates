@@ -19,6 +19,17 @@ mkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://
 |  | `actors` | Target actors (comma separated) | `string` | `dependabot[bot],renovate[bot],github-actions[bot],book000` |
 |  | `reviewers` | Reviewers (comma separated) | `string` | `book000` |
 
+### bicep-ci.yml
+
+```shell
+mkdir -p .github/workflows ; wget -O .github/workflows/bicep-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/bicep-ci.yml
+```
+
+| Required | Key | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+|  | `bicep-file` | Bicep ファイルのパス | `string` | `infra/main.bicep` |
+|  | `bicepparam-file` | Bicep パラメータファイルのパス | `string` | `infra/main.bicepparam` |
+
 ### docker.yml
 
 ```shell
