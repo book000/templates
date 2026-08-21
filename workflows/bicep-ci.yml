@@ -1,0 +1,17 @@
+name: Bicep CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  merge_group:
+
+jobs:
+  bicep-ci:
+    name: Bicep CI
+    uses: book000/templates/.github/workflows/reusable-bicep-ci.yml@master

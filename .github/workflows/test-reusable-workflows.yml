@@ -49,6 +49,14 @@ jobs:
     name: Test reusable-hadolint-ci
     uses: ./.github/workflows/reusable-hadolint-ci.yml
 
+  # Test Bicep CI
+  test-bicep-ci:
+    name: Test reusable-bicep-ci
+    uses: ./.github/workflows/reusable-bicep-ci.yml
+    with:
+      bicep-file: test-scenarios/bicep/infra/main.bicep
+      bicepparam-file: test-scenarios/bicep/infra/main.bicepparam
+
   # Test Add Reviewer (only on pull requests from the same repo to avoid issues)
   test-add-reviewer:
     name: Test reusable-add-reviewer
@@ -156,6 +164,7 @@ jobs:
       - test-maven
       - test-actionlint
       - test-hadolint
+      - test-bicep-ci
       - test-add-reviewer
       - test-docker
 
@@ -168,6 +177,7 @@ jobs:
           echo "Maven result: ${{ needs.test-maven.result }}"
           echo "Actionlint result: ${{ needs.test-actionlint.result }}"
           echo "Hadolint result: ${{ needs.test-hadolint.result }}"
+          echo "Bicep CI result: ${{ needs.test-bicep-ci.result }}"
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
 
@@ -178,6 +188,7 @@ jobs:
              [[ "${{ needs.test-maven.result }}" != "success" ]] || \
              [[ "${{ needs.test-actionlint.result }}" != "success" ]] || \
              [[ "${{ needs.test-hadolint.result }}" != "success" ]] || \
+             [[ "${{ needs.test-bicep-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-add-reviewer.result }}" == "failure" ]] || \
              [[ "${{ needs.test-docker.result }}" != "success" ]]; then
             echo "❌ Some reusable workflow tests failed!"
