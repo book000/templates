@@ -83,6 +83,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci-pnpm.yml https:
 |  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
 |  | `lock-path` | Lock file path | `string` | `{dir}/pnpm-lock.yaml` |
 |  | `check-git-diff` | Check git diff | `boolean` | `false` |
+|  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
 
 ### nodejs-ci.yml
 
@@ -97,6 +98,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 |  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
 |  | `lock-path` | yarn.lock path | `string` | `{dir}/yarn.lock` |
 |  | `check-git-diff` | Check git diff | `boolean` | `false` |
+|  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
 
 ## Dockerfile
 
