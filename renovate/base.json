@@ -47,6 +47,14 @@
       "rangeStrategy": "pin"
     },
     {
+      "description": "FROM node (Dockerfile) / .node-version / engines.node (package.json) を同一バージョンへ同期させるため、 node datasource の更新をグループ化して同一バージョンへ pin する",
+      "matchPackageNames": ["node"],
+      "matchDatasources": ["node"],
+      "groupName": "node",
+      "versioning": "node",
+      "rangeStrategy": "pin"
+    },
+    {
       "groupName": "fastify",
       "matchDatasources": ["npm"],
       "matchPackageNames": ["fastify", "fastify-raw-body", "@fastify/**"]
