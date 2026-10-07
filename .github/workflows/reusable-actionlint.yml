@@ -26,7 +26,7 @@ jobs:
 
       - name: Run actionlint (Pull-Request)
         if: ${{ github.event_name == 'pull_request' }}
-        uses: reviewdog/action-actionlint@13465d022aa41c282f730be17574b5ce692d0186 # v1.78.1
+        uses: reviewdog/action-actionlint@a1e3e7ff7b1f7554e043f455cc78803e773c4a88 # v1.79.0
         with:
           fail_level: error
           # INPUT_ACTIONLINT_FLAGS は shell word splitting されるため、空白なしの RE2 にする。
