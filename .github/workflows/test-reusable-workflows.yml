@@ -34,6 +34,9 @@ jobs:
   test-maven:
     name: Test reusable-maven
     uses: ./.github/workflows/reusable-maven.yml
+    permissions:
+      contents: write
+      actions: read
     with:
       is-merged: false
       is-release: false
@@ -62,6 +65,9 @@ jobs:
     name: Test reusable-add-reviewer
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/reusable-add-reviewer.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       actors: "github-actions[bot],test-user"
       reviewers: "github-actions[bot]"
@@ -131,6 +137,11 @@ jobs:
   test-docker:
     name: Test reusable-docker
     uses: ./.github/workflows/reusable-docker.yml
+    permissions:
+      contents: write
+      actions: read
+      packages: write
+      deployments: write
     with:
       targets: |
         [
