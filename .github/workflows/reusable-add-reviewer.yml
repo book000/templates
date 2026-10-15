@@ -11,6 +11,10 @@ on:
         description: Reviewers (comma separated)
         type: string
         default: book000
+      light-runs-on:
+        description: Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest)
+        type: string
+        default: ubuntu-slim
 
 permissions:
   contents: read
@@ -18,7 +22,7 @@ permissions:
 
 jobs:
   add-reviewer:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.light-runs-on }}
 
     steps:
       - name: Setup
