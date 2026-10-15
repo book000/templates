@@ -18,6 +18,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://
 | --- | --- | --- | --- | --- |
 |  | `actors` | Target actors (comma separated) | `string` | `dependabot[bot],renovate[bot],github-actions[bot],book000` |
 |  | `reviewers` | Reviewers (comma separated) | `string` | `book000` |
+|  | `light-runs-on` | Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest) | `string` | `ubuntu-slim` |
 
 ### bicep-ci.yml
 
@@ -46,6 +47,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.gi
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
 |  | `version` | Next custom version (Not included prefix) | `string` | `` |
 |  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
+|  | `light-runs-on` | Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest) | `string` | `ubuntu-slim` |
 
 ### hadolint-ci.yml
 
@@ -84,6 +86,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci-pnpm.yml https:
 |  | `lock-path` | Lock file path | `string` | `{dir}/pnpm-lock.yaml` |
 |  | `check-git-diff` | Check git diff | `boolean` | `false` |
 |  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
+|  | `light-runs-on` | Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest) | `string` | `ubuntu-slim` |
 
 ### nodejs-ci.yml
 

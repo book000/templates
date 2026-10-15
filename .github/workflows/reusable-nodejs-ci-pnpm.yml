@@ -34,12 +34,16 @@ on:
           actions/checkout's default pwn-request protection.
         type: boolean
         default: false
+      light-runs-on:
+        description: Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest)
+        type: string
+        default: ubuntu-slim
 permissions:
   contents: read
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.light-runs-on }}
 
     outputs:
       directorys: ${{ steps.setup.outputs.directorys }}
@@ -246,7 +250,7 @@ jobs:
 
   finished-node-ci:
     name: Check finished Node CI
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.light-runs-on }}
     if: always()
     needs:
       - node-ci
