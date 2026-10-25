@@ -26,7 +26,7 @@ jobs:
 
       - name: Run actionlint (Pull-Request)
         if: ${{ github.event_name == 'pull_request' }}
-        uses: reviewdog/action-actionlint/dockerless@419a49378266e892f40c773b4f2fc6de9aa87499 # v1.80.4
+        uses: reviewdog/action-actionlint/dockerless@8bacd0b6ac20de8f143bda009d7c86f263c06bd1 # v1.80.5
         with:
           fail_level: error
           # INPUT_ACTIONLINT_FLAGS は shell word splitting されるため、空白なしの RE2 にする。
