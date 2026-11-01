@@ -393,6 +393,8 @@ jobs:
       - build
       - merge-latest
       - release
+    permissions:
+      contents: write # Required for uploading release assets
 
     steps:
       - name: 📥 Check out the repo
