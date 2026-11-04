@@ -103,6 +103,31 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 |  | `check-git-diff` | Check git diff | `boolean` | `false` |
 |  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
 
+### python-ci.yml
+
+```shell
+mkdir -p .github/workflows ; wget -O .github/workflows/python-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/python-ci.yml
+```
+
+| Required | Key | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+|  | `directory` | Target directory | `string` | `.` |
+|  | `python-version` | Python version. If empty, uses {directory}/.python-version when it exists, otherwise 3.x | `string` | `` |
+|  | `requirements-file` | requirements file path relative to the target directory (skipped if it does not exist) | `string` | `requirements.txt` |
+|  | `disabled-jobs` | Disable jobs (comma separated. compile, ruff, format, test) | `string` | `NULL` |
+|  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
+
+### shellcheck-ci.yml
+
+```shell
+mkdir -p .github/workflows ; wget -O .github/workflows/shellcheck-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/shellcheck-ci.yml
+```
+
+| Required | Key | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+|  | `directory` | Target directory (git tracked files only) | `string` | `.` |
+|  | `severity` | Minimum severity of issues to report (error, warning, info, style) | `string` | `warning` |
+
 ## Dockerfile
 
 ### node-app-pnpm.Dockerfile
