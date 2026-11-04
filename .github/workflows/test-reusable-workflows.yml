@@ -52,6 +52,20 @@ jobs:
     name: Test reusable-hadolint-ci
     uses: ./.github/workflows/reusable-hadolint-ci.yml
 
+  # Test Python CI
+  test-python-ci:
+    name: Test reusable-python-ci
+    uses: ./.github/workflows/reusable-python-ci.yml
+    with:
+      directory: test-scenarios/python
+
+  # Test ShellCheck CI
+  test-shellcheck-ci:
+    name: Test reusable-shellcheck-ci
+    uses: ./.github/workflows/reusable-shellcheck-ci.yml
+    with:
+      directory: test-scenarios/docker
+
   # Test Bicep CI
   test-bicep-ci:
     name: Test reusable-bicep-ci
