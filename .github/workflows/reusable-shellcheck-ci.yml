@@ -1,0 +1,57 @@
+name: ShellCheck
+
+on:
+  workflow_call:
+    inputs:
+      directory:
+        description: Target directory (git tracked files only)
+        type: string
+        default: .
+      severity:
+        description: Minimum severity of issues to report (error, warning, info, style)
+        type: string
+        default: warning
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛎 Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 👀 Run ShellCheck
+        env:
+          INPUT_DIRECTORY: ${{ inputs.directory }}
+          INPUT_SEVERITY: ${{ inputs.severity }}
+        run: |
+          set -euo pipefail
+
+          # directory の誤指定で何も検査せず成功扱いになるのを防ぐ
+          if ! git ls-files -z --error-unmatch -- "$INPUT_DIRECTORY" > /dev/null 2>&1; then
+            echo "Error: no tracked files under '$INPUT_DIRECTORY'." >&2
+            exit 1
+          fi
+
+          files=()
+          while IFS= read -r -d '' f; do
+            [ -f "$f" ] && [ ! -L "$f" ] || continue
+            case "$f" in
+              *.sh|*.bash) files+=("$f") ;;
+              *) if head -n 1 "$f" | grep -aqE '^#!.*[/ ](ba|da|k)?sh( |$)'; then files+=("$f"); fi ;;
+            esac
+          done < <(git ls-files -z -- "$INPUT_DIRECTORY")
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+
+          printf 'Checking: %s\n' "${files[@]}"
+          shellcheck --severity="$INPUT_SEVERITY" -- "${files[@]}"

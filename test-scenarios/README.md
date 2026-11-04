@@ -8,6 +8,8 @@ This directory contains test scenarios to validate that the reusable GitHub work
 - `nodejs-pnpm/` - Test project for `reusable-nodejs-ci-pnpm.yml`
 - `maven/` - Test project for `reusable-maven.yml`
 - `docker/` - Test files for `reusable-docker.yml` and `reusable-hadolint-ci.yml`
+- `python/` - Test project for `reusable-python-ci.yml`
+- `docker/test.sh` is also used as the target of `reusable-shellcheck-ci.yml`
 - `workflows/` - Test workflow files for `reusable-actionlint.yml`
 
 ## Purpose

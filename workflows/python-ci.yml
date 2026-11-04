@@ -1,0 +1,19 @@
+# Python の構文チェック・ruff・pytest を実行する。バージョンは .python-version があればそれを利用する
+
+name: Python CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  merge_group:
+
+jobs:
+  python-ci:
+    name: Python CI
+    uses: book000/templates/.github/workflows/reusable-python-ci.yml@master
