@@ -45,7 +45,7 @@ jobs:
           INPUT_DISABLED_JOBS: ${{ inputs.disabled-jobs }}
         run: |
           # 入力はシェルへ直接展開せず、環境変数経由で扱う
-          disabled=",${INPUT_DISABLED_JOBS// /},"
+          disabled=",${INPUT_DISABLED_JOBS//[[:space:]]/},"
           for job in compile ruff format test; do
             if [[ "$disabled" == *",${job},"* ]]; then
               echo "disabled-${job}=true" >> "$GITHUB_OUTPUT"
