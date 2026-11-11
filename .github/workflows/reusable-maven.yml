@@ -122,8 +122,13 @@ jobs:
 
       - name: Replace pom.xml version
         working-directory: ${{ inputs.directory }}
+        env:
+          APP_VERSION: ${{ needs.calc-version.outputs.version }}
         run: |
-          sed -r -i "1,/version/s#<version>(.+?)</version>#<version>${{ needs.calc-version.outputs.version }}</version>#" pom.xml
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          # Escape the sed replacement special characters (backslash, delimiter, ampersand)
+          escaped_version=$(printf '%s' "$APP_VERSION" | sed -e 's/[\\#&]/\\&/g')
+          sed -r -i "1,/version/s#<version>(.+?)</version>#<version>${escaped_version}</version>#" pom.xml
           git diff
 
       - name: Build with Maven

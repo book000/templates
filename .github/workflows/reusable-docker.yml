@@ -110,9 +110,11 @@ jobs:
 
       - name: 📊 Set platform matrix
         id: platform-matrix
+        env:
+          INPUT_PLATFORMS: ${{ inputs.platforms }}
         run: |
-          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
-          platforms="${{ inputs.platforms }}"
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          platforms="$INPUT_PLATFORMS"
           # shellcheck disable=SC2312
           echo "matrix=[$(printf '%s' "$platforms" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> "$GITHUB_OUTPUT"
           if [[ "$platforms" == *","* ]]; then
@@ -158,8 +160,11 @@ jobs:
     steps:
       - name: 🗑️ Remove platform prefix
         id: platform
+        env:
+          MATRIX_PLATFORM: ${{ matrix.platform }}
         run: |
-          platform="${{ matrix.platform }}"
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          platform="$MATRIX_PLATFORM"
           short_platform="${platform##*/}"
           echo "shortPlatform=$short_platform" >> "$GITHUB_OUTPUT"
           echo "shortHyphenPlatform=${short_platform//\//-}" >> "$GITHUB_OUTPUT"
@@ -208,14 +213,22 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 📝 package.json update version
+        env:
+          APP_VERSION: ${{ needs.calc-version.outputs.version }}
         run: |
-          find . -type d -name node_modules -prune -o -type f -name package.json -exec sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${{ needs.calc-version.outputs.version }}\"/" {} \;
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          # Escape the sed replacement special characters (backslash, delimiter, ampersand)
+          escaped_version=$(printf '%s' "$APP_VERSION" | sed -e 's/[\\/&]/\\&/g')
+          find . -type d -name node_modules -prune -o -type f -name package.json -exec sed -r -i "1,/version/s/\"version\": \".+\"/\"version\": \"${escaped_version}\"/" {} \;
           git diff -- '**/package.json'
         background: true
 
       - name: 📝 Create application version file
+        env:
+          APP_VERSION: ${{ needs.calc-version.outputs.version }}
         run: |
-          echo -n "${{ needs.calc-version.outputs.version }}" > .app-version
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          printf '%s' "$APP_VERSION" > .app-version
           git diff -- .app-version
         background: true
 
@@ -224,9 +237,13 @@ jobs:
 
       - name: 🏷️ Set tag suffix value
         id: tag
+        env:
+          NEED_MERGE: ${{ needs.calc-version.outputs.need-merge }}
+          SHORT_HYPHEN_PLATFORM: ${{ steps.platform.outputs.shortHyphenPlatform }}
         run: |
-          if [ "${{ needs.calc-version.outputs.need-merge }}" = "true" ]; then
-            echo "suffix=-${{ steps.platform.outputs.shortHyphenPlatform }}" >> "$GITHUB_OUTPUT"
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          if [ "$NEED_MERGE" = "true" ]; then
+            echo "suffix=-${SHORT_HYPHEN_PLATFORM}" >> "$GITHUB_OUTPUT"
           else
             echo "suffix=" >> "$GITHUB_OUTPUT"
           fi
@@ -320,11 +337,15 @@ jobs:
 
       - name: 📝 Create extra-images list
         id: extra-images
+        env:
+          INPUT_PLATFORMS: ${{ inputs.platforms }}
+          INPUT_REGISTRY: ${{ inputs.registry }}
+          MATRIX_IMAGE_NAME: ${{ matrix.target.imageName }}
         run: |
-          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
-          platforms="${{ inputs.platforms }}"
-          registry="${{ inputs.registry }}"
-          image_name="${{ matrix.target.imageName }}"
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          platforms="$INPUT_PLATFORMS"
+          registry="$INPUT_REGISTRY"
+          image_name="$MATRIX_IMAGE_NAME"
           echo "images=$(printf '%s' "$platforms" | sed -r "s#([a-z]+)/([a-z0-9]+)#${registry}/${image_name}:latest-\2#g")" >> "$GITHUB_OUTPUT"
 
       - name: 📝 Create and push manifest images (latest)
@@ -453,9 +474,12 @@ jobs:
 
       - name: 📦 Create zip
         id: create-zip
+        env:
+          APP_TAG: ${{ needs.calc-version.outputs.tag }}
         run: |
+          # Pass inputs through environment variables instead of expanding them into the shell script
           REPO="${GITHUB_REPOSITORY#"${GITHUB_REPOSITORY_OWNER}/"}"
-          ZIP_FILENAME="${REPO}_${{ needs.calc-version.outputs.tag }}.zip"
+          ZIP_FILENAME="${REPO}_${APP_TAG}.zip"
           ZIP_PATH="$(pwd)/output/${ZIP_FILENAME}"
           cd output
           zip -r "${ZIP_PATH}" ./*
