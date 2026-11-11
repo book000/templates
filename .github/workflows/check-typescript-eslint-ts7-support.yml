@@ -34,7 +34,7 @@ jobs:
         run: |
           RANGE=$(npm view typescript-eslint peerDependencies.typescript)
           if [ -z "$RANGE" ]; then
-            echo "::error::typescript-eslint の peerDependencies.typescript を取得できませんでした"
+            echo "::error::Could not get peerDependencies.typescript of typescript-eslint"
             exit 1
           fi
 
@@ -64,8 +64,8 @@ jobs:
         run: |
           # Use single quotes so the Markdown backticks are passed to printf literally instead of being command-substituted
           # shellcheck disable=SC2016
-          BODY=$(printf 'typescript-eslint の `peerDependencies.typescript` が `%s` に更新され、TypeScript 7 系を許容するようになった可能性があります。\n\nrenovate/base.json に暫定で入れている typescript のメジャー更新ブロックルールを解除できるか確認してください。\n\n- 検知元: このリポジトリの `check-typescript-eslint-ts7-support` ワークフロー\n- 確認事項: 実際に `typescript@7.x` + 最新の `typescript-eslint` で ESLint が正常動作するか、対象リポジトリの1つで動作確認してから解除すること' "$RANGE")
+          BODY=$(printf '`peerDependencies.typescript` of typescript-eslint was updated to `%s` and may now allow TypeScript 7.\n\nCheck whether the temporary major-update block rule for typescript in renovate/base.json can be removed.\n\n- Detected by: the `check-typescript-eslint-ts7-support` workflow of this repository\n- What to check: verify that ESLint works with `typescript@7.x` and the latest `typescript-eslint` in one target repository before removing the rule' "$RANGE")
           gh issue create --repo "${{ github.repository }}" \
-            --title "typescript-eslint が TypeScript 7 に対応した可能性 — Renovate のブロックルール解除を検討" \
+            --title "typescript-eslint may now support TypeScript 7 — consider removing the Renovate block rule" \
             --assignee book000 \
             --body "$BODY"

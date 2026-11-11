@@ -56,11 +56,11 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           edit-mode: replace
           body: |
-            ## Environment 承認待ち
+            ## Environment 承認待ち (Awaiting approval)
 
-            この PR のビルドを実行するには、Environment `fork-pr-build` の承認が必要です。
+            Approval of the `fork-pr-build` Environment is required to run the build for this PR.
 
-            [Actions run を確認して承認してください](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}?pr=${{ github.event.pull_request.number }})
+            [Check the Actions run and approve it](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}?pr=${{ github.event.pull_request.number }})
 
   approval-gate:
     name: Approval gate
