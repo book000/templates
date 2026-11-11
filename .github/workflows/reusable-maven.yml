@@ -32,12 +32,7 @@ on:
         type: string
         default: .
       allow-unsafe-pr-checkout:
-        description: >-
-          Allow checking out a fork pull request's head SHA from a
-          pull_request_target-triggered workflow. Only set this to true
-          after the caller workflow has gated it behind a manual review
-          step (e.g. an Environment approval), since this defeats
-          actions/checkout's default pwn-request protection.
+        description: Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection.
         type: boolean
         default: false
     outputs:
@@ -55,7 +50,7 @@ permissions:
   contents: read
 
 jobs:
-  # バージョンを計算する
+  # Calculate the version
   calc-version:
     name: Calculate next version
     runs-on: ubuntu-latest
@@ -63,23 +58,23 @@ jobs:
       contents: write  # Required for creating tags
 
     outputs:
-      # バージョン
+      # Version
       version: ${{ steps.tag-version.outputs.new_version }}
-      # バージョンタグ
+      # Version tag
       tag: ${{ steps.tag-version.outputs.new_tag }}
-      # リリースノート
+      # Release notes
       changelog: ${{ steps.tag-version.outputs.changelog }}
 
     steps:
       - name: Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          # Use github.event.pull_request.head.sha when not merged, and github.base_ref when merged
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
-          # allow-unsafe-pr-checkout 有効時(=フォークPRをcheckoutする場合)は
-          # GITHUB_TOKEN を git config に残さないことでpwn-requestのリスクを下げる
+          # When allow-unsafe-pr-checkout is enabled (i.e. a fork PR is checked out),
+          # do not leave GITHUB_TOKEN in git config to reduce the pwn-request risk
           persist-credentials: ${{ !inputs.allow-unsafe-pr-checkout }}
 
       - name: Bump version and push tag
@@ -92,7 +87,7 @@ jobs:
           dry_run: ${{ inputs.is-merged == true && 'false' || 'true' }}
           custom_tag: ${{ inputs.version }}
 
-  # Mavenでビルドする
+  # Build with Maven
   build:
     name: Maven build
     runs-on: ubuntu-latest
@@ -104,11 +99,11 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          # Use github.event.pull_request.head.sha when not merged, and github.base_ref when merged
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
-          # allow-unsafe-pr-checkout 有効時(=フォークPRをcheckoutする場合)は
-          # GITHUB_TOKEN を git config に残さないことでpwn-requestのリスクを下げる
+          # When allow-unsafe-pr-checkout is enabled (i.e. a fork PR is checked out),
+          # do not leave GITHUB_TOKEN in git config to reduce the pwn-request risk
           persist-credentials: ${{ !inputs.allow-unsafe-pr-checkout }}
 
       - name: Set up JDK 17

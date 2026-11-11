@@ -1,4 +1,4 @@
-# GitHub Packages に Docker image を公開する。（Release イベント駆動）
+# Publish a Docker image to GitHub Packages. (Triggered by release events)
 
 name: Docker Publish
 

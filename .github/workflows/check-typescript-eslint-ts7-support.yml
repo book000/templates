@@ -1,21 +1,18 @@
 name: Check typescript-eslint TypeScript 7 support
 
-# 目的: typescript-eslint が TypeScript 7 系に対応したかを定期的に検知する。
+# Purpose: periodically detect whether typescript-eslint supports TypeScript 7.
 #
-# 背景: TypeScript 7 (Go ネイティブコンパイラ) は tsc の内部 API (ts.Extension.Cjs 等) を
-# 提供していないため、typescript-eslint@8.63.0 系はこれに依存する起動時コードで
-# クラッシュする。typescript-eslint 側も peerDependencies で typescript を
-# <6.1.0 までに制限しており、対応は TS7 の新API公開待ち
-# (https://github.com/typescript-eslint/typescript-eslint/issues/10940)。
+# Background: TypeScript 7 (the native Go compiler) does not provide tsc internal APIs
+# such as ts.Extension.Cjs, so typescript-eslint crashes in startup code that depends on
+# them, and its peerDependencies.typescript range excludes TypeScript 7.
 #
-# renovate/base.json では暫定的に typescript のメジャー更新をブロックしているため、
-# 対応が入ったタイミングに気づけるよう、npm 上の typescript-eslint の
-# peerDependencies.typescript が TypeScript 7 系を許容するようになったかを
-# 週次でチェックし、対応が確認できた場合のみ Issue を起票する。
+# renovate/base.json temporarily blocks major typescript updates, so to notice when
+# support lands, check weekly whether the peerDependencies.typescript of typescript-eslint
+# on npm now allows TypeScript 7, and open an Issue only when it does.
 
 on:
   schedule:
-    - cron: "0 0 * * 1" # 毎週月曜 00:00 UTC
+    - cron: "0 0 * * 1" # Every Monday 00:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -26,7 +23,7 @@ jobs:
     name: Check typescript-eslint peer range
     runs-on: ubuntu-latest
     permissions:
-      issues: write # 対応検知時に Issue を起票するため
+      issues: write # To open an Issue when support is detected
 
     steps:
       - name: Install semver
@@ -65,7 +62,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RANGE: ${{ steps.check.outputs.range }}
         run: |
-          # Markdown 用のバッククォートをコマンド置換させず、リテラルのまま printf に渡すため単一引用符を使う
+          # Use single quotes so the Markdown backticks are passed to printf literally instead of being command-substituted
           # shellcheck disable=SC2016
           BODY=$(printf 'typescript-eslint の `peerDependencies.typescript` が `%s` に更新され、TypeScript 7 系を許容するようになった可能性があります。\n\nrenovate/base.json に暫定で入れている typescript のメジャー更新ブロックルールを解除できるか確認してください。\n\n- 検知元: このリポジトリの `check-typescript-eslint-ts7-support` ワークフロー\n- 確認事項: 実際に `typescript@7.x` + 最新の `typescript-eslint` で ESLint が正常動作するか、対象リポジトリの1つで動作確認してから解除すること' "$RANGE")
           gh issue create --repo "${{ github.repository }}" \

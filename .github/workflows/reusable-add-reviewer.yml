@@ -28,7 +28,7 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          # Use printf to safely handle the input without shell injection
+          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
           ACTORS=$(printf '%s' "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "actors: $ACTORS"
           echo "is-need-add-reviewer=$(printf '%s' "$ACTORS" | jq -r --arg actor "${{ github.actor }}" '. | contains([$actor]) | not')" >> "$GITHUB_OUTPUT"

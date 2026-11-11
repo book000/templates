@@ -4,11 +4,11 @@ on:
   workflow_call:
     inputs:
       bicep-file:
-        description: Bicep ファイルのパス
+        description: Path to the Bicep file
         type: string
         default: infra/main.bicep
       bicepparam-file:
-        description: Bicep パラメータファイルのパス
+        description: Path to the Bicep parameter file
         type: string
         default: infra/main.bicepparam
 
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Bicep CLI
-        # az は GitHub-hosted ubuntu-latest ランナーにプリインストール済みであることを前提とする
+        # Assumes az is preinstalled on GitHub-hosted ubuntu-latest runners
         run: az bicep install
 
       - name: az bicep lint

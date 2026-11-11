@@ -1,4 +1,4 @@
-# Node.js でビルド・テストを実行する。バージョンは .node-version に記載されているものを利用する
+# Build and test with Node.js. The version is taken from .node-version
 
 name: Node CI for pnpm
 
@@ -26,12 +26,7 @@ on:
         type: boolean
         default: false
       allow-unsafe-pr-checkout:
-        description: >-
-          Allow checking out a fork pull request's head SHA from a
-          pull_request_target-triggered workflow. Only set this to true
-          after the caller workflow has gated it behind a manual review
-          step (e.g. an Environment approval), since this defeats
-          actions/checkout's default pwn-request protection.
+        description: Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection.
         type: boolean
         default: false
       light-runs-on:
@@ -53,7 +48,7 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          # Use printf to safely handle the input without shell injection
+          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
           DIRECTORYS=$(printf '%s' "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "directorys=$DIRECTORYS" >> "$GITHUB_OUTPUT"
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
@@ -76,8 +71,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
-          # allow-unsafe-pr-checkout 有効時(=フォークPRをcheckoutする場合)は
-          # GITHUB_TOKEN を git config に残さないことでpwn-requestのリスクを下げる
+          # When allow-unsafe-pr-checkout is enabled (i.e. a fork PR is checked out),
+          # do not leave GITHUB_TOKEN in git config to reduce the pwn-request risk
           persist-credentials: ${{ !inputs.allow-unsafe-pr-checkout }}
 
       - name: 📂 Set lock path

@@ -33,7 +33,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # directory の誤指定で何も検査せず成功扱いになるのを防ぐ
+          # Fail instead of silently passing when a wrong directory leaves nothing to check
           if ! git ls-files -z --error-unmatch -- "$INPUT_DIRECTORY" > /dev/null 2>&1; then
             echo "Error: no tracked files under '$INPUT_DIRECTORY'." >&2
             exit 1

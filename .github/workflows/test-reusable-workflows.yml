@@ -12,7 +12,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Test Node.js CI with yarn
   test-nodejs-ci:
     name: Test reusable-nodejs-ci
     uses: ./.github/workflows/reusable-nodejs-ci.yml
@@ -21,7 +20,6 @@ jobs:
       disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
       check-git-diff: false
 
-  # Test Node.js CI with pnpm
   test-nodejs-ci-pnpm:
     name: Test reusable-nodejs-ci-pnpm
     uses: ./.github/workflows/reusable-nodejs-ci-pnpm.yml
@@ -30,7 +28,6 @@ jobs:
       disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
       check-git-diff: false
 
-  # Test Maven CI
   test-maven:
     name: Test reusable-maven
     uses: ./.github/workflows/reusable-maven.yml
@@ -42,31 +39,26 @@ jobs:
       is-release: false
       directory: test-scenarios/maven
 
-  # Test Actionlint
   test-actionlint:
     name: Test reusable-actionlint
     uses: ./.github/workflows/reusable-actionlint.yml
 
-  # Test Hadolint CI
   test-hadolint:
     name: Test reusable-hadolint-ci
     uses: ./.github/workflows/reusable-hadolint-ci.yml
 
-  # Test Python CI
   test-python-ci:
     name: Test reusable-python-ci
     uses: ./.github/workflows/reusable-python-ci.yml
     with:
       directory: test-scenarios/python
 
-  # Test ShellCheck CI
   test-shellcheck-ci:
     name: Test reusable-shellcheck-ci
     uses: ./.github/workflows/reusable-shellcheck-ci.yml
     with:
       directory: test-scenarios/docker
 
-  # Test Bicep CI
   test-bicep-ci:
     name: Test reusable-bicep-ci
     uses: ./.github/workflows/reusable-bicep-ci.yml
@@ -74,7 +66,6 @@ jobs:
       bicep-file: test-scenarios/bicep/infra/main.bicep
       bicepparam-file: test-scenarios/bicep/infra/main.bicepparam
 
-  # Test Add Reviewer (only on pull requests from the same repo to avoid issues)
   test-add-reviewer:
     name: Test reusable-add-reviewer
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
@@ -86,8 +77,8 @@ jobs:
       actors: "github-actions[bot],test-user"
       reviewers: "github-actions[bot]"
 
-  # ネガティブテスト: allowBuilds 未設定で Ignored build scripts が検出されることを確認
-  # reusable workflow は continue-on-error に対応していないため直接スクリプトをテストする
+  # Negative test: confirm that "Ignored build scripts" is detected when allowBuilds is not set
+  # Reusable workflows do not support continue-on-error, so the script is tested directly
   test-nodejs-ci-pnpm-ignored-build:
     name: Test Ignored build scripts detection
     runs-on: ubuntu-latest
@@ -118,7 +109,7 @@ jobs:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-ignored-build-test-${{ hashFiles('test-scenarios/nodejs-pnpm-ignored-build-scripts/pnpm-lock.yaml') }}
 
-      - name: 👨🏻‍💻 Install dependencies (Ignored build scripts が発生するため失敗が期待される)
+      - name: 👨🏻‍💻 Install dependencies (expected to fail because of Ignored build scripts)
         id: install
         continue-on-error: true
         working-directory: test-scenarios/nodejs-pnpm-ignored-build-scripts
@@ -132,7 +123,7 @@ jobs:
             exit 1
           fi
 
-      - name: ✅ Ignored build scripts 検出の確認
+      - name: ✅ Confirm Ignored build scripts detection
         run: |
           if [[ "${{ steps.install.outcome }}" != "failure" ]]; then
             echo "❌ 検出テスト失敗: install ステップが失敗しませんでした (outcome: ${{ steps.install.outcome }})"
@@ -147,7 +138,7 @@ jobs:
           fi
           echo "✅ Ignored build scripts の検出が正常に機能しています"
 
-  # Test Docker workflow (dry run without pushing)
+  # Test the Docker workflow (dry run without pushing)
   test-docker:
     name: Test reusable-docker
     uses: ./.github/workflows/reusable-docker.yml
@@ -172,12 +163,8 @@ jobs:
       DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-  # Summary job to check all tests passed
-  # ジョブ名の末尾に " Finished" を含める: book000/sync-repo-settings の
-  # detect_status_checks() が必須ステータスチェックを自動検出する際、
-  # prefer_finished_jobs: true の設定により "finished" を含むジョブ名を
-  # 優先して選択する。これにより、全テストジョブの成否を集約するこの
-  # ジョブだけが必須チェックとして登録されるようにする。
+  # Aggregates all test jobs. Keep " Finished" in the name: book000/sync-repo-settings prefers
+  # job names containing "finished" when auto-detecting required checks.
   test-summary:
     name: Test Summary Finished
     runs-on: ubuntu-latest
@@ -206,7 +193,7 @@ jobs:
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
 
-          # Check if any positive test failed (skipped is OK for add-reviewer when not on PR)
+          # Check that no positive test failed (skipped is OK for add-reviewer when not on a PR)
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}" != "success" ]] || \

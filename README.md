@@ -1,5 +1,13 @@
 # book000/templates
 
+Templates shared across multiple repositories. Copy the files from this repository with `wget`.
+
+- GitHub Actions workflows: copy the files under `workflows/`. The real work lives in the reusable workflows (`.github/workflows/reusable-*.yml`), which the copied workflow calls with `uses: book000/templates/.github/workflows/reusable-*.yml@master`.
+- Dockerfile: copy a file under `dockerfiles/` as `Dockerfile`.
+- Renovate: copy a configuration under `renovate/` as `renovate.json`.
+
+In each workflow table, an input marked with `✔` in the `Required` column is required.
+
 ## GitHub Action workflows
 
 ### actionlint.yml
@@ -28,8 +36,8 @@ mkdir -p .github/workflows ; wget -O .github/workflows/bicep-ci.yml https://raw.
 
 | Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `bicep-file` | Bicep ファイルのパス | `string` | `infra/main.bicep` |
-|  | `bicepparam-file` | Bicep パラメータファイルのパス | `string` | `infra/main.bicepparam` |
+|  | `bicep-file` | Path to the Bicep file | `string` | `infra/main.bicep` |
+|  | `bicepparam-file` | Path to the Bicep parameter file | `string` | `infra/main.bicepparam` |
 
 ### docker.yml
 

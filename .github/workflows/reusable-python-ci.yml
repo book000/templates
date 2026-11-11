@@ -44,7 +44,7 @@ jobs:
           INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
           INPUT_DISABLED_JOBS: ${{ inputs.disabled-jobs }}
         run: |
-          # 入力はシェルへ直接展開せず、環境変数経由で扱う
+          # Pass inputs through environment variables instead of expanding them into the shell script
           disabled=",${INPUT_DISABLED_JOBS//[[:space:]]/},"
           for job in compile ruff format test; do
             if [[ "$disabled" == *",${job},"* ]]; then
@@ -112,5 +112,5 @@ jobs:
         working-directory: ${{ inputs.directory }}
         run: |
           python -m pip install pytest
-          # テストが 1 件も収集されない場合 (exit code 5) は成功扱いにする
+          # Treat "no tests collected" (exit code 5) as success
           python -m pytest || { code=$?; [ "$code" -eq 5 ] && echo "No tests collected." || exit "$code"; }

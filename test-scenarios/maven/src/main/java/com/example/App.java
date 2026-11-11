@@ -10,7 +10,6 @@ public class App {
         String capitalized = StringUtils.capitalize(testString);
         System.out.println("Capitalized: " + capitalized);
         
-        // Simple test
         if (StringUtils.isNotEmpty(testString)) {
             System.out.println("String is not empty: " + testString);
         }
