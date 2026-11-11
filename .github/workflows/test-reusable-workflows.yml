@@ -176,6 +176,8 @@ jobs:
       - test-maven
       - test-actionlint
       - test-hadolint
+      - test-python-ci
+      - test-shellcheck-ci
       - test-bicep-ci
       - test-add-reviewer
       - test-docker
@@ -189,6 +191,8 @@ jobs:
           echo "Maven result: ${{ needs.test-maven.result }}"
           echo "Actionlint result: ${{ needs.test-actionlint.result }}"
           echo "Hadolint result: ${{ needs.test-hadolint.result }}"
+          echo "Python CI result: ${{ needs.test-python-ci.result }}"
+          echo "ShellCheck CI result: ${{ needs.test-shellcheck-ci.result }}"
           echo "Bicep CI result: ${{ needs.test-bicep-ci.result }}"
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
@@ -200,6 +204,8 @@ jobs:
              [[ "${{ needs.test-maven.result }}" != "success" ]] || \
              [[ "${{ needs.test-actionlint.result }}" != "success" ]] || \
              [[ "${{ needs.test-hadolint.result }}" != "success" ]] || \
+             [[ "${{ needs.test-python-ci.result }}" != "success" ]] || \
+             [[ "${{ needs.test-shellcheck-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-bicep-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-add-reviewer.result }}" == "failure" ]] || \
              [[ "${{ needs.test-docker.result }}" != "success" ]]; then
