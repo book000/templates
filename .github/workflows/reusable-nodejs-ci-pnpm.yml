@@ -47,11 +47,14 @@ jobs:
     steps:
       - name: Setup
         id: setup
+        env:
+          INPUT_DIRECTORYS: ${{ inputs.directorys }}
+          INPUT_DISABLED_JOBS: ${{ inputs.disabled-jobs }}
         run: |
-          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
-          DIRECTORYS=$(printf '%s' "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          DIRECTORYS=$(printf '%s' "$INPUT_DIRECTORYS" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "directorys=$DIRECTORYS" >> "$GITHUB_OUTPUT"
-          DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
+          DISABLED_JOBS=$(printf '%s' "$INPUT_DISABLED_JOBS" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "disabled-jobs=$DISABLED_JOBS" >> "$GITHUB_OUTPUT"
 
   node-ci:
@@ -77,9 +80,13 @@ jobs:
 
       - name: 📂 Set lock path
         id: lock-path
+        env:
+          INPUT_LOCK_PATH: ${{ inputs.lock-path }}
+          MATRIX_DIRECTORY: ${{ matrix.directory }}
         run: |
-          LOCK_PATH_TEMPLATE="${{ inputs.lock-path }}"
-          DIR="${{ matrix.directory }}"
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          LOCK_PATH_TEMPLATE="$INPUT_LOCK_PATH"
+          DIR="$MATRIX_DIRECTORY"
           LOCK_PATH="${LOCK_PATH_TEMPLATE//\{dir\}/$DIR}"
           echo "lock-path=$LOCK_PATH" >> "$GITHUB_OUTPUT"
 
@@ -99,13 +106,20 @@ jobs:
 
       - name: 👨🏻‍💻 Install apt packages
         if: inputs.install-apt-packages != ''
+        env:
+          INPUT_APT_PACKAGES: ${{ inputs.install-apt-packages }}
         run: |
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          # Split on whitespace (including newlines) without glob expansion
+          read -r -d '' -a packages <<< "$INPUT_APT_PACKAGES" || true
           sudo apt-get update
-          sudo apt-get install -y ${{ inputs.install-apt-packages }}
+          sudo apt-get install -y "${packages[@]}"
 
       - name: 📃 Check package.json definition
         id: package-json
         working-directory: ${{ matrix.directory }}
+        env:
+          DISABLED_JOBS: ${{ needs.setup.outputs.disabled-jobs }}
         run: |
           compile=$(jq '.scripts | has("compile")' package.json)
           build=$(jq '.scripts | has("build")' package.json)
@@ -131,13 +145,13 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
           {
-            echo "disabled-compile=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["compile"])')"
-            echo "disabled-build=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["build"])')"
-            echo "disabled-generate=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["generate"])')"
-            echo "disabled-package=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["package"])')"
-            echo "disabled-lint=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["lint"])')"
-            echo "disabled-test=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["test"])')"
-            echo "disabled-depcheck=$(echo ${{ needs.setup.outputs.disabled-jobs }} | jq -r '. | contains(["depcheck"])')"
+            echo "disabled-compile=$(printf '%s' "$DISABLED_JOBS" | jq -r '. | contains(["compile"])')"
+            echo "disabled-build=$(printf '%s' "$DISABLED_JOBS" | jq -r '. | contains(["build"])')"
+            echo "disabled-generate=$(printf '%s' "$DISABLED_JOBS" | jq -r '. | contains(["generate"])')"
+            echo "disabled-package=$(printf '%s' "$DISABLED_JOBS" | jq -r '. | contains(["package"])')"
+            echo "disabled-lint=$(printf '%s' "$DISABLED_JOBS" | jq -r '. | contains(["lint"])')"
+            echo "disabled-test=$(printf '%s' "$DISABLED_JOBS" | jq -r '. | contains(["test"])')"
+            echo "disabled-depcheck=$(printf '%s' "$DISABLED_JOBS" | jq -r '. | contains(["depcheck"])')"
           } >> "$GITHUB_OUTPUT"
 
       - name: 📂 Get pnpm store directory

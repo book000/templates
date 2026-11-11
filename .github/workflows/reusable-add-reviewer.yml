@@ -27,9 +27,11 @@ jobs:
     steps:
       - name: Setup
         id: setup
+        env:
+          INPUT_ACTORS: ${{ inputs.actors }}
         run: |
-          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
-          ACTORS=$(printf '%s' "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
+          # Pass inputs through environment variables instead of expanding them into the shell script
+          ACTORS=$(printf '%s' "$INPUT_ACTORS" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "actors: $ACTORS"
           echo "is-need-add-reviewer=$(printf '%s' "$ACTORS" | jq -r --arg actor "${{ github.actor }}" '. | contains([$actor]) | not')" >> "$GITHUB_OUTPUT"
 
@@ -38,9 +40,12 @@ jobs:
         if: ${{ steps.setup.outputs.is-need-add-reviewer == 'true' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Pass inputs through environment variables instead of expanding them into the script
           script: |
             await github.rest.pulls.requestReviewers({
               ...context.repo,
               pull_number: context.issue.number,
-              reviewers: "${{ inputs.reviewers }}".split(",")
+              reviewers: process.env.INPUT_REVIEWERS.split(",")
             })
+        env:
+          INPUT_REVIEWERS: ${{ inputs.reviewers }}

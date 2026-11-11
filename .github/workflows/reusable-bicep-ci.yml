@@ -28,11 +28,18 @@ jobs:
         # Assumes az is preinstalled on GitHub-hosted ubuntu-latest runners
         run: az bicep install
 
+      # Pass inputs through environment variables instead of expanding them into the shell script
       - name: az bicep lint
-        run: az bicep lint --file "${{ inputs.bicep-file }}"
+        env:
+          BICEP_FILE: ${{ inputs.bicep-file }}
+        run: az bicep lint --file "$BICEP_FILE"
 
       - name: az bicep build
-        run: az bicep build --file "${{ inputs.bicep-file }}" --stdout > /dev/null
+        env:
+          BICEP_FILE: ${{ inputs.bicep-file }}
+        run: az bicep build --file "$BICEP_FILE" --stdout > /dev/null
 
       - name: az bicep build-params
-        run: az bicep build-params --file "${{ inputs.bicepparam-file }}" --stdout > /dev/null
+        env:
+          BICEPPARAM_FILE: ${{ inputs.bicepparam-file }}
+        run: az bicep build-params --file "$BICEPPARAM_FILE" --stdout > /dev/null
