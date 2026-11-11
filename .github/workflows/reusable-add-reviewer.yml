@@ -4,15 +4,15 @@ on:
   workflow_call:
     inputs:
       actors:
-        description: Target actors (comma separated)
+        description: 対象のアクター（カンマ区切り）
         type: string
         default: dependabot[bot],renovate[bot],github-actions[bot],book000
       reviewers:
-        description: Reviewers (comma separated)
+        description: レビュアー（カンマ区切り）
         type: string
         default: book000
       light-runs-on:
-        description: Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest)
+        description: 軽量ジョブのランナーラベル（ubuntu-slim、ubuntu-latest など）
         type: string
         default: ubuntu-slim
 
@@ -28,7 +28,7 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          # Use printf to safely handle the input without shell injection
+          # 注意: ワークフロー式（inputs の値）はシェルの解釈前に展開されるため、入力は信頼できる呼び出し元のものに限る
           ACTORS=$(printf '%s' "${{ inputs.actors }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "actors: $ACTORS"
           echo "is-need-add-reviewer=$(printf '%s' "$ACTORS" | jq -r --arg actor "${{ github.actor }}" '. | contains([$actor]) | not')" >> "$GITHUB_OUTPUT"

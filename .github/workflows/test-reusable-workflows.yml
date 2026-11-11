@@ -12,25 +12,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Test Node.js CI with yarn
   test-nodejs-ci:
     name: Test reusable-nodejs-ci
     uses: ./.github/workflows/reusable-nodejs-ci.yml
     with:
       directorys: "test-scenarios/nodejs-yarn"
-      disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
+      disabled-jobs: "depcheck"  # テスト失敗を避けるため depcheck をスキップする
       check-git-diff: false
 
-  # Test Node.js CI with pnpm
   test-nodejs-ci-pnpm:
     name: Test reusable-nodejs-ci-pnpm
     uses: ./.github/workflows/reusable-nodejs-ci-pnpm.yml
     with:
       directorys: "test-scenarios/nodejs-pnpm"
-      disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
+      disabled-jobs: "depcheck"  # テスト失敗を避けるため depcheck をスキップする
       check-git-diff: false
 
-  # Test Maven CI
   test-maven:
     name: Test reusable-maven
     uses: ./.github/workflows/reusable-maven.yml
@@ -42,31 +39,26 @@ jobs:
       is-release: false
       directory: test-scenarios/maven
 
-  # Test Actionlint
   test-actionlint:
     name: Test reusable-actionlint
     uses: ./.github/workflows/reusable-actionlint.yml
 
-  # Test Hadolint CI
   test-hadolint:
     name: Test reusable-hadolint-ci
     uses: ./.github/workflows/reusable-hadolint-ci.yml
 
-  # Test Python CI
   test-python-ci:
     name: Test reusable-python-ci
     uses: ./.github/workflows/reusable-python-ci.yml
     with:
       directory: test-scenarios/python
 
-  # Test ShellCheck CI
   test-shellcheck-ci:
     name: Test reusable-shellcheck-ci
     uses: ./.github/workflows/reusable-shellcheck-ci.yml
     with:
       directory: test-scenarios/docker
 
-  # Test Bicep CI
   test-bicep-ci:
     name: Test reusable-bicep-ci
     uses: ./.github/workflows/reusable-bicep-ci.yml
@@ -74,7 +66,6 @@ jobs:
       bicep-file: test-scenarios/bicep/infra/main.bicep
       bicepparam-file: test-scenarios/bicep/infra/main.bicepparam
 
-  # Test Add Reviewer (only on pull requests from the same repo to avoid issues)
   test-add-reviewer:
     name: Test reusable-add-reviewer
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
@@ -147,7 +138,7 @@ jobs:
           fi
           echo "✅ Ignored build scripts の検出が正常に機能しています"
 
-  # Test Docker workflow (dry run without pushing)
+  # Docker ワークフローのテスト（push を行わないドライラン）
   test-docker:
     name: Test reusable-docker
     uses: ./.github/workflows/reusable-docker.yml
@@ -172,7 +163,7 @@ jobs:
       DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-  # Summary job to check all tests passed
+  # 全テストの成功を確認する集約ジョブ
   # ジョブ名の末尾に " Finished" を含める: book000/sync-repo-settings の
   # detect_status_checks() が必須ステータスチェックを自動検出する際、
   # prefer_finished_jobs: true の設定により "finished" を含むジョブ名を
@@ -206,7 +197,7 @@ jobs:
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
 
-          # Check if any positive test failed (skipped is OK for add-reviewer when not on PR)
+          # 正常系テストが 1 つでも失敗していないか確認する（add-reviewer は PR 以外ではスキップでも可）
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}" != "success" ]] || \

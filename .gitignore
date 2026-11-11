@@ -1,16 +1,16 @@
-# Test scenario build artifacts - these are only for local testing
+# テストシナリオのビルド成果物（ローカルでのテスト専用）
 test-scenarios/*/node_modules/
 test-scenarios/*/target/
 test-scenarios/*/dist/
 test-scenarios/*/build/
 test-scenarios/*/coverage/
 
-# Temporary files
+# 一時ファイル
 test-scenarios/*/.DS_Store
 test-scenarios/*/.env
 test-scenarios/*/.env.local
 
-# Dependencies installed for scripts
+# スクリプト用にインストールした依存関係
 node_modules/
 package.json
 package-lock.json

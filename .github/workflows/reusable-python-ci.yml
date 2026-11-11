@@ -4,23 +4,23 @@ on:
   workflow_call:
     inputs:
       directory:
-        description: Target directory
+        description: 対象ディレクトリ
         type: string
         default: .
       python-version:
-        description: Python version. If empty, uses {directory}/.python-version when it exists, otherwise 3.x
+        description: Python のバージョン。空の場合は {directory}/.python-version があればそれを、なければ 3.x を使う
         type: string
         default: ""
       requirements-file:
-        description: requirements file path relative to the target directory (skipped if it does not exist)
+        description: 対象ディレクトリからの requirements ファイルの相対パス（存在しない場合はスキップ）
         type: string
         default: requirements.txt
       disabled-jobs:
-        description: Disable jobs (comma separated. compile, ruff, format, test)
+        description: 無効化するジョブ（カンマ区切り。compile, ruff, format, test）
         type: string
         default: "NULL"
       install-apt-packages:
-        description: Install apt packages (space separated)
+        description: インストールする apt パッケージ（スペース区切り）
         type: string
         default: ""
 

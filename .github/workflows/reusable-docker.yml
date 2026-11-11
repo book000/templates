@@ -4,68 +4,63 @@ on:
   workflow_call:
     inputs:
       registry:
-        description: Docker registry
+        description: Docker レジストリ
         type: string
         default: ghcr.io
       platforms:
-        description: Docker platforms
+        description: Docker プラットフォーム
         type: string
         default: linux/amd64,linux/arm64
       targets:
-        description: Docker targets
+        description: Docker ビルド対象
         required: true
         type: string
       is-merged:
-        description: Is merged
+        description: マージ済みかどうか
         type: boolean
         default: ${{ github.event.pull_request.merged == true }}
       is-release:
-        description: Whether to release
+        description: リリースするかどうか
         type: boolean
         default: true
       pr-head-sha:
-        description: Pull request head SHA
+        description: プルリクエストの head SHA
         type: string
         default: ${{ github.event.pull_request.head.sha }}
       version:
-        description: Next custom version (Not included prefix)
+        description: 次のバージョンを明示する場合の値（プレフィックスを含めない）
         type: string
         default: ""
       allow-unsafe-pr-checkout:
-        description: >-
-          Allow checking out a fork pull request's head SHA from a
-          pull_request_target-triggered workflow. Only set this to true
-          after the caller workflow has gated it behind a manual review
-          step (e.g. an Environment approval), since this defeats
-          actions/checkout's default pwn-request protection.
+        description: pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。
         type: boolean
         default: false
       light-runs-on:
-        description: Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest)
+        description: 軽量ジョブのランナーラベル（ubuntu-slim、ubuntu-latest など）
         type: string
         default: ubuntu-slim
     outputs:
       version:
-        description: Next version
+        description: 次のバージョン
         value: ${{ jobs.calc-version.outputs.version }}
       tag:
-        description: Next tag
+        description: 次のタグ
         value: ${{ jobs.calc-version.outputs.tag }}
       changelog:
-        description: Changelog
+        description: 変更履歴
         value: ${{ jobs.calc-version.outputs.changelog }}
       upload_url:
-        description: Release upload URL
+        description: リリースのアップロード URL
         value: ${{ jobs.release.outputs.upload_url }}
       release_id:
-        description: Release ID
+        description: リリース ID
         value: ${{ jobs.release.outputs.release_id }}
     secrets:
       DOCKER_USERNAME:
-        description: Docker registry password
+        description: Docker レジストリのパスワード
         required: true
       DOCKER_PASSWORD:
-        description: Docker registry username
+        description: Docker レジストリのユーザー名
         required: true
 
 permissions:
@@ -79,7 +74,7 @@ jobs:
     name: Calculate next version
     runs-on: ${{ inputs.light-runs-on }}
     permissions:
-      contents: write # Required for creating tags
+      contents: write # タグの作成に必要
 
     outputs:
       # バージョン
@@ -119,11 +114,10 @@ jobs:
       - name: 📊 Set platform matrix
         id: platform-matrix
         run: |
-          # Use printf and parameter expansion to safely handle platform input
+          # 注意: ワークフロー式（inputs の値）はシェルの解釈前に展開されるため、入力は信頼できる呼び出し元のものに限る
           platforms="${{ inputs.platforms }}"
           # shellcheck disable=SC2312
           echo "matrix=[$(printf '%s' "$platforms" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> "$GITHUB_OUTPUT"
-          # Check if comma exists for need-merge determination
           if [[ "$platforms" == *","* ]]; then
             echo "need-merge=true" >> "$GITHUB_OUTPUT"
           else
@@ -169,7 +163,6 @@ jobs:
       - name: 🗑️ Remove platform prefix
         id: platform
         run: |
-          # Use parameter expansion to safely process platform string
           platform="${{ matrix.platform }}"
           short_platform="${platform##*/}"
           echo "shortPlatform=$short_platform" >> "$GITHUB_OUTPUT"
@@ -332,7 +325,7 @@ jobs:
       - name: 📝 Create extra-images list
         id: extra-images
         run: |
-          # Use printf to safely handle platform input without shell injection
+          # 注意: ワークフロー式（inputs の値）はシェルの解釈前に展開されるため、入力は信頼できる呼び出し元のものに限る
           platforms="${{ inputs.platforms }}"
           registry="${{ inputs.registry }}"
           image_name="${{ matrix.target.imageName }}"
@@ -365,7 +358,7 @@ jobs:
       - build
       - merge-latest
     permissions:
-      contents: write # Required for creating releases
+      contents: write # リリースの作成に必要
 
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -394,7 +387,7 @@ jobs:
       - merge-latest
       - release
     permissions:
-      contents: write # Required for uploading release assets
+      contents: write # リリースアセットのアップロードに必要
 
     steps:
       - name: 📥 Check out the repo

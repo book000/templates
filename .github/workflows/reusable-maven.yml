@@ -4,51 +4,46 @@ on:
   workflow_call:
     inputs:
       java-version:
-        description: Java version
+        description: Java のバージョン
         type: string
         default: "17"
       jdk-distribution:
-        description: JDK distribution
+        description: JDK のディストリビューション
         type: string
         default: "adopt"
       is-merged:
-        description: Is merged
+        description: マージ済みかどうか
         type: boolean
         default: ${{ github.event.pull_request.merged == true }}
       is-release:
-        description: Whether to release
+        description: リリースするかどうか
         type: boolean
         default: true
       pr-head-sha:
-        description: Pull request head SHA
+        description: プルリクエストの head SHA
         type: string
         default: ${{ github.event.pull_request.head.sha }}
       version:
-        description: Next custom version (Not included prefix)
+        description: 次のバージョンを明示する場合の値（プレフィックスを含めない）
         type: string
         default: ""
       directory:
-        description: Working directory containing pom.xml
+        description: pom.xml があるワーキングディレクトリ
         type: string
         default: .
       allow-unsafe-pr-checkout:
-        description: >-
-          Allow checking out a fork pull request's head SHA from a
-          pull_request_target-triggered workflow. Only set this to true
-          after the caller workflow has gated it behind a manual review
-          step (e.g. an Environment approval), since this defeats
-          actions/checkout's default pwn-request protection.
+        description: pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。
         type: boolean
         default: false
     outputs:
       version:
-        description: Next version
+        description: 次のバージョン
         value: ${{ jobs.calc-version.outputs.version }}
       tag:
-        description: Next tag
+        description: 次のタグ
         value: ${{ jobs.calc-version.outputs.tag }}
       changelog:
-        description: Changelog
+        description: 変更履歴
         value: ${{ jobs.calc-version.outputs.changelog }}
 
 permissions:
@@ -60,7 +55,7 @@ jobs:
     name: Calculate next version
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required for creating tags
+      contents: write  # タグの作成に必要
 
     outputs:
       # バージョン
@@ -98,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: calc-version
     permissions:
-      contents: write  # Required for creating releases
+      contents: write  # リリースの作成に必要
 
     steps:
       - name: Check out the repo

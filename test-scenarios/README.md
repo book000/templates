@@ -1,42 +1,34 @@
-# Test Scenarios for Reusable Workflows
+# Reusable Workflow のテストシナリオ
 
-This directory contains test scenarios to validate that the reusable GitHub workflows in this repository function correctly.
+このディレクトリは、このリポジトリの Reusable Workflow が正しく動作することを検証するためのテストシナリオです。
 
-## Test Structure
+## 構成
 
-- `nodejs-yarn/` - Test project for `reusable-nodejs-ci.yml`
-- `nodejs-pnpm/` - Test project for `reusable-nodejs-ci-pnpm.yml`
-- `maven/` - Test project for `reusable-maven.yml`
-- `docker/` - Test files for `reusable-docker.yml` and `reusable-hadolint-ci.yml`
-- `python/` - Test project for `reusable-python-ci.yml`
-- `docker/test.sh` is also used as the target of `reusable-shellcheck-ci.yml`
-- `workflows/` - Test workflow files for `reusable-actionlint.yml`
+- `nodejs-yarn/`: `reusable-nodejs-ci.yml` 用のテストプロジェクト
+- `nodejs-pnpm/`: `reusable-nodejs-ci-pnpm.yml` 用のテストプロジェクト
+- `nodejs-pnpm-ignored-build-scripts/`: pnpm の Ignored build scripts 検出が機能することを確かめる負のテスト用プロジェクト
+- `maven/`: `reusable-maven.yml` 用のテストプロジェクト
+- `docker/`: `reusable-docker.yml` と `reusable-hadolint-ci.yml` 用のテストファイル（`docker/test.sh` は `reusable-shellcheck-ci.yml` の対象にもなる）
+- `python/`: `reusable-python-ci.yml` 用のテストプロジェクト
+- `bicep/`: `reusable-bicep-ci.yml` 用のテストファイル
+- `workflows/`: actionlint 用のサンプルワークフロー（テストワークフローからは参照されない。`reusable-actionlint.yml` はリポジトリ自身の `.github/workflows/` を検査する）
 
-## Purpose
+## 目的
 
-These test scenarios help ensure that:
+- 依存（`actions/setup-node` など）の更新による破壊的変更を、利用側のリポジトリに影響する前に検出する
+- Reusable Workflow の構文が正しいことを確認する
+- 単純で正しい入力を各ワークフローが処理できることを確認する
+- 変更による退行を防ぐ
 
-1. **Breaking changes are detected early** - When dependencies like `actions/setup-node` are updated, the tests will catch issues before they affect downstream projects.
-2. **Workflow syntax is valid** - All reusable workflows use correct GitHub Actions syntax.
-3. **Basic functionality works** - Each workflow can successfully process simple, valid inputs.
-4. **Regression prevention** - Changes to workflows are validated before being released.
+## テストの実行方法
 
-## How Tests Work
+テストは `.github/workflows/test-reusable-workflows.yml` が実行します。各 Reusable Workflow を `test-scenarios/` 配下のテスト用入力で呼び出し、公開やデプロイといった副作用が出ないよう `is-merged: false`、`is-release: false` などを指定します。テストに支障が出るステップ（`depcheck` など）は `disabled-jobs` でスキップします。
 
-The tests are executed by the `.github/workflows/test-reusable-workflows.yml` workflow, which:
+## メンテナンス
 
-1. **Calls each reusable workflow** with appropriate test inputs
-2. **Uses non-destructive parameters** (e.g., `is-merged: false`, `is-release: false`)
-3. **Skips problematic steps** (e.g., dependency checking that might fail in test scenarios)
-4. **Validates basic execution** without side effects like publishing or deploying
+Reusable Workflow を追加・変更するときは、次のとおり更新します。
 
-## Maintenance
-
-When adding or modifying reusable workflows:
-
-1. **Update test scenarios** if new input parameters are added
-2. **Add new test directories** for new workflow types
-3. **Ensure test projects remain minimal** but functional
-4. **Update the main test workflow** to include new workflows
-
-This testing approach helps maintain the reliability of reusable workflows that are used across multiple repositories.
+1. 入力を追加した場合は、テストシナリオを更新する
+2. 新しい種類のワークフローを追加した場合は、テスト用ディレクトリを追加する
+3. テストプロジェクトは最小限で動作する状態を保つ
+4. `test-reusable-workflows.yml` に新しいワークフローのテストを追加し、`test-summary` ジョブの `needs` にも加える

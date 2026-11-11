@@ -4,11 +4,11 @@ on:
   workflow_call:
     inputs:
       directory:
-        description: Target directory (git tracked files only)
+        description: 対象ディレクトリ（git 管理下のファイルのみ）
         type: string
         default: .
       severity:
-        description: Minimum severity of issues to report (error, warning, info, style)
+        description: 報告する指摘の最小重大度（error, warning, info, style）
         type: string
         default: warning
 

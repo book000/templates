@@ -85,8 +85,8 @@ jobs:
         [
           { imageName: "tomacheese/twitter-dm-memo", context: ".", file: "Dockerfile", packageName: "twitter-dm-memo" }
         ]
-      # registry: registry.hub.docker.com # default: ghcr.io
-      # platforms: linux/amd64 # default: linux/amd64,linux/arm64
+      # registry: registry.hub.docker.com # デフォルト: ghcr.io
+      # platforms: linux/amd64 # デフォルト: linux/amd64,linux/arm64
       allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
     secrets:
       DOCKER_USERNAME: ${{ github.actor }}

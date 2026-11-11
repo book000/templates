@@ -6,7 +6,6 @@ echo "Current directory: $(pwd)"
 echo "Date: $(date)"
 echo "User: $(whoami)"
 
-# Test curl is available
 if command -v curl &> /dev/null; then
     echo "curl is available"
 else

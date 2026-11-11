@@ -26,14 +26,13 @@ function getWorkflowText(path) {
   }
 
   const inputs = reusable.on.workflow_call.inputs;
-  const headers = ["Required", "Key", "Description", "Type", "Default"];
+  const headers = ["必須", "キー", "説明", "型", "デフォルト"];
   const inputsText = Object.keys(inputs).map((key) => {
     const input = inputs[key];
     const required = input.required ? "✔" : "";
     const description = input.description || "";
     const type = input.type ? `\`${input.type}\`` : "";
-    // Check if default exists (not undefined, not null)
-    // Allow false, 0, and empty string as valid defaults
+    // false・0・空文字列も有効なデフォルト値として扱う（undefined と null のみ「なし」）
     const hasDefault = input.default !== undefined && input.default !== null;
     const defaultVal = hasDefault ? `\`${input.default}\`` : "";
     const line = [
