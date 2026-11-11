@@ -1,4 +1,4 @@
-# Node.js でビルド・テストを実行する。バージョンは .node-version に記載されているものを利用する
+# Build and test with Node.js. The version is taken from .node-version
 
 name: Node CI for pnpm
 
@@ -6,31 +6,31 @@ on:
   workflow_call:
     inputs:
       directorys:
-        description: 対象ディレクトリ（カンマ区切り）
+        description: Target directorys (comma separated)
         type: string
         default: .
       disabled-jobs:
-        description: 無効化するジョブ（カンマ区切り）
+        description: Disable Jobs (comma separated)
         type: string
         default: "NULL"
       install-apt-packages:
-        description: インストールする apt パッケージ（スペース区切り）
+        description: Install apt packages (space separated)
         type: string
         default: ""
       lock-path:
-        description: ロックファイルのパス
+        description: Lock file path
         type: string
         default: "{dir}/pnpm-lock.yaml"
       check-git-diff:
-        description: git diff を確認するかどうか
+        description: Check git diff
         type: boolean
         default: false
       allow-unsafe-pr-checkout:
-        description: pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。
+        description: Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection.
         type: boolean
         default: false
       light-runs-on:
-        description: 軽量ジョブのランナーラベル（ubuntu-slim、ubuntu-latest など）
+        description: Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest)
         type: string
         default: ubuntu-slim
 permissions:
@@ -48,7 +48,7 @@ jobs:
       - name: Setup
         id: setup
         run: |
-          # 注意: ワークフロー式（inputs の値）はシェルの解釈前に展開されるため、入力は信頼できる呼び出し元のものに限る
+          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
           DIRECTORYS=$(printf '%s' "${{ inputs.directorys }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))')
           echo "directorys=$DIRECTORYS" >> "$GITHUB_OUTPUT"
           DISABLED_JOBS=$(printf '%s' "${{ inputs.disabled-jobs }}" | jq -R -c 'split(",") | map(select(length > 0) | ltrimstr(" ") | rtrimstr(" "))' | sed -e "s/\"/\\\\\"/g")
@@ -71,8 +71,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
-          # allow-unsafe-pr-checkout 有効時(=フォークPRをcheckoutする場合)は
-          # GITHUB_TOKEN を git config に残さないことでpwn-requestのリスクを下げる
+          # When allow-unsafe-pr-checkout is enabled (i.e. a fork PR is checked out),
+          # do not leave GITHUB_TOKEN in git config to reduce the pwn-request risk
           persist-credentials: ${{ !inputs.allow-unsafe-pr-checkout }}
 
       - name: 📂 Set lock path

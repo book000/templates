@@ -4,23 +4,23 @@ on:
   workflow_call:
     inputs:
       directory:
-        description: 対象ディレクトリ
+        description: Target directory
         type: string
         default: .
       python-version:
-        description: Python のバージョン。空の場合は {directory}/.python-version があればそれを、なければ 3.x を使う
+        description: Python version. If empty, uses {directory}/.python-version when it exists, otherwise 3.x
         type: string
         default: ""
       requirements-file:
-        description: 対象ディレクトリからの requirements ファイルの相対パス（存在しない場合はスキップ）
+        description: requirements file path relative to the target directory (skipped if it does not exist)
         type: string
         default: requirements.txt
       disabled-jobs:
-        description: 無効化するジョブ（カンマ区切り。compile, ruff, format, test）
+        description: Disable jobs (comma separated. compile, ruff, format, test)
         type: string
         default: "NULL"
       install-apt-packages:
-        description: インストールする apt パッケージ（スペース区切り）
+        description: Install apt packages (space separated)
         type: string
         default: ""
 
@@ -44,7 +44,7 @@ jobs:
           INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
           INPUT_DISABLED_JOBS: ${{ inputs.disabled-jobs }}
         run: |
-          # 入力はシェルへ直接展開せず、環境変数経由で扱う
+          # Pass inputs through environment variables instead of expanding them into the shell script
           disabled=",${INPUT_DISABLED_JOBS//[[:space:]]/},"
           for job in compile ruff format test; do
             if [[ "$disabled" == *",${job},"* ]]; then
@@ -112,5 +112,5 @@ jobs:
         working-directory: ${{ inputs.directory }}
         run: |
           python -m pip install pytest
-          # テストが 1 件も収集されない場合 (exit code 5) は成功扱いにする
+          # Treat "no tests collected" (exit code 5) as success
           python -m pytest || { code=$?; [ "$code" -eq 5 ] && echo "No tests collected." || exit "$code"; }

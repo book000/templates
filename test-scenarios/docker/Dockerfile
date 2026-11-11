@@ -4,7 +4,7 @@ ARG APPLICATION_VERSION=unknown
 ARG GIT_REVISION=unknown
 ARG BUILD_TIME=unknown
 
-# reusable-docker.yml が build metadata を各 Docker build へ渡すことを検証する。
+# Verify that reusable-docker.yml passes the build metadata to every Docker build.
 RUN test "$APPLICATION_VERSION" != "unknown" \
     && test "$GIT_REVISION" != "unknown" \
     && test "$BUILD_TIME" != "unknown"

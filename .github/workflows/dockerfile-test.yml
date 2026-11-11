@@ -27,7 +27,7 @@ jobs:
       - name: 📄 List Dockefile files
         id: list-files
         run: |
-          # git diff --name-only の結果をもとに、Dockerfile 拡張子のファイルを取得して、JSON配列として "$GITHUB_OUTPUT" に files として出力する
+          # Emit the names of changed Dockerfiles as a JSON array named files
           echo "[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '^dockerfiles/.+Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]"
           echo "files=[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '^dockerfiles/.+Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> "$GITHUB_OUTPUT"
 
@@ -50,8 +50,8 @@ jobs:
       - name: 🧪 Test
         id: test
         run: |
-          # dockerfiles/tests/<File>/ ディレクトリが存在するか確認し、存在する場合は、そのディレクトリに移動して docker build を実行する
-          # <File> は拡張子を除いたファイル名
+          # If dockerfiles/tests/<File>/ exists, move into it and run docker build
+          # <File> is the file name without the extension
           if [ -d "dockerfiles/tests/${{ matrix.file }}" ]; then
             cp dockerfiles/${{ matrix.file }}.Dockerfile dockerfiles/tests/${{ matrix.file }}/Dockerfile
             cd dockerfiles/tests/${{ matrix.file }}

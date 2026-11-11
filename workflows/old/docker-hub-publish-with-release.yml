@@ -1,5 +1,5 @@
-# DockerHub に Docker image を公開する。（Release イベント駆動）
-# Secrets の DOCKER_USERNAME と DOCKER_PASSWORD を設定する必要あり（DOCKER_USERNAME はトークン）
+# Publish a Docker image to Docker Hub. (Triggered by release events)
+# The DOCKER_USERNAME and DOCKER_PASSWORD secrets must be set (DOCKER_USERNAME is a token)
 
 name: Docker Publish
 

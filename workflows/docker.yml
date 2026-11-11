@@ -1,5 +1,5 @@
-# 任意のレジストリに Docker image を公開orビルドする。
-# プルリクの作成・更新時に動作する。
+# Publish or build a Docker image to any registry.
+# Runs when a pull request is opened or updated.
 
 name: Docker
 
@@ -25,8 +25,8 @@ on:
   merge_group:
 
 concurrency:
-  # pull_request と pull_request_target が同一グループになると互いをキャンセルしてしまうため
-  # event_name を含めることで両イベントのキャンセルを独立させる
+  # If pull_request and pull_request_target shared one group they would cancel each other,
+  # so include event_name to keep their cancellation independent
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
@@ -34,7 +34,7 @@ jobs:
   post-approval-request:
     name: Post approval request
     runs-on: ubuntu-latest
-    # フォーク PR のときのみ承認リクエストを投稿する（closed は不要）
+    # Post the approval request only for fork PRs (not needed for closed)
     if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.action != 'closed'
     continue-on-error: true
     permissions:
@@ -66,9 +66,8 @@ jobs:
     name: Approval gate
     runs-on: ubuntu-latest
     needs: post-approval-request
-    # post-approval-request の結果に関わらず常に実行する
     if: always()
-    # フォーク PR かつ closed でない場合のみ Environment で手動承認が必要
+    # Manual approval via Environment is required only for fork PRs that are not closed
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.action != 'closed' && 'fork-pr-build' || '' }}
     permissions: {}
     steps:
@@ -85,8 +84,8 @@ jobs:
         [
           { imageName: "tomacheese/twitter-dm-memo", context: ".", file: "Dockerfile", packageName: "twitter-dm-memo" }
         ]
-      # registry: registry.hub.docker.com # デフォルト: ghcr.io
-      # platforms: linux/amd64 # デフォルト: linux/amd64,linux/arm64
+      # registry: registry.hub.docker.com # default: ghcr.io
+      # platforms: linux/amd64 # default: linux/amd64,linux/arm64
       allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
     secrets:
       DOCKER_USERNAME: ${{ github.actor }}

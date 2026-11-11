@@ -18,8 +18,7 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          # GitHub Actions の background/wait-all は 2026-06-25 導入済みだが、
-          # actionlint v1.7.12 は未対応のため、その既知誤検知だけを除外する。
+          # actionlint does not support background/wait-all yet, so ignore only those known false positives (remove once supported).
           ./actionlint -color \
             -ignore='unexpected.*key.*background' \
             -ignore='step.*must.*run.*script.*with.*run.*section.*or.*run.*action.*with.*uses.*section'
@@ -29,7 +28,7 @@ jobs:
         uses: reviewdog/action-actionlint/dockerless@a7d35aaf8c309203a4ae861d32b7bd490baa7bf3 # v1.83.0
         with:
           fail_level: error
-          # INPUT_ACTIONLINT_FLAGS は shell word splitting されるため、空白なしの RE2 にする。
+          # INPUT_ACTIONLINT_FLAGS is split by the shell, so use a regular expression without spaces.
           actionlint_flags: >-
             -ignore=unexpected.*key.*background
             -ignore=step.*must.*run.*script.*with.*run.*section.*or.*run.*action.*with.*uses.*section

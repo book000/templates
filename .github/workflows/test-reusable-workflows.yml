@@ -17,7 +17,7 @@ jobs:
     uses: ./.github/workflows/reusable-nodejs-ci.yml
     with:
       directorys: "test-scenarios/nodejs-yarn"
-      disabled-jobs: "depcheck"  # テスト失敗を避けるため depcheck をスキップする
+      disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
       check-git-diff: false
 
   test-nodejs-ci-pnpm:
@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/reusable-nodejs-ci-pnpm.yml
     with:
       directorys: "test-scenarios/nodejs-pnpm"
-      disabled-jobs: "depcheck"  # テスト失敗を避けるため depcheck をスキップする
+      disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
       check-git-diff: false
 
   test-maven:
@@ -77,8 +77,8 @@ jobs:
       actors: "github-actions[bot],test-user"
       reviewers: "github-actions[bot]"
 
-  # ネガティブテスト: allowBuilds 未設定で Ignored build scripts が検出されることを確認
-  # reusable workflow は continue-on-error に対応していないため直接スクリプトをテストする
+  # Negative test: confirm that "Ignored build scripts" is detected when allowBuilds is not set
+  # Reusable workflows do not support continue-on-error, so the script is tested directly
   test-nodejs-ci-pnpm-ignored-build:
     name: Test Ignored build scripts detection
     runs-on: ubuntu-latest
@@ -109,7 +109,7 @@ jobs:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-ignored-build-test-${{ hashFiles('test-scenarios/nodejs-pnpm-ignored-build-scripts/pnpm-lock.yaml') }}
 
-      - name: 👨🏻‍💻 Install dependencies (Ignored build scripts が発生するため失敗が期待される)
+      - name: 👨🏻‍💻 Install dependencies (expected to fail because of Ignored build scripts)
         id: install
         continue-on-error: true
         working-directory: test-scenarios/nodejs-pnpm-ignored-build-scripts
@@ -123,7 +123,7 @@ jobs:
             exit 1
           fi
 
-      - name: ✅ Ignored build scripts 検出の確認
+      - name: ✅ Confirm Ignored build scripts detection
         run: |
           if [[ "${{ steps.install.outcome }}" != "failure" ]]; then
             echo "❌ 検出テスト失敗: install ステップが失敗しませんでした (outcome: ${{ steps.install.outcome }})"
@@ -138,7 +138,7 @@ jobs:
           fi
           echo "✅ Ignored build scripts の検出が正常に機能しています"
 
-  # Docker ワークフローのテスト（push を行わないドライラン）
+  # Test the Docker workflow (dry run without pushing)
   test-docker:
     name: Test reusable-docker
     uses: ./.github/workflows/reusable-docker.yml
@@ -163,12 +163,8 @@ jobs:
       DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-  # 全テストの成功を確認する集約ジョブ
-  # ジョブ名の末尾に " Finished" を含める: book000/sync-repo-settings の
-  # detect_status_checks() が必須ステータスチェックを自動検出する際、
-  # prefer_finished_jobs: true の設定により "finished" を含むジョブ名を
-  # 優先して選択する。これにより、全テストジョブの成否を集約するこの
-  # ジョブだけが必須チェックとして登録されるようにする。
+  # Aggregates all test jobs. Keep " Finished" in the name: book000/sync-repo-settings prefers
+  # job names containing "finished" when auto-detecting required checks.
   test-summary:
     name: Test Summary Finished
     runs-on: ubuntu-latest
@@ -197,7 +193,7 @@ jobs:
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
 
-          # 正常系テストが 1 つでも失敗していないか確認する（add-reviewer は PR 以外ではスキップでも可）
+          # Check that no positive test failed (skipped is OK for add-reviewer when not on a PR)
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}" != "success" ]] || \

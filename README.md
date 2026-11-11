@@ -1,12 +1,12 @@
 # book000/templates
 
-複数のリポジトリで使い回すテンプレートを管理するリポジトリです。このリポジトリのファイルは `wget` で各リポジトリへコピーして使います。
+Templates shared across multiple repositories. Copy the files from this repository with `wget`.
 
-- GitHub Actions ワークフロー: `workflows/` のファイルをコピーして使う。実処理は Reusable Workflow（`.github/workflows/reusable-*.yml`）に置き、コピーしたワークフローから `uses: book000/templates/.github/workflows/reusable-*.yml@master` で呼び出す
-- Dockerfile: `dockerfiles/` のファイルを `Dockerfile` としてコピーして使う
-- Renovate: `renovate/` の設定を `renovate.json` としてコピーして使う
+- GitHub Actions workflows: copy the files under `workflows/`. The real work lives in the reusable workflows (`.github/workflows/reusable-*.yml`), which the copied workflow calls with `uses: book000/templates/.github/workflows/reusable-*.yml@master`.
+- Dockerfile: copy a file under `dockerfiles/` as `Dockerfile`.
+- Renovate: copy a configuration under `renovate/` as `renovate.json`.
 
-各ワークフローの表で、「必須」列に `✔` が付いた入力は必須です。
+In each workflow table, an input marked with `✔` in the `Required` column is required.
 
 ## GitHub Action workflows
 
@@ -22,11 +22,11 @@ mkdir -p .github/workflows ; wget -O .github/workflows/actionlint.yml https://ra
 mkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://raw.githubusercontent.com/book000/templates/master/workflows/add-reviewer.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `actors` | 対象のアクター（カンマ区切り） | `string` | `dependabot[bot],renovate[bot],github-actions[bot],book000` |
-|  | `reviewers` | レビュアー（カンマ区切り） | `string` | `book000` |
-|  | `light-runs-on` | 軽量ジョブのランナーラベル（ubuntu-slim、ubuntu-latest など） | `string` | `ubuntu-slim` |
+|  | `actors` | Target actors (comma separated) | `string` | `dependabot[bot],renovate[bot],github-actions[bot],book000` |
+|  | `reviewers` | Reviewers (comma separated) | `string` | `book000` |
+|  | `light-runs-on` | Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest) | `string` | `ubuntu-slim` |
 
 ### bicep-ci.yml
 
@@ -34,10 +34,10 @@ mkdir -p .github/workflows ; wget -O .github/workflows/add-reviewer.yml https://
 mkdir -p .github/workflows ; wget -O .github/workflows/bicep-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/bicep-ci.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `bicep-file` | Bicep ファイルのパス | `string` | `infra/main.bicep` |
-|  | `bicepparam-file` | Bicep パラメータファイルのパス | `string` | `infra/main.bicepparam` |
+|  | `bicep-file` | Path to the Bicep file | `string` | `infra/main.bicep` |
+|  | `bicepparam-file` | Path to the Bicep parameter file | `string` | `infra/main.bicepparam` |
 
 ### docker.yml
 
@@ -45,17 +45,17 @@ mkdir -p .github/workflows ; wget -O .github/workflows/bicep-ci.yml https://raw.
 mkdir -p .github/workflows ; wget -O .github/workflows/docker.yml https://raw.githubusercontent.com/book000/templates/master/workflows/docker.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `registry` | Docker レジストリ | `string` | `ghcr.io` |
-|  | `platforms` | Docker プラットフォーム | `string` | `linux/amd64,linux/arm64` |
-| ✔ | `targets` | Docker ビルド対象 | `string` |  |
-|  | `is-merged` | マージ済みかどうか | `boolean` | `${{ github.event.pull_request.merged == true }}` |
-|  | `is-release` | リリースするかどうか | `boolean` | `true` |
-|  | `pr-head-sha` | プルリクエストの head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
-|  | `version` | 次のバージョンを明示する場合の値（プレフィックスを含めない） | `string` | `` |
-|  | `allow-unsafe-pr-checkout` | pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。 | `boolean` | `false` |
-|  | `light-runs-on` | 軽量ジョブのランナーラベル（ubuntu-slim、ubuntu-latest など） | `string` | `ubuntu-slim` |
+|  | `registry` | Docker registry | `string` | `ghcr.io` |
+|  | `platforms` | Docker platforms | `string` | `linux/amd64,linux/arm64` |
+| ✔ | `targets` | Docker targets | `string` |  |
+|  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
+|  | `is-release` | Whether to release | `boolean` | `true` |
+|  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
+|  | `version` | Next custom version (Not included prefix) | `string` | `` |
+|  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
+|  | `light-runs-on` | Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest) | `string` | `ubuntu-slim` |
 
 ### hadolint-ci.yml
 
@@ -69,16 +69,16 @@ mkdir -p .github/workflows ; wget -O .github/workflows/hadolint-ci.yml https://r
 mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/maven-ci.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `java-version` | Java のバージョン | `string` | `17` |
-|  | `jdk-distribution` | JDK のディストリビューション | `string` | `adopt` |
-|  | `is-merged` | マージ済みかどうか | `boolean` | `${{ github.event.pull_request.merged == true }}` |
-|  | `is-release` | リリースするかどうか | `boolean` | `true` |
-|  | `pr-head-sha` | プルリクエストの head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
-|  | `version` | 次のバージョンを明示する場合の値（プレフィックスを含めない） | `string` | `` |
-|  | `directory` | pom.xml があるワーキングディレクトリ | `string` | `.` |
-|  | `allow-unsafe-pr-checkout` | pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。 | `boolean` | `false` |
+|  | `java-version` | Java version | `string` | `17` |
+|  | `jdk-distribution` | JDK distribution | `string` | `adopt` |
+|  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
+|  | `is-release` | Whether to release | `boolean` | `true` |
+|  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
+|  | `version` | Next custom version (Not included prefix) | `string` | `` |
+|  | `directory` | Working directory containing pom.xml | `string` | `.` |
+|  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
 
 ### nodejs-ci-pnpm.yml
 
@@ -86,15 +86,15 @@ mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.
 mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci-pnpm.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-ci-pnpm.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `directorys` | 対象ディレクトリ（カンマ区切り） | `string` | `.` |
-|  | `disabled-jobs` | 無効化するジョブ（カンマ区切り） | `string` | `NULL` |
-|  | `install-apt-packages` | インストールする apt パッケージ（スペース区切り） | `string` | `` |
-|  | `lock-path` | ロックファイルのパス | `string` | `{dir}/pnpm-lock.yaml` |
-|  | `check-git-diff` | git diff を確認するかどうか | `boolean` | `false` |
-|  | `allow-unsafe-pr-checkout` | pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。 | `boolean` | `false` |
-|  | `light-runs-on` | 軽量ジョブのランナーラベル（ubuntu-slim、ubuntu-latest など） | `string` | `ubuntu-slim` |
+|  | `directorys` | Target directorys (comma separated) | `string` | `.` |
+|  | `disabled-jobs` | Disable Jobs (comma separated) | `string` | `NULL` |
+|  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
+|  | `lock-path` | Lock file path | `string` | `{dir}/pnpm-lock.yaml` |
+|  | `check-git-diff` | Check git diff | `boolean` | `false` |
+|  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
+|  | `light-runs-on` | Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest) | `string` | `ubuntu-slim` |
 
 ### nodejs-ci.yml
 
@@ -102,14 +102,14 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci-pnpm.yml https:
 mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/nodejs-ci.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `directorys` | 対象ディレクトリ（カンマ区切り） | `string` | `.` |
-|  | `disabled-jobs` | 無効化するジョブ（カンマ区切り） | `string` | `NULL` |
-|  | `install-apt-packages` | インストールする apt パッケージ（スペース区切り） | `string` | `` |
-|  | `lock-path` | yarn.lock のパス | `string` | `{dir}/yarn.lock` |
-|  | `check-git-diff` | git diff を確認するかどうか | `boolean` | `false` |
-|  | `allow-unsafe-pr-checkout` | pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。 | `boolean` | `false` |
+|  | `directorys` | Target directorys (comma separated) | `string` | `.` |
+|  | `disabled-jobs` | Disable Jobs (comma separated) | `string` | `NULL` |
+|  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
+|  | `lock-path` | yarn.lock path | `string` | `{dir}/yarn.lock` |
+|  | `check-git-diff` | Check git diff | `boolean` | `false` |
+|  | `allow-unsafe-pr-checkout` | Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection. | `boolean` | `false` |
 
 ### python-ci.yml
 
@@ -117,13 +117,13 @@ mkdir -p .github/workflows ; wget -O .github/workflows/nodejs-ci.yml https://raw
 mkdir -p .github/workflows ; wget -O .github/workflows/python-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/python-ci.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `directory` | 対象ディレクトリ | `string` | `.` |
-|  | `python-version` | Python のバージョン。空の場合は {directory}/.python-version があればそれを、なければ 3.x を使う | `string` | `` |
-|  | `requirements-file` | 対象ディレクトリからの requirements ファイルの相対パス（存在しない場合はスキップ） | `string` | `requirements.txt` |
-|  | `disabled-jobs` | 無効化するジョブ（カンマ区切り。compile, ruff, format, test） | `string` | `NULL` |
-|  | `install-apt-packages` | インストールする apt パッケージ（スペース区切り） | `string` | `` |
+|  | `directory` | Target directory | `string` | `.` |
+|  | `python-version` | Python version. If empty, uses {directory}/.python-version when it exists, otherwise 3.x | `string` | `` |
+|  | `requirements-file` | requirements file path relative to the target directory (skipped if it does not exist) | `string` | `requirements.txt` |
+|  | `disabled-jobs` | Disable jobs (comma separated. compile, ruff, format, test) | `string` | `NULL` |
+|  | `install-apt-packages` | Install apt packages (space separated) | `string` | `` |
 
 ### shellcheck-ci.yml
 
@@ -131,10 +131,10 @@ mkdir -p .github/workflows ; wget -O .github/workflows/python-ci.yml https://raw
 mkdir -p .github/workflows ; wget -O .github/workflows/shellcheck-ci.yml https://raw.githubusercontent.com/book000/templates/master/workflows/shellcheck-ci.yml
 ```
 
-| 必須 | キー | 説明 | 型 | デフォルト |
+| Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
-|  | `directory` | 対象ディレクトリ（git 管理下のファイルのみ） | `string` | `.` |
-|  | `severity` | 報告する指摘の最小重大度（error, warning, info, style） | `string` | `warning` |
+|  | `directory` | Target directory (git tracked files only) | `string` | `.` |
+|  | `severity` | Minimum severity of issues to report (error, warning, info, style) | `string` | `warning` |
 
 ## Dockerfile
 

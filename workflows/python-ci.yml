@@ -1,4 +1,4 @@
-# Python の構文チェック・ruff・pytest を実行する。バージョンは .python-version があればそれを利用する
+# Run Python syntax check, ruff and pytest. The version is taken from .python-version when it exists
 
 name: Python CI
 

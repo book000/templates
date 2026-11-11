@@ -4,8 +4,9 @@ Development guidance lives in `AGENTS.md`. This file lists only what to check in
 
 ## Language
 
-- Deliverables (PR/Issue text, review comments, code comments, docs, commit descriptions) are written in Japanese. Runtime messages (logs, errors) stay in English.
-- Write review comments in Japanese.
+- All deliverables (PR/Issue text, review comments, code comments, docs, commit descriptions) are written in English, and runtime messages (logs, errors) are English.
+- Exceptions: strings that other repositories match on (for example the Japanese `body-includes` text of the fork-PR approval comment), quotations, generated files, and the bundled actionlint docs in `docs/`.
+- Write review comments in English.
 
 ## What this repository is
 
@@ -16,7 +17,7 @@ Development guidance lives in `AGENTS.md`. This file lists only what to check in
 - Backward compatibility: no `inputs` / `secrets` / `outputs`, job name, or file path of `workflows/` and `.github/workflows/reusable-*.yml` is removed, renamed, made required, or given a behavior-changing default.
 - Strings that downstream repositories match on (for example `body-includes` in the fork-PR approval comment) are unchanged, or changed consistently in both places.
 - Security: no secrets echoed to logs, no fork PR code executed in a privileged context, trust-boundary inputs such as `allow-unsafe-pr-checkout` stay safe by default, `permissions` are minimal.
-- Shell steps fail fast and do not swallow pipe failures. New code passes inputs to scripts through `env:` and references them as `"$VAR"`; `printf` around a directly interpolated workflow expression is not a mitigation (some existing steps still interpolate directly).
+- Shell steps fail fast and do not swallow pipe failures. New code passes inputs to scripts through `env:` and references them as `"$VAR"`; `printf` around a directly interpolated workflow expression is not a mitigation (existing steps that interpolate directly are tracked separately; do not flag them).
 - Third-party Actions are pinned to commit SHAs. References to `book000/templates` itself (`@master`) are intentionally not pinned (Renovate `pinDigests: false`); do not flag them.
 - Dockerfiles follow Hadolint best practices and keep the Alpine base and `Asia/Tokyo` timezone.
 - New or changed reusable workflows are covered by `test-reusable-workflows.yml` and `test-scenarios/`.
@@ -27,4 +28,4 @@ Development guidance lives in `AGENTS.md`. This file lists only what to check in
 - `actionlint` in the repository root is an intentionally committed binary.
 - There is no `package.json`; do not ask for npm scripts.
 - The two-layer layout (`workflows/` wrapper plus `.github/workflows/reusable-*.yml`) is intentional.
-- `docs/` is a bundled copy of the upstream actionlint documentation (English).
+- `docs/` is a bundled copy of the upstream actionlint documentation.

@@ -47,7 +47,7 @@
       "rangeStrategy": "pin"
     },
     {
-      "description": "FROM node (Dockerfile) / .node-version / engines.node (package.json) を同一バージョンへ同期させるため、 node datasource の更新をグループ化して同一バージョンへ pin する",
+      "description": "Group node datasource updates and pin them to one version so that FROM node (Dockerfile), .node-version and engines.node (package.json) stay in sync",
       "matchPackageNames": ["node"],
       "matchDatasources": ["node"],
       "groupName": "node",
@@ -60,7 +60,7 @@
       "matchPackageNames": ["fastify", "fastify-raw-body", "@fastify/**"]
     },
     {
-      "description": "TypeScript 7 は tsc の内部API (ts.Extension.Cjs 等) をまだ提供しておらず、typescript-eslint@8.63.0 系がこれに依存する起動時コードでクラッシュするため、typescript のメジャー更新を暫定的にブロックする。typescript-eslint 側の対応状況は check-typescript-eslint-ts7-support ワークフローで検知するので、対応が確認できたらこのルールを削除すること (typescript-eslint/typescript-eslint#10940)",
+      "description": "TypeScript 7 does not provide tsc internal APIs (such as ts.Extension.Cjs) yet, and typescript-eslint crashes in startup code that depends on them, so major typescript updates are temporarily blocked. The check-typescript-eslint-ts7-support workflow detects when typescript-eslint adds support; remove this rule once support is confirmed",
       "matchPackageNames": ["typescript"],
       "matchUpdateTypes": ["major"],
       "enabled": false

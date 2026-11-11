@@ -1,12 +1,12 @@
 # book000/templates
 
-複数のリポジトリで使い回すテンプレートを管理するリポジトリです。このリポジトリのファイルは `wget` で各リポジトリへコピーして使います。
+Templates shared across multiple repositories. Copy the files from this repository with `wget`.
 
-- GitHub Actions ワークフロー: `workflows/` のファイルをコピーして使う。実処理は Reusable Workflow（`.github/workflows/reusable-*.yml`）に置き、コピーしたワークフローから `uses: book000/templates/.github/workflows/reusable-*.yml@master` で呼び出す
-- Dockerfile: `dockerfiles/` のファイルを `Dockerfile` としてコピーして使う
-- Renovate: `renovate/` の設定を `renovate.json` としてコピーして使う
+- GitHub Actions workflows: copy the files under `workflows/`. The real work lives in the reusable workflows (`.github/workflows/reusable-*.yml`), which the copied workflow calls with `uses: book000/templates/.github/workflows/reusable-*.yml@master`.
+- Dockerfile: copy a file under `dockerfiles/` as `Dockerfile`.
+- Renovate: copy a configuration under `renovate/` as `renovate.json`.
 
-各ワークフローの表で、「必須」列に `✔` が付いた入力は必須です。
+In each workflow table, an input marked with `✔` in the `Required` column is required.
 
 ## GitHub Action workflows
 

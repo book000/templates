@@ -4,63 +4,63 @@ on:
   workflow_call:
     inputs:
       registry:
-        description: Docker レジストリ
+        description: Docker registry
         type: string
         default: ghcr.io
       platforms:
-        description: Docker プラットフォーム
+        description: Docker platforms
         type: string
         default: linux/amd64,linux/arm64
       targets:
-        description: Docker ビルド対象
+        description: Docker targets
         required: true
         type: string
       is-merged:
-        description: マージ済みかどうか
+        description: Is merged
         type: boolean
         default: ${{ github.event.pull_request.merged == true }}
       is-release:
-        description: リリースするかどうか
+        description: Whether to release
         type: boolean
         default: true
       pr-head-sha:
-        description: プルリクエストの head SHA
+        description: Pull request head SHA
         type: string
         default: ${{ github.event.pull_request.head.sha }}
       version:
-        description: 次のバージョンを明示する場合の値（プレフィックスを含めない）
+        description: Next custom version (Not included prefix)
         type: string
         default: ""
       allow-unsafe-pr-checkout:
-        description: pull_request_target で起動されたワークフローから、フォーク PR の head SHA をチェックアウトすることを許可する。actions/checkout 既定の pwn-request 対策を無効にするため、呼び出し側ワークフローで手動レビュー（Environment 承認など）を必須にした後でのみ true にすること。
+        description: Allow checking out a fork pull request's head SHA from a pull_request_target-triggered workflow. Only set this to true after the caller workflow has gated it behind a manual review step (e.g. an Environment approval), since this defeats actions/checkout's default pwn-request protection.
         type: boolean
         default: false
       light-runs-on:
-        description: 軽量ジョブのランナーラベル（ubuntu-slim、ubuntu-latest など）
+        description: Runner label for lightweight jobs (e.g. ubuntu-slim, ubuntu-latest)
         type: string
         default: ubuntu-slim
     outputs:
       version:
-        description: 次のバージョン
+        description: Next version
         value: ${{ jobs.calc-version.outputs.version }}
       tag:
-        description: 次のタグ
+        description: Next tag
         value: ${{ jobs.calc-version.outputs.tag }}
       changelog:
-        description: 変更履歴
+        description: Changelog
         value: ${{ jobs.calc-version.outputs.changelog }}
       upload_url:
-        description: リリースのアップロード URL
+        description: Release upload URL
         value: ${{ jobs.release.outputs.upload_url }}
       release_id:
-        description: リリース ID
+        description: Release ID
         value: ${{ jobs.release.outputs.release_id }}
     secrets:
       DOCKER_USERNAME:
-        description: Docker レジストリのパスワード
+        description: Docker registry password
         required: true
       DOCKER_PASSWORD:
-        description: Docker レジストリのユーザー名
+        description: Docker registry username
         required: true
 
 permissions:
@@ -69,34 +69,31 @@ permissions:
   deployments: write
 
 jobs:
-  # バージョンを計算する
+  # Calculate the version
   calc-version:
     name: Calculate next version
     runs-on: ${{ inputs.light-runs-on }}
     permissions:
-      contents: write # タグの作成に必要
+      contents: write # Required for creating tags
 
     outputs:
-      # バージョン
       version: ${{ steps.tag-version.outputs.new_version }}
-      # バージョンタグ
       tag: ${{ steps.tag-version.outputs.new_tag }}
-      # リリースノート
       changelog: ${{ steps.tag-version.outputs.changelog }}
-      # プラットフォーム(アーキテクチャ)のマトリクス
+      # Matrix of platforms (architectures)
       platform-matrix: ${{ steps.platform-matrix.outputs.matrix }}
-      # latestタグへのマージが必要かどうか (複数のプラットフォームがある時は必要)
+      # Whether merging into the latest tag is needed (required when there are multiple platforms)
       need-merge: ${{ steps.platform-matrix.outputs.need-merge }}
-      # ビルド対象情報のマトリクス
+      # Matrix of build targets
       targets-matrix: ${{ steps.targets-matrix.outputs.matrix }}
-      # パッケージのアップロードが必要かどうか
+      # Whether package upload is needed
       need-upload: ${{ steps.need-upload.outputs.need-upload }}
 
     steps:
       - name: 📥 Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          # Use github.event.pull_request.head.sha when not merged, and github.base_ref when merged
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           fetch-depth: 0
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
@@ -114,7 +111,7 @@ jobs:
       - name: 📊 Set platform matrix
         id: platform-matrix
         run: |
-          # 注意: ワークフロー式（inputs の値）はシェルの解釈前に展開されるため、入力は信頼できる呼び出し元のものに限る
+          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
           platforms="${{ inputs.platforms }}"
           # shellcheck disable=SC2312
           echo "matrix=[$(printf '%s' "$platforms" | sed -r -e 's/([^,]+)/\"\1\"/g' -e 's/([^,]+),/\1,/g')]" >> "$GITHUB_OUTPUT"
@@ -136,27 +133,26 @@ jobs:
       - name: 📦 Check if need package upload
         id: need-upload
         run: |
-          # package.json がない場合は false
+          # false when there is no package.json
           if [ ! -f package.json ]; then
             echo "need-upload=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # "ncc build" が package.json にある場合は true、ない場合は false
+          # true when package.json contains "ncc build", false otherwise
           echo "need-upload=$(grep -q 'ncc build' package.json && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
-  # Dockerイメージをビルドする
+  # Build the Docker images
   build:
     name: Docker build (${{ matrix.target.packageName }}, ${{ matrix.platform }})
-    # matrix.platform が linux/arm64 の場合は ubuntu-24.04-arm を使う。それ以外の場合は ubuntu-latest を使う
+    # Use ubuntu-24.04-arm when matrix.platform is linux/arm64, ubuntu-latest otherwise
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     needs: calc-version
 
     strategy:
       fail-fast: false
       matrix:
-        # ビルドするプラットフォーム
         platform: ${{ fromJSON(needs.calc-version.outputs.platform-matrix) }}
-        # ビルドするDockerfile
+        # Dockerfile to build
         target: ${{ fromJSON(needs.calc-version.outputs.targets-matrix) }}
 
     steps:
@@ -189,7 +185,7 @@ jobs:
       - name: 📥 Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          # Use github.event.pull_request.head.sha when not merged, and github.base_ref when merged
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
 
@@ -241,8 +237,8 @@ jobs:
         with:
           images: ${{ inputs.registry }}/${{ matrix.target.imageName }}
           tags: |
-            # need-mergeがtrueの時はshortHyphenPlatformを含める (latest-arm64)
-            # need-mergeがfalseの時はshortHyphenPlatformを含めない (latest)
+            # Include shortHyphenPlatform when need-merge is true (latest-arm64)
+            # Omit shortHyphenPlatform when need-merge is false (latest)
             type=raw,value=${{ needs.calc-version.outputs.tag }}${{ steps.tag.outputs.suffix }}
             type=raw,value=latest${{ steps.tag.outputs.suffix }}
 
@@ -298,7 +294,7 @@ jobs:
             exit 1
           fi
 
-  # 各プラットフォームのlatestからlatestタグにマージしてイメージを作成
+  # Merge each platform's latest image into the latest tag
   merge-latest:
     name: Merge latest (${{ matrix.target.packageName }})
     runs-on: ubuntu-latest
@@ -310,7 +306,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # ビルドするDockerfile
+        # Dockerfile to build
         target: ${{ fromJSON(needs.calc-version.outputs.targets-matrix) }}
 
     steps:
@@ -325,7 +321,7 @@ jobs:
       - name: 📝 Create extra-images list
         id: extra-images
         run: |
-          # 注意: ワークフロー式（inputs の値）はシェルの解釈前に展開されるため、入力は信頼できる呼び出し元のものに限る
+          # Inputs are expanded into this script before the shell parses it, so pass only trusted values
           platforms="${{ inputs.platforms }}"
           registry="${{ inputs.registry }}"
           image_name="${{ matrix.target.imageName }}"
@@ -333,7 +329,7 @@ jobs:
 
       - name: 📝 Create and push manifest images (latest)
         uses: Noelware/docker-manifest-action@b33ab348026b120a895167160f5605b0197f0862 # 0.4.3
-        # プラットフォームがひとつの場合はマージ処理を行わない
+        # Skip merging when there is only one platform
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
           images: ${{ steps.extra-images.outputs.images }}
@@ -342,7 +338,7 @@ jobs:
 
       - name: 📝 Create and push manifest images (version)
         uses: Noelware/docker-manifest-action@b33ab348026b120a895167160f5605b0197f0862 # 0.4.3
-        # プラットフォームがひとつの場合はマージ処理を行わない
+        # Skip merging when there is only one platform
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
         with:
           images: ${{ steps.extra-images.outputs.images }}
@@ -358,7 +354,7 @@ jobs:
       - build
       - merge-latest
     permissions:
-      contents: write # リリースの作成に必要
+      contents: write # Required for creating releases
 
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -387,13 +383,13 @@ jobs:
       - merge-latest
       - release
     permissions:
-      contents: write # リリースアセットのアップロードに必要
+      contents: write # Required for uploading release assets
 
     steps:
       - name: 📥 Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # マージされていない時には github.event.pull_request.head.sha を使い、マージされた時にはgithub.base_refを使う
+          # Use github.event.pull_request.head.sha when not merged, and github.base_ref when merged
           ref: ${{ inputs.is-merged == true && github.base_ref || inputs.pr-head-sha }}
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
 

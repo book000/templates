@@ -1,1 +1,1 @@
-# 依存パッケージなし
+# no dependencies

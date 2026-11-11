@@ -1,5 +1,3 @@
-"""app.add のテスト。"""
-
 import sys
 from pathlib import Path
 
