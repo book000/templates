@@ -5,8 +5,8 @@ Guidance for AI coding agents and contributors. `CLAUDE.md` imports this file, a
 ## Language
 
 - All deliverables are written in **English**: commit messages, PR/Issue titles and bodies, review comments, code comments and docstrings, and documentation (`README.md`, `AGENTS.md`, `test-scenarios/README.md`, etc.).
-- Exceptions (keep as is): quotations, technical identifiers, generated files, external text, and strings that other repositories match on. The fork-PR approval comment in `workflows/*.yml` (`body-includes: Environment 承認待ち`) must stay Japanese: it matches the `## Environment 承認待ち` heading of the bot comment, so change the search condition and the heading together, and only after checking downstream repositories. The rest of that comment body is legacy Japanese text, tracked with the runtime messages below. `docs/` is a bundled copy of the rhysd/actionlint documentation and is not translated.
-- Runtime messages (logs, errors) are English. Existing Japanese runtime text in workflows (log and error messages, and the tracking Issue created by `check-typescript-eslint-ts7-support.yml`) is tracked separately; do not change it without checking the impact on downstream repositories.
+- Exceptions (keep as is): quotations, technical identifiers, generated files, external text, and strings that other repositories match on. The fork-PR approval comment in `workflows/*.yml`: the search condition `body-includes: Environment 承認待ち` and the Japanese marker in the heading `## Environment 承認待ち` must stay (the heading may carry an English suffix such as `(Awaiting approval)`), so change the search condition and the heading marker together, and only after checking downstream repositories. `docs/` is a bundled copy of the rhysd/actionlint documentation and is not translated.
+- Runtime messages (logs, errors, bot comments, auto-created Issues) are English. The approval-comment marker above is the only Japanese text left in the workflows.
 - Do not rewrite Git history to change the language of past commits.
 
 ## Overview
@@ -48,7 +48,7 @@ docker run --rm -i hadolint/hadolint < dockerfiles/node-app-pnpm.Dockerfile
 
 - `README.md` is generated; do not edit it by hand. Edit `.github/templates.md` and run `node scripts/generate-readme.js` (on push, `generate-readme.yml` commits the result). The input descriptions come from `inputs.<name>.description` in the reusable workflows.
 - Do not remove, rename or make required any `inputs`, `secrets`, `outputs`, job name or file path of a reusable workflow without checking backward compatibility. Check that a changed default does not change behavior.
-- Do not change strings that callers match on (for example `body-includes: Environment 承認待ち` in the approval comment of `workflows/*.yml`). If you must, change the heading of the comment body and the search condition in `workflows/` together.
+- Do not change strings that callers match on (for example `body-includes: Environment 承認待ち` in the approval comment of `workflows/*.yml`). If you must, change the heading marker of the comment body and the search condition in `workflows/` together; the heading may carry an English suffix as long as the marker substring stays.
 - In new shell steps, pass workflow inputs and other expressions through `env:` and reference them as `"$VAR"`; do not interpolate `${{ }}` directly into `run:` scripts.
 - Inputs that cross a trust boundary, such as `allow-unsafe-pr-checkout`, must be safe by default (`false`). Never run fork PR code in a privileged context.
 - References to `book000/templates` itself use tags or branches, following the Renovate setting (`pinDigests: false`).
