@@ -11,7 +11,6 @@ This directory contains test scenarios to validate that the reusable GitHub work
 - `docker/` - Test files for `reusable-docker.yml` and `reusable-hadolint-ci.yml` (`docker/test.sh` is also the target of `reusable-shellcheck-ci.yml`)
 - `python/` - Test project for `reusable-python-ci.yml`
 - `bicep/` - Test files for `reusable-bicep-ci.yml`
-- `workflows/` - Sample workflow for actionlint. It is not referenced by the test workflow; `reusable-actionlint.yml` checks this repository's own `.github/workflows/`
 
 ## Purpose
 
