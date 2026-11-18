@@ -68,6 +68,11 @@
     {
       "matchPackageNames": ["!/^@book000\\//"],
       "stabilityDays": 3
+    },
+    {
+      "description": "pnpm rejects npm releases younger than its minimumReleaseAge (default 1440 minutes = 1 day), so @book000/ packages need at least the same waiting period",
+      "matchPackageNames": ["/^@book000\\//"],
+      "minimumReleaseAge": "1 day"
     }
   ]
 }
