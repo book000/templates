@@ -98,15 +98,89 @@ jobs:
           fetch-depth: 0
           allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
 
-      - name: 🏷️ Bump version and push tag
-        id: tag-version
-        uses: mathieudutour/github-tag-action@a22cf08638b34d5badda920f9daf6e72c477b07b # v6.2
+      - name: 🏷️ Calculate version
+        id: calculate-version
+        uses: mathieudutour/github-tag-action@af99e60ce8132224b8e6ebab5023449fe256ed46 # v7.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: "minor"
           custom_release_rules: "feat:minor:✨ Features,fix:patch:🐛 Fixes,docs:patch:📰 Docs,chore:patch:🎨 Chore,perf:patch:🎈 Performance improvements,refactor:patch:🧹 Refactoring,build:patch:🔍 Build,ci:patch:🔍 CI,revert:patch:⏪ Revert,style:patch:🧹 Style,test:patch:👀 Test,release:major:📦 Release"
-          dry_run: ${{ inputs.is-merged == true && 'false' || 'true' }}
+          commit_analyzer_preset: angular
+          ignore_keywords: ""
+          pre_release_branches: ".*"
+          dry_run: "true"
           custom_tag: ${{ inputs.version }}
+
+      - name: 🏷️ Calculate version without new commits
+        id: fallback-version
+        if: steps.calculate-version.outputs.new_version == ''
+        uses: mathieudutour/github-tag-action@af99e60ce8132224b8e6ebab5023449fe256ed46 # v7.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: "minor"
+          force_bump: minor
+          force_prerelease_bump: prerelease
+          custom_release_rules: "feat:minor:✨ Features,fix:patch:🐛 Fixes,docs:patch:📰 Docs,chore:patch:🎨 Chore,perf:patch:🎈 Performance improvements,refactor:patch:🧹 Refactoring,build:patch:🔍 Build,ci:patch:🔍 CI,revert:patch:⏪ Revert,style:patch:🧹 Style,test:patch:👀 Test,release:major:📦 Release"
+          commit_analyzer_preset: angular
+          ignore_keywords: ""
+          pre_release_branches: ".*"
+          dry_run: "true"
+
+      - name: 🏷️ Select version
+        id: select-version
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          CALCULATED_VERSION: ${{ steps.calculate-version.outputs.new_version || steps.fallback-version.outputs.new_version }}
+          CUSTOM_VERSION: ${{ inputs.version }}
+        with:
+          script: |
+            let version = process.env.CALCULATED_VERSION;
+            const isPullRequest = context.ref.startsWith('refs/pull/') ||
+              ['pull_request', 'pull_request_target', 'pull_request_review', 'pull_request_review_comment'].includes(context.eventName);
+            if (!process.env.CUSTOM_VERSION.trim() && isPullRequest) {
+              const suffix = `-${context.sha.slice(0, 7)}`;
+              if (!version.endsWith(suffix)) throw new Error('Calculated preview version has an unexpected suffix');
+              version = version.slice(0, -suffix.length);
+            }
+            if (!version) throw new Error('Version calculation produced no version');
+            core.setOutput('version', version);
+
+      - name: 📝 Generate release notes
+        id: release-notes
+        uses: mathieudutour/github-tag-action@af99e60ce8132224b8e6ebab5023449fe256ed46 # v7.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.select-version.outputs.version }}
+          custom_release_rules: "feat:minor:✨ Features,fix:patch:🐛 Fixes,docs:patch:📰 Docs,chore:patch:🎨 Chore,perf:patch:🎈 Performance improvements,refactor:patch:🧹 Refactoring,build:patch:🔍 Build,ci:patch:🔍 CI,revert:patch:⏪ Revert,style:patch:🧹 Style,test:patch:👀 Test,release:major:📦 Release"
+          commit_analyzer_preset: angular
+          ignore_keywords: ""
+          pre_release_branches: ".*"
+          dry_run: "true"
+
+      - name: 🏷️ Publish tag
+        id: tag-version
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          IS_MERGED: ${{ inputs.is-merged }}
+          VERSION: ${{ steps.release-notes.outputs.new_version }}
+          TAG: ${{ steps.release-notes.outputs.new_tag }}
+          CHANGELOG: ${{ steps.release-notes.outputs.changelog }}
+        with:
+          script: |
+            const { VERSION, TAG, CHANGELOG, IS_MERGED } = process.env;
+            if (!VERSION || !TAG) throw new Error('Version calculation produced no tag');
+            if (IS_MERGED === 'true') {
+              const { owner, repo } = context.repo;
+              try {
+                await github.rest.git.getRef({ owner, repo, ref: `tags/${TAG}` });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.git.createRef({ owner, repo, ref: `refs/tags/${TAG}`, sha: context.sha });
+              }
+            }
+            core.setOutput('new_version', VERSION);
+            core.setOutput('new_tag', TAG);
+            core.setOutput('changelog', CHANGELOG);
 
       - name: 📊 Set platform matrix
         id: platform-matrix

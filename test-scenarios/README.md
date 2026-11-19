@@ -8,7 +8,7 @@ This directory contains test scenarios to validate that the reusable GitHub work
 - `nodejs-pnpm/` - Test project for `reusable-nodejs-ci-pnpm.yml`
 - `nodejs-pnpm-ignored-build-scripts/` - Project for the negative test that checks pnpm "Ignored build scripts" detection
 - `maven/` - Test project for `reusable-maven.yml`
-- `docker/` - Test files for `reusable-docker.yml` and `reusable-hadolint-ci.yml` (`docker/test.sh` is also the target of `reusable-shellcheck-ci.yml`)
+- `docker/` - Test files for `reusable-docker.yml` and `reusable-hadolint-ci.yml`; `docker/test.sh` is also the target of `reusable-shellcheck-ci.yml`, and `docker/version-compat.test.js` checks version selection and tag publication
 - `python/` - Test project for `reusable-python-ci.yml`
 - `bicep/` - Test files for `reusable-bicep-ci.yml`
 

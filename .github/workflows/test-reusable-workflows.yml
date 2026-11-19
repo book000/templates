@@ -138,6 +138,13 @@ jobs:
           fi
           echo "✅ Detection of Ignored build scripts works"
 
+  test-docker-version-compat:
+    name: Test Docker version compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: node test-scenarios/docker/version-compat.test.js
+
   # Test the Docker workflow (dry run without pushing)
   test-docker:
     name: Test reusable-docker
@@ -181,6 +188,7 @@ jobs:
       - test-bicep-ci
       - test-add-reviewer
       - test-docker
+      - test-docker-version-compat
 
     steps:
       - name: Check test results
@@ -196,6 +204,7 @@ jobs:
           echo "Bicep CI result: ${{ needs.test-bicep-ci.result }}"
           echo "Add Reviewer result: ${{ needs.test-add-reviewer.result }}"
           echo "Docker result: ${{ needs.test-docker.result }}"
+          echo "Docker version compatibility result: ${{ needs.test-docker-version-compat.result }}"
 
           # Check that no positive test failed (skipped is OK for add-reviewer when not on a PR)
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
@@ -208,7 +217,8 @@ jobs:
              [[ "${{ needs.test-shellcheck-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-bicep-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-add-reviewer.result }}" == "failure" ]] || \
-             [[ "${{ needs.test-docker.result }}" != "success" ]]; then
+             [[ "${{ needs.test-docker.result }}" != "success" ]] || \
+             [[ "${{ needs.test-docker-version-compat.result }}" != "success" ]]; then
             echo "❌ Some reusable workflow tests failed!"
             exit 1
           else
