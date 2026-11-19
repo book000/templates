@@ -349,22 +349,24 @@ jobs:
           echo "images=$(printf '%s' "$platforms" | sed -r "s#([a-z]+)/([a-z0-9]+)#${registry}/${image_name}:latest-\2#g")" >> "$GITHUB_OUTPUT"
 
       - name: 📝 Create and push manifest images (latest)
-        uses: Noelware/docker-manifest-action@b33ab348026b120a895167160f5605b0197f0862 # 0.4.3
         # Skip merging when there is only one platform
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
-        with:
-          images: ${{ steps.extra-images.outputs.images }}
-          inputs: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
-          push: true
+        env:
+          IMAGES: ${{ steps.extra-images.outputs.images }}
+          DESTINATION: ${{ inputs.registry }}/${{ matrix.target.imageName }}:latest
+        run: |
+          IFS=',' read -r -a images <<< "$IMAGES"
+          docker buildx imagetools create --tag "$DESTINATION" "${images[@]}"
 
       - name: 📝 Create and push manifest images (version)
-        uses: Noelware/docker-manifest-action@b33ab348026b120a895167160f5605b0197f0862 # 0.4.3
         # Skip merging when there is only one platform
         if: ${{ needs.calc-version.outputs.need-merge == 'true' }}
-        with:
-          images: ${{ steps.extra-images.outputs.images }}
-          inputs: ${{ inputs.registry }}/${{ matrix.target.imageName }}:${{ needs.calc-version.outputs.tag }}
-          push: true
+        env:
+          IMAGES: ${{ steps.extra-images.outputs.images }}
+          DESTINATION: ${{ inputs.registry }}/${{ matrix.target.imageName }}:${{ needs.calc-version.outputs.tag }}
+        run: |
+          IFS=',' read -r -a images <<< "$IMAGES"
+          docker buildx imagetools create --tag "$DESTINATION" "${images[@]}"
 
   release:
     name: Release ${{ needs.calc-version.outputs.tag }}
