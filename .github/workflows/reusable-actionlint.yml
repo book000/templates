@@ -14,21 +14,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Run actionlint (Push)
-        if: ${{ github.event_name == 'push' }}
-        run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          # actionlint does not support background/wait-all yet, so ignore only those known false positives (remove once supported).
-          ./actionlint -color \
-            -ignore='unexpected.*key.*background' \
-            -ignore='step.*must.*run.*script.*with.*run.*section.*or.*run.*action.*with.*uses.*section'
-
-      - name: Run actionlint (Pull-Request)
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: reviewdog/action-actionlint/dockerless@ae857e78c1b42b3d0a49637181b09d3d56d402b4 # v1.84.1
+      # jactionlint natively supports the background/wait-all step keys, so no ignore patterns are needed.
+      # Pinning the action by commit SHA also pins the jactionlint version (the release the action was published with).
+      - name: Run jactionlint
+        uses: jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e # v2.6.0
         with:
-          fail_level: error
-          # INPUT_ACTIONLINT_FLAGS is split by the shell, so use a regular expression without spaces.
-          actionlint_flags: >-
-            -ignore=unexpected.*key.*background
-            -ignore=step.*must.*run.*script.*with.*run.*section.*or.*run.*action.*with.*uses.*section
+          profile: correctness
+          # Never run the online checks, so a caller's config file cannot make the job call the GitHub API.
+          online: "false"
