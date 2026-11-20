@@ -20,7 +20,8 @@ A provider of templates reused across many repositories. It is not an applicatio
 - `renovate/`: shared Renovate configs (`base*.json` are the common parts, `public.json` and `private.json` are what callers copy). The root `renovate.json` is this repository's own config
 - `test-scenarios/`: test projects for the reusable workflows (see `test-scenarios/README.md`)
 - `scripts/generate-readme.js`: generates `README.md`
-- `actionlint`: a committed actionlint binary (Linux 64-bit ELF). CI downloads the latest version and does not use this binary
+- `actionlint`: a committed actionlint binary (Linux 64-bit ELF). CI no longer uses it (CI runs jactionlint); it is kept only for comparison during the jactionlint trial, and its removal is decided when the trial concludes
+- `.github/jactionlint.yaml`: the jactionlint config for this repository's own workflow lint (correctness profile plus security rules, with rule-ID based `ignores` for known pre-existing findings)
 - `docs/`: a bundled copy of the rhysd/actionlint documentation, not specific to this repository
 
 ## Commands
@@ -30,18 +31,20 @@ A provider of templates reused across many repositories. It is not an applicatio
 npm install --no-save js-yaml   # first time only (CI uses yarn add js-yaml); leaves no lock file
 node scripts/generate-readme.js
 
-# Validate workflows (same ignores as CI)
-./actionlint -color -shellcheck= \
-  -ignore='unexpected.*key.*background' \
-  -ignore='step.*must.*run.*script.*with.*run.*section.*or.*run.*action.*with.*uses.*section'
+# Validate workflows (the repo config .github/jactionlint.yaml applies automatically)
+# first time only; the binary is extracted into the current directory (move it onto PATH if preferred; use another platform's archive name when not on Linux amd64)
+gh release download v2.6.0 --repo jdx/jactionlint -p 'jactionlint_2.6.0_linux_amd64.tar.gz' -p 'jactionlint_2.6.0_checksums.txt'
+sha256sum -c --ignore-missing jactionlint_2.6.0_checksums.txt
+tar xzf jactionlint_2.6.0_linux_amd64.tar.gz jactionlint
+./jactionlint --shellcheck=
 
 # Validate Dockerfiles
 docker build --check -f dockerfiles/node-app-pnpm.Dockerfile .
 docker run --rm -i hadolint/hadolint < dockerfiles/node-app-pnpm.Dockerfile
 ```
 
-- The `-ignore` flags match `actionlint.yml` (which checks this repository's own workflows in `.github/workflows/`) and suppress known false positives: actionlint does not support the GitHub Actions `background` / `wait-all` keywords yet. Drop them once actionlint supports them.
-- The `workflows/` check (`actionlint-templates.yml`) replaces `.github/workflows/*` with `workflows/*` and runs without `-ignore`. Do this in a separate temporary repository locally.
+- `--shellcheck=` matches the CI setting that disables shellcheck integration. jactionlint supports the GitHub Actions `background` / `wait-all` step keys, so no ignore flags are needed.
+- The `workflows/` check (`actionlint-templates.yml`) copies `workflows/*` over `.github/workflows/` in a separate temporary repository, removes `.github/jactionlint.yaml` (the templates deliberately use `pull_request_target`), and runs `jactionlint --profile correctness --shellcheck=`. Do this in a separate temporary repository locally.
 - Integration tests for the reusable workflows and Dockerfiles run on GitHub Actions (`test-reusable-workflows.yml`, `dockerfile-test.yml`).
 
 ## Development guidelines

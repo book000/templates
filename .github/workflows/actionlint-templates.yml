@@ -23,10 +23,13 @@ jobs:
       - name: Move workflow files
         run: |
           rm -v .github/workflows/*
+          # The templates use pull_request_target on purpose, so drop the repository config that enables the security rules
+          rm -v .github/jactionlint.yaml
           # Ignore workflow files in subdirectories
           cp -v workflows/* .github/workflows/ || true
 
-      - name: Run actionlint
-        run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color -shellcheck=
+      - name: Run jactionlint
+        uses: jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e # v2.6.0
+        with:
+          profile: correctness
+          args: --shellcheck=

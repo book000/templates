@@ -25,7 +25,7 @@ Development guidance lives in `AGENTS.md`. This file lists only what to check in
 
 ## Do not flag
 
-- `actionlint` in the repository root is an intentionally committed binary.
+- `actionlint` in the repository root is an intentionally committed binary, retained only for comparison during the jactionlint trial (CI uses jactionlint).
 - There is no `package.json`; do not ask for npm scripts.
 - The two-layer layout (`workflows/` wrapper plus `.github/workflows/reusable-*.yml`) is intentional.
 - `docs/` is a bundled copy of the upstream actionlint documentation.

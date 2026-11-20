@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jdx/jactionlint/main/schema/jactionlint-config.json
+# Config for this repository's own workflows (trial of jactionlint, Issue #615).
+# The correctness profile matches what actionlint checks; the security rules of the default profile are enabled on top of it.
+profile: correctness
+
+rules:
+  actions-lock: true
+  adhoc-packages: true
+  agentic-actions: true
+  artipacked: true
+  bot-conditions: true
+  cache-poisoning: true
+  checkout-static-credentials: true
+  dangerous-triggers: true
+  dependabot-cooldown: true
+  dependabot-execution: true
+  excessive-permissions: true
+  github-app: true
+  github-env: true
+  hardcoded-registry-credentials: true
+  insecure-commands: true
+  insecure-ssh-keyscan: true
+  insecure-url-scheme: true
+  invisible-characters: true
+  misfeature: true
+  obfuscation: true
+  overprovisioned-secrets: true
+  secrets-inherit: true
+  superfluous-actions: true
+  typosquat-uses: true
+  unlocked-install: true
+  unpinned-images: true
+  unpinned-tools: true
+  unredacted-secrets: true
+  unsound-contains: true
+  unsound-prefix-match: true
+  untrusted-artifact: true
+  untrusted-checkout: true
+  unverified-download: true
+  use-trusted-publishing: true
+
+# Findings that existed before the trial. Release workflows are out of scope of the trial and must not be edited.
+ignores:
+  - rule: excessive-permissions
+    file: .github/workflows/reusable-add-reviewer.yml
+    reason: existing workflow-level permission, outside the jactionlint trial scope
+  - rule: excessive-permissions
+    file: .github/workflows/reusable-docker.yml
+    reason: release workflow, outside the jactionlint trial scope
+  - rule: cache-poisoning
+    file: .github/workflows/reusable-docker.yml
+    reason: release workflow, outside the jactionlint trial scope
+  - rule: cache-poisoning
+    file: .github/workflows/reusable-maven.yml
+    reason: release workflow, outside the jactionlint trial scope
+  - rule: superfluous-actions
+    file: .github/workflows/reusable-docker.yml
+    reason: release workflow, outside the jactionlint trial scope
+  - rule: superfluous-actions
+    file: .github/workflows/reusable-maven.yml
+    reason: release workflow, outside the jactionlint trial scope
+  - rule: adhoc-packages
+    file: .github/workflows/check-typescript-eslint-ts7-support.yml
+    reason: existing own-CI behavior, outside the jactionlint trial scope
+  - rule: adhoc-packages
+    file: .github/workflows/generate-readme.yml
+    reason: existing own-CI behavior, outside the jactionlint trial scope

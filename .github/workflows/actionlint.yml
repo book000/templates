@@ -11,6 +11,7 @@ on:
       - master
     paths:
       - ".github/workflows/*"
+      - ".github/jactionlint.yaml"
   merge_group:
 
 jobs:
@@ -19,10 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Run actionlint
-        run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          # actionlint does not support background/wait-all yet, so ignore only those known false positives (remove once supported).
-          ./actionlint -color -shellcheck= \
-            -ignore='unexpected.*key.*background' \
-            -ignore='step.*must.*run.*script.*with.*run.*section.*or.*run.*action.*with.*uses.*section'
+      # The profile and rules come from .github/jactionlint.yaml. The action pin also pins the jactionlint version.
+      - name: Run jactionlint
+        uses: jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e # v2.6.0
+        with:
+          args: --shellcheck=
