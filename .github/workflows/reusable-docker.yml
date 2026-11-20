@@ -345,7 +345,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.target.packageName }}-${{ steps.platform.outputs.shortHyphenPlatform }},ignore-error=true
+          cache-to: ${{ github.event_name != 'pull_request_target' && format('type=gha,mode=max,scope={0}-{1},ignore-error=true', matrix.target.packageName, steps.platform.outputs.shortHyphenPlatform) || '' }}
           provenance: false
           build-args: |
             APPLICATION_VERSION=${{ needs.calc-version.outputs.version }}

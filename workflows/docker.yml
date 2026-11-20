@@ -1,9 +1,13 @@
 # Publish or build a Docker image to any registry.
-# Runs when a pull request is opened or updated.
+# Runs for pull requests and pushes to the default branch candidates.
 
 name: Docker
 
 on:
+  push:
+    branches:
+      - main
+      - master
   pull_request:
     branches:
       - main
