@@ -41,7 +41,9 @@ jobs:
 
           files=()
           while IFS= read -r -d '' f; do
-            [ -f "$f" ] && [ ! -L "$f" ] || continue
+            if [ ! -f "$f" ] || [ -L "$f" ]; then
+              continue
+            fi
             case "$f" in
               *.sh|*.bash) files+=("$f") ;;
               *) if head -n 1 "$f" | grep -aqE '^#!.*[/ ](ba|da|k)?sh( |$)'; then files+=("$f"); fi ;;
