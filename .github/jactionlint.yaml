@@ -59,9 +59,6 @@ ignores:
   - rule: superfluous-actions
     file: .github/workflows/reusable-maven.yml
     reason: release workflow, outside the jactionlint trial scope
-  - rule: shellcheck
-    file: .github/workflows/reusable-shellcheck-ci.yml
-    reason: SC2015 (info) in the file-filter loop is reported by the shellcheck on the CI runner but not by shellcheck 0.11.0; the workflow is outside the jactionlint trial scope
   - rule: adhoc-packages
     file: .github/workflows/check-typescript-eslint-ts7-support.yml
     reason: existing own-CI behavior, outside the jactionlint trial scope
