@@ -1,4 +1,6 @@
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
+
+RUN npm install -g yarn@1.22.22
 
 WORKDIR /app
 
@@ -14,7 +16,7 @@ COPY tsconfig.json .
 
 RUN yarn package
 
-FROM node:20-alpine AS runner
+FROM node:26-alpine AS runner
 
 # hadolint ignore=DL3018
 RUN apk update && \
