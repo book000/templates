@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node index.js",
     "lint": "echo 'Linting passed'",
-    "build": "echo 'Build completed'"
+    "build": "echo 'Build completed'",
+    "generate": "echo 'Generate completed'"
   },
   "dependencies": {
     "date-fns": "4.4.0"
