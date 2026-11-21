@@ -29,6 +29,7 @@ The tests are executed by `.github/workflows/test-reusable-workflows.yml`, which
 2. **Uses non-destructive parameters** (e.g. `is-merged: false`, `is-release: false`) so nothing is published or deployed
 3. **Skips problematic steps** (e.g. `depcheck`, via `disabled-jobs`)
 4. **Validates basic execution** without side effects
+5. **Checks that `build` (and, for pnpm, `generate`) steps actually ran** in the Node.js CI test jobs (`test-nodejs-ci-build-check`)
 
 ## Maintenance
 

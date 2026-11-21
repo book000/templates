@@ -184,16 +184,15 @@ jobs:
         working-directory: ${{ matrix.directory }}
         run: yarn compile
 
-      - name: 🏗️ Run build & generate (Nuxt.js)
-        if: >-
-          steps.package-json.outputs.build == 'true' &&
-          steps.package-json.outputs.disabled-build == 'false' &&
-          steps.package-json.outputs.generate == 'true' &&
-          steps.package-json.outputs.disabled-generate == 'false'
+      - name: 🏗️ Run build
+        if: steps.package-json.outputs.build == 'true' && steps.package-json.outputs.disabled-build == 'false'
         working-directory: ${{ matrix.directory }}
-        run: |
-          yarn build
-          yarn generate
+        run: yarn build
+
+      - name: 🏗️ Run generate
+        if: steps.package-json.outputs.generate == 'true' && steps.package-json.outputs.disabled-generate == 'false'
+        working-directory: ${{ matrix.directory }}
+        run: yarn generate
 
       - name: Check exists dist directory
         id: check-dist
