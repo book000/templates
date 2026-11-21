@@ -34,7 +34,7 @@ jobs:
           # Emit the names of Dockerfiles to test as a JSON array named files.
           # Select all Dockerfiles when the SHAs are unknown or this workflow changed;
           # otherwise select changed Dockerfiles and Dockerfiles whose test app changed.
-          all() { ls dockerfiles/*.Dockerfile | sed -E 's#^dockerfiles/(.+)\.Dockerfile$#\1#'; }
+          all() { printf '%s\n' dockerfiles/*.Dockerfile | sed -E 's#^dockerfiles/(.+)\.Dockerfile$#\1#'; }
           if [ -z "$BASE_SHA" ] || [ -z "$HEAD_SHA" ]; then
             names=$(all)
           else
