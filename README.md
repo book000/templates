@@ -72,7 +72,7 @@ mkdir -p .github/workflows ; wget -O .github/workflows/maven-ci.yml https://raw.
 | Required | Key | Description | Type | Default |
 | --- | --- | --- | --- | --- |
 |  | `java-version` | Java version | `string` | `17` |
-|  | `jdk-distribution` | JDK distribution | `string` | `adopt` |
+|  | `jdk-distribution` | JDK distribution | `string` | `temurin` |
 |  | `is-merged` | Is merged | `boolean` | `${{ github.event.pull_request.merged == true }}` |
 |  | `is-release` | Whether to release | `boolean` | `true` |
 |  | `pr-head-sha` | Pull request head SHA | `string` | `${{ github.event.pull_request.head.sha }}` |
