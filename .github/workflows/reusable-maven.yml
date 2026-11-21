@@ -10,7 +10,7 @@ on:
       jdk-distribution:
         description: JDK distribution
         type: string
-        default: "adopt"
+        default: "temurin"
       is-merged:
         description: Is merged
         type: boolean
@@ -106,11 +106,11 @@ jobs:
           # do not leave GITHUB_TOKEN in git config to reduce the pwn-request risk
           persist-credentials: ${{ !inputs.allow-unsafe-pr-checkout }}
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
-          java-version: 17
-          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          distribution: ${{ inputs.jdk-distribution }}
 
       - name: Cache local Maven repository
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
