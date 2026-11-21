@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:26-alpine
 
 # hadolint ignore=DL3018
 RUN apk update && \
@@ -6,7 +6,8 @@ RUN apk update && \
   apk add --update --no-cache tzdata && \
   cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
   echo "Asia/Tokyo" > /etc/timezone && \
-  apk del tzdata
+  apk del tzdata && \
+  npm install -g yarn@1.22.22
 
 WORKDIR /app
 
