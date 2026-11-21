@@ -26,14 +26,36 @@ jobs:
 
       - name: 📄 List Dockefile files
         id: list-files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+          SELF: .github/workflows/dockerfile-test.yml
         run: |
-          # Emit the names of changed Dockerfiles as a JSON array named files
-          echo "[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '^dockerfiles/.+Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]"
-          echo "files=[$(git diff --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '^dockerfiles/.+Dockerfile$' | sed -r -e 's/dockerfiles\/(.+).Dockerfile/\1/' -e 's/^/"/' -e 's/$/",/' | tr -d '\n' | sed -e 's/,$//')]" >> "$GITHUB_OUTPUT"
+          # Emit the names of Dockerfiles to test as a JSON array named files.
+          # Select all Dockerfiles when the SHAs are unknown or this workflow changed;
+          # otherwise select changed Dockerfiles and Dockerfiles whose test app changed.
+          all() { ls dockerfiles/*.Dockerfile | sed -E 's#^dockerfiles/(.+)\.Dockerfile$#\1#'; }
+          if [ -z "$BASE_SHA" ] || [ -z "$HEAD_SHA" ]; then
+            names=$(all)
+          else
+            changed=$(git diff --diff-filter=ACM --name-only "$BASE_SHA" "$HEAD_SHA")
+            if printf '%s\n' "$changed" | grep -Fxq "$SELF"; then
+              names=$(all)
+            else
+              names=$({
+                printf '%s\n' "$changed" | sed -nE 's#^dockerfiles/([^/]+)\.Dockerfile$#\1#p'
+                printf '%s\n' "$changed" | sed -nE 's#^dockerfiles/tests/([^/]+)/.*#\1#p'
+              } | sort -u | while read -r n; do [ -f "dockerfiles/$n.Dockerfile" ] && echo "$n"; done || true)
+            fi
+          fi
+          files=$(printf '%s\n' "$names" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "files=$files"
+          echo "files=$files" >> "$GITHUB_OUTPUT"
 
   test:
     runs-on: ubuntu-latest
     needs: list-files
+    if: needs.list-files.outputs.files != '[]'
 
     strategy:
       matrix:
