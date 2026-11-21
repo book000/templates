@@ -28,6 +28,46 @@ jobs:
       disabled-jobs: "depcheck"  # Skip depcheck to avoid test failures
       check-git-diff: false
 
+  # A skipped step has conclusion "skipped", so checking the step conclusion proves the script ran.
+  test-nodejs-ci-build-check:
+    name: Test Node.js CI runs build and generate
+    runs-on: ubuntu-latest
+    needs:
+      - test-nodejs-ci
+      - test-nodejs-ci-pnpm
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Check build and generate steps ran
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/$REPO/actions/runs/$RUN_ID/jobs" --jq '.jobs[]' | jq -s '.' > jobs.json
+
+          check() {
+            local job="$1" step="$2"
+            local count
+            count=$(jq --arg job "node-ci ($job)" '[.[] | select(.name | contains($job))] | length' jobs.json)
+            if [ "$count" != "1" ]; then
+              echo "::error::Expected exactly one job matching 'node-ci ($job)', found $count"
+              exit 1
+            fi
+            if ! jq -e --arg job "node-ci ($job)" --arg step "$step" \
+              '[.[] | select(.name | contains($job)) | .steps[] | select(.name == $step and .conclusion == "success")] | length == 1' jobs.json > /dev/null; then
+              echo "::error::Step '$step' did not succeed in the job for $job"
+              exit 1
+            fi
+            echo "OK: '$step' succeeded for $job"
+          }
+
+          check test-scenarios/nodejs-yarn "🏗️ Run build"
+          check test-scenarios/nodejs-pnpm "🏗️ Run build"
+          check test-scenarios/nodejs-pnpm "🏗️ Run generate"
+
   test-maven:
     name: Test reusable-maven
     uses: ./.github/workflows/reusable-maven.yml
@@ -180,6 +220,7 @@ jobs:
       - test-nodejs-ci
       - test-nodejs-ci-pnpm
       - test-nodejs-ci-pnpm-ignored-build
+      - test-nodejs-ci-build-check
       - test-maven
       - test-actionlint
       - test-hadolint
@@ -196,6 +237,7 @@ jobs:
           echo "Node.js CI result: ${{ needs.test-nodejs-ci.result }}"
           echo "Node.js CI pnpm result: ${{ needs.test-nodejs-ci-pnpm.result }}"
           echo "Node.js CI pnpm (ignored build scripts detection) result: ${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}"
+          echo "Node.js CI build/generate check result: ${{ needs.test-nodejs-ci-build-check.result }}"
           echo "Maven result: ${{ needs.test-maven.result }}"
           echo "Actionlint result: ${{ needs.test-actionlint.result }}"
           echo "Hadolint result: ${{ needs.test-hadolint.result }}"
@@ -210,6 +252,7 @@ jobs:
           if [[ "${{ needs.test-nodejs-ci.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm.result }}" != "success" ]] || \
              [[ "${{ needs.test-nodejs-ci-pnpm-ignored-build.result }}" != "success" ]] || \
+             [[ "${{ needs.test-nodejs-ci-build-check.result }}" != "success" ]] || \
              [[ "${{ needs.test-maven.result }}" != "success" ]] || \
              [[ "${{ needs.test-actionlint.result }}" != "success" ]] || \
              [[ "${{ needs.test-hadolint.result }}" != "success" ]] || \
