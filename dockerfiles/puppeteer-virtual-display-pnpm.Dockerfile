@@ -3,7 +3,7 @@ FROM zenika/alpine-chrome:with-puppeteer-xvfb AS runner
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PATH"
 
-# hadolint ignore=DL3002
+# hadolint ignore=DL3002,DL3066
 USER root
 
 # hadolint ignore=DL3018,DL3016
