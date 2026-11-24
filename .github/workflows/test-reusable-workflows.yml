@@ -68,6 +68,23 @@ jobs:
           check test-scenarios/nodejs-pnpm "🏗️ Run build"
           check test-scenarios/nodejs-pnpm "🏗️ Run generate"
 
+      # Slashed matrix values must yield valid artifact names; the scenario build scripts create dist/
+      - name: Check dist artifacts were uploaded
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/$REPO/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[].name' > artifacts.txt
+          for name in test-scenarios-nodejs-yarn-dist test-scenarios-nodejs-pnpm-dist; do
+            if ! grep -Fxq "$name" artifacts.txt; then
+              echo "::error::Artifact '$name' was not uploaded"
+              exit 1
+            fi
+            echo "OK: artifact '$name' exists"
+          done
+
   test-maven:
     name: Test reusable-maven
     uses: ./.github/workflows/reusable-maven.yml
