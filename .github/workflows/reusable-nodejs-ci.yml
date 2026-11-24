@@ -202,11 +202,18 @@ jobs:
           IS_SYMLINK=$(test -L dist && echo true || echo false)
           echo "exists=$(test "$IS_DIRECTORY" = true && test "$IS_SYMLINK" = false && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
+      # Artifact names must not contain "/", so a subdirectory like viewer/frontend becomes viewer-frontend
+      - name: 📦 Set artifact name
+        id: artifact-name
+        env:
+          MATRIX_DIRECTORY: ${{ matrix.directory }}
+        run: echo "prefix=${MATRIX_DIRECTORY//\//-}" >> "$GITHUB_OUTPUT"
+
       - name: 📦 Upload dist artifact
         if: steps.check-dist.outputs.exists == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: ${{ matrix.directory }}-dist
+          name: ${{ steps.artifact-name.outputs.prefix }}-dist
           path: ${{ matrix.directory }}/dist
 
       - name: Check exists output directory
@@ -220,7 +227,7 @@ jobs:
         if: steps.check-output.outputs.exists == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: ${{ matrix.directory }}-output
+          name: ${{ steps.artifact-name.outputs.prefix }}-output
           path: ${{ matrix.directory }}/output
 
       - name: 👀 Check git status
