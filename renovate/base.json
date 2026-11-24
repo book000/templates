@@ -34,6 +34,16 @@
         "renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "fileMatch": [
+        "(^|/)\\.github/workflows/[^/]+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "(?m)(?:^[ \\t]*(?:-[ \\t]+)?(?:run:[ \\t]*[\"']?)?|[;&|][ \\t]*)npx[ \\t]+(?:(?:-y|--yes)[ \\t]+)?(?<depName>(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*)@(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+[^ \\t\\r\\n;&|\"']*)"
+      ],
+      "datasourceTemplate": "npm",
+      "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
