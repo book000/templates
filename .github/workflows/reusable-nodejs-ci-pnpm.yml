@@ -195,7 +195,7 @@ jobs:
       - name: ☑️ Check Dependencies
         if: steps.package-json.outputs.disabled-depcheck == 'false'
         working-directory: ${{ matrix.directory }}
-        run: npx depcheck
+        run: npx depcheck@1.4.7
         background: true
 
       - name: ⏳ Wait for parallel steps
